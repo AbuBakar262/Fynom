@@ -5,7 +5,7 @@ from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeErr
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework import serializers
-from user.models import User, UserWalletAddress, Collection
+from user.models import User, Collection
 
 
 class UserLoginSerializer(serializers.ModelSerializer):
@@ -89,11 +89,6 @@ class UserPassowrdResetSerializer(serializers.Serializer):
             raise ValidationError("token is not valid ro expire")
 
 
-# class UserWalletAddressSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = UserWalletAddress
-#         fields = ["walletAddress"]
-
 
 class UserProfileSerializer(serializers.ModelSerializer):
     # metamaskAddress = UserWalletAddressSerializer(many=False)
@@ -101,8 +96,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "profilePicture", "coverPicture", "name", "username", "email", "facebookLink", "twitterLink",
-                  "discordLink", "instagramLink", "redditLink", "metamask"]
+        fields = ["id", "profile_picture", "cover_picture", "name", "username", "email", "facebook_link", "twitter_link",
+                  "discord_link", "instagram_link", "reddit_link", "metamask"]
         # fields = "__all__"
 
     def get_metamask(self, obj):
@@ -119,15 +114,15 @@ class UserStatusViewSerializer(serializers.ModelSerializer):
 
 
 class UserProfileStatusViewSerializer(serializers.ModelSerializer):
-    wallet_address = serializers.SerializerMethodField('get_metamask')
+    wallet_addres = serializers.SerializerMethodField('get_metamask')
 
     class Meta:
         model = User
-        fields = ["id", "name", "username", "wallet_address", "created_at", "status"]
+        fields = ["id", "name", "username", "wallet_addres", "created_at", "status"]
 
     def get_metamask(self, obj):
         try:
-            return obj.metamaskAddress.walletAddress
+            return obj.metamask_address.wallet_address
         except:
             return None
 
@@ -135,7 +130,7 @@ class UserProfileStatusViewSerializer(serializers.ModelSerializer):
 class UserProfileStatusUpdateViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "status", "statusReasons"]
+        fields = ["id", "status", "status_reasons"]
 
     # def validate_status(self, attrs):
     #     if attrs == 'Disapprove' or attrs == 'Suspend':

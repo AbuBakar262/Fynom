@@ -66,11 +66,11 @@ class Collection(models.Model):
     cover_image = models.ImageField(upload_to='image/', null=True, blank=True)
     name = models.CharField(max_length=50, blank=False, null=False)
     website_url = models.CharField(max_length=80, null=True, blank=True)
-    instagramURL = models.CharField(max_length=80, null=True, blank=True)
+    instagram_url = models.CharField(max_length=80, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    madeBy = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
-    collectionCategory = models.ForeignKey(NFTCategory, blank=True, null=True, on_delete=models.CASCADE)
+    create_by = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    collection_category = models.ForeignKey(NFTCategory, blank=True, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name

@@ -199,7 +199,7 @@ class UserCollection(viewsets.ViewSet):
         try:
             # user_id = User.objects.get(id=request.user.id)
             data = request.data
-            data['madeBy'] = request.user.id
+            data['create_by'] = request.user.id
             serializer = UserCollectionSerializer(data=data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
