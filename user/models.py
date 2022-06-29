@@ -4,11 +4,11 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class UserWalletAddress(models.Model):
-    walletAddress = models.CharField(max_length=50, blank=False, null=False, unique=True, default=None)
-    createdAt = models.DateTimeField(auto_now_add=True)
+    wallet_address = models.CharField(max_length=50, blank=False, null=False, unique=True, default=None)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.walletAddress
+        return self.wallet_address
 
 
 STATE_CHOICES = (
@@ -20,55 +20,55 @@ STATE_CHOICES = (
 
 
 class User(AbstractUser):
-    profilePicture = models.ImageField(upload_to='image/', null=True, blank=True)
-    coverPicture = models.ImageField(upload_to='image/', null=True, blank=True)
+    profile_picture = models.ImageField(upload_to='image/', null=True, blank=True)
+    cover_picture = models.ImageField(upload_to='image/', null=True, blank=True)
     name = models.CharField(max_length=50, blank=False, null=False, unique=False)
     username = models.CharField(max_length=50, blank=False, null=False, unique=True)  # use as display name
     email = models.EmailField(_('email address'), unique=True, blank=False, null=False)
-    facebookLink = models.URLField(null=True, blank=True)
-    twitterLink = models.URLField(null=True, blank=True)
-    discordLink = models.URLField(null=True, blank=True)
-    instagramLink = models.URLField(null=True, blank=True)
-    redditLink = models.URLField(null=True, blank=True)
+    facebook_link = models.CharField(max_length=50, null=True, blank=True)
+    twitter_link = models.CharField(max_length=50, null=True, blank=True)
+    discord_link = models.CharField(max_length=50, null=True, blank=True)
+    instagram_link = models.CharField(max_length=50, null=True, blank=True)
+    reddit_link = models.CharField(max_length=50, null=True, blank=True)
     status = models.CharField(max_length=50, choices=STATE_CHOICES, default='Pending')
-    statusReasons = models.TextField(blank=True, null=True)
-    metamaskAddress = models.ForeignKey(UserWalletAddress, blank=True, null=True, related_name='wallet_address',
+    status_reasons = models.TextField(blank=True, null=True)
+    metamask_address = models.ForeignKey(UserWalletAddress, blank=True, null=True, related_name='user_in_wallet_address',
                                         on_delete=models.CASCADE)
-    createdAt = models.DateTimeField(auto_now_add=True)
-    updatedAt = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name', 'username']
 
 
 class NFTCategory(models.Model):
-    categoryName = models.CharField(max_length=50, blank=True, null=True)
-    createdAt = models.DateTimeField(auto_now_add=True)
-    updatedAt = models.DateTimeField(auto_now=True)
+    category_name = models.CharField(max_length=50, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.categoryName
+        return self.category_name
 
 
 class NFTSubCategory(models.Model):
-    subCategoryName = models.CharField(max_length=50, blank=True, null=True)
-    mainCategory = models.ForeignKey(NFTCategory, blank=True, null=True, on_delete=models.CASCADE)
-    createdAt = models.DateTimeField(auto_now_add=True)
-    updatedAt = models.DateTimeField(auto_now=True)
+    sub_category_name = models.CharField(max_length=50, blank=True, null=True)
+    main_category = models.ForeignKey(NFTCategory, blank=True, null=True, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.subCategoryName
+        return self.sub_category_name
 
 
 class Collection(models.Model):
-    logoImage = models.ImageField(upload_to='image/', null=True, blank=True)
-    featuredImage = models.ImageField(upload_to='image/', null=True, blank=True)
-    coverImage = models.ImageField(upload_to='image/', null=True, blank=True)
+    logo_image = models.ImageField(upload_to='image/', null=True, blank=True)
+    featured_image = models.ImageField(upload_to='image/', null=True, blank=True)
+    cover_image = models.ImageField(upload_to='image/', null=True, blank=True)
     name = models.CharField(max_length=50, blank=False, null=False)
-    websiteURL = models.URLField(null=True, blank=True)
-    instagramURL = models.URLField(null=True, blank=True)
-    createdAt = models.DateTimeField(auto_now_add=True)
-    updatedAt = models.DateTimeField(auto_now=True)
+    website_url = models.CharField(max_length=80, null=True, blank=True)
+    instagramURL = models.CharField(max_length=80, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     madeBy = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     collectionCategory = models.ForeignKey(NFTCategory, blank=True, null=True, on_delete=models.CASCADE)
 
@@ -97,60 +97,60 @@ SOLD_STSTUS = (
 
 class CreateNFT(models.Model):
     thumbnail = models.ImageField(upload_to='image/', null=True, blank=True)
-    nftPicture = models.ImageField(upload_to='image/', null=True, blank=True)
+    nft_picture = models.ImageField(upload_to='image/', null=True, blank=True)
     teaser = models.FileField(upload_to='video/', null=True, blank=True)
-    nftTitle = models.CharField(max_length=50, blank=True, null=True)
-    nftCollection = models.ForeignKey(Collection, blank=True, null=True, related_name='nft_collection',
+    nft_title = models.CharField(max_length=50, blank=True, null=True)
+    nft_collection = models.ForeignKey(Collection, blank=True, null=True, related_name='nft_collection',
                                       on_delete=models.CASCADE)
     description = models.TextField(blank=True, null=True)
-    nftCategory = models.ForeignKey(NFTCategory, blank=True, null=True, related_name='nft_category',
+    nft_category = models.ForeignKey(NFTCategory, blank=True, null=True, related_name='nft_category',
                                     on_delete=models.CASCADE)
     royality = models.FloatField(blank=True, null=True)
     hash = models.CharField(max_length=50, blank=True, null=True)
-    contractID = models.CharField(max_length=50, blank=True, null=True)
-    nftOwner = models.ForeignKey(UserWalletAddress, blank=True, null=True, related_name='nftOwner_wallet_address',
+    contract_id = models.CharField(max_length=50, blank=True, null=True)
+    nft_owner = models.ForeignKey(UserWalletAddress, blank=True, null=True, related_name='nftOwner_wallet_address',
                                  on_delete=models.CASCADE)
-    nftStatus = models.CharField(max_length=50, choices=NFT_STATUS, default='Pending')
-    statusRemarks = models.TextField(blank=True, null=True)
-    topNFT = models.BooleanField()
-    nftSellType = models.CharField(max_length=50, choices=NFT_SELL_TYPE, default='Pending')
-    fixPrice = models.FloatField(blank=True, null=True)
-    startingPrice = models.FloatField(blank=True, null=True)
-    startDateTime = models.DateTimeField(blank=True, null=True)
-    endDateTime = models.DateTimeField(blank=True, null=True)
-    soldStatus = models.CharField(max_length=50, choices=SOLD_STSTUS, default='Pending')
-    soldPrice = models.FloatField(blank=True, null=True)
-    serviceFee = models.FloatField(blank=True, null=True)
-    createdAt = models.DateTimeField(auto_now_add=True)
-    updatedAt = models.DateTimeField(auto_now=True)
+    nft_status = models.CharField(max_length=50, choices=NFT_STATUS, default='Pending')
+    status_remarks = models.TextField(blank=True, null=True)
+    top_nft = models.BooleanField()
+    nft_sell_type = models.CharField(max_length=50, choices=NFT_SELL_TYPE, default='Pending')
+    fix_price = models.FloatField(blank=True, null=True)
+    starting_rice = models.FloatField(blank=True, null=True)
+    start_dateTime = models.DateTimeField(blank=True, null=True)
+    end_datetime = models.DateTimeField(blank=True, null=True)
+    sold_status = models.CharField(max_length=50, choices=SOLD_STSTUS, default='Pending')
+    sold_price = models.FloatField(blank=True, null=True)
+    service_fee = models.FloatField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.nftTitle
+        return self.nft_title
 
 
 class SupportingDocuments(models.Model):
     documents = models.FileField(upload_to='document/', null=True, blank=True)
-    nftCreateInfo = models.ForeignKey(CreateNFT, blank=True, null=True, on_delete=models.CASCADE)
-    createdAt = models.DateTimeField(auto_now_add=True)
-    updatedAt = models.DateTimeField(auto_now=True)
+    nft_create_info = models.ForeignKey(CreateNFT, blank=True, null=True, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Tags(models.Model):
-    tagTitle = models.CharField(max_length=50, blank=True, null=True)
-    nftCreateInfo = models.ForeignKey(CreateNFT, blank=True, null=True, on_delete=models.CASCADE)
-    createdAt = models.DateTimeField(auto_now_add=True)
-    updatedAt = models.DateTimeField(auto_now=True)
+    tag_title = models.CharField(max_length=50, blank=True, null=True)
+    nft_create_info = models.ForeignKey(CreateNFT, blank=True, null=True, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.tagTitle
+        return self.tag_title
 
 
 class BidOnNFT(models.Model):
-    nftDetail = models.ForeignKey(CreateNFT, blank=True, null=True, on_delete=models.CASCADE)
-    bidBy = models.ForeignKey(UserWalletAddress, blank=True, null=True, on_delete=models.CASCADE)
-    bidPrice = models.FloatField(blank=True, null=True)
-    createdAt = models.DateTimeField(auto_now_add=True)
-    updatedAt = models.DateTimeField(auto_now=True)
+    nft_detail = models.ForeignKey(CreateNFT, blank=True, null=True, on_delete=models.CASCADE)
+    bid_by = models.ForeignKey(UserWalletAddress, blank=True, null=True, on_delete=models.CASCADE)
+    bid_price = models.FloatField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 # class SoldNFTHistory(models.Model):
