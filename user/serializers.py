@@ -132,12 +132,8 @@ class UserProfileStatusUpdateViewSerializer(serializers.ModelSerializer):
         model = User
         fields = ["id", "status", "status_reasons"]
 
-    # def validate_status(self, attrs):
-    #     if attrs == 'Disapprove' or attrs == 'Suspend':
-    #         reason
-
 
 class UserCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
-        fields = ["id", "name"]
+        fields = ["id", "logo_image", "featured_image", "cover_image", "name", "website_url", "instagram_url", "collection_category", "create_by"]

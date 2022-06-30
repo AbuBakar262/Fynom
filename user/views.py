@@ -195,9 +195,8 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
 class UserCollection(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
-    def create(self, request):
+    def create(self, request, pk=None):
         try:
-            # user_id = User.objects.get(id=request.user.id)
             data = request.data
             data['create_by'] = request.user.id
             serializer = UserCollectionSerializer(data=data)
@@ -210,3 +209,38 @@ class UserCollection(viewsets.ViewSet):
             return Response({
                 "success": False, "status_code": 400, 'message': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, pk=None):
+        try:
+            if pk is not None:
+                collection = Collection.objects.get(id=pk)
+                serializer = UserCollectionSerializer(collection)
+                return Response({
+                    "success": True, "status_code": 200, 'message': 'User Collection Retrieve Successfull',
+                    "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "success": False, "status_code": 400, 'message': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, pk):
+        try:
+            collection = Collection.objects.get(id=pk)
+            serializer = UserCollectionSerializer(collection, data=request.data, partial=True)
+            print(pk)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({
+                "success": True, "status_code": 200, 'message': 'User Collection Update Successfull',
+                "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "success": False, "status_code": 400, 'message': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk):
+        collection = Collection.objects.get(id=pk)
+        collection.delete()
+        return Response({
+            "success": True, "status_code": 200, 'message': 'User Collection Delete Successfull',
+            "data": []}, status=status.HTTP_200_OK)

@@ -1,8 +1,9 @@
 from django.urls import path, include
-
+from django.conf.urls.static import static
+from backend import settings
 from . import views
 from .views import UserLoginView, UserChangePasswrodView, SendPasswordResetEmailView, UserPasswordResetView, \
-    UserProfileListView, UserProfileUpdateView
+    UserProfileListView, UserProfileUpdateView, UserCollection
 
 from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
@@ -19,4 +20,4 @@ urlpatterns = [
     path('send-reset-password-email/', SendPasswordResetEmailView.as_view(), name="send_reset_password_email"),
     path('rest-password/<uid>/<token>/', UserPasswordResetView.as_view(), name='rest_password'),
     path('user-status/<int:pk>/', views.UserStatusView.as_view(), name="user_status"),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
