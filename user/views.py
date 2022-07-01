@@ -2,7 +2,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
-from user.models import User, UserWalletAddress, Collection
+from user.models import User
+from blockchain.models import Collection
 from user.serializers import UserLoginSerializer, UserPassowrdResetSerializer, SendPasswordResetEmailSerializer, \
     UserChangePasswordSerializer, UserProfileSerializer, UserProfileStatusUpdateViewSerializer, \
     UserProfileStatusViewSerializer, UserCollectionSerializer
@@ -20,7 +21,7 @@ def get_tokens_for_user(user):
     }
 
 
-class UserLoginView(APIView):
+class AdminLoginView(APIView):
 
     def post(self, request, *args, **kwargs):
         try:
@@ -28,16 +29,22 @@ class UserLoginView(APIView):
             serializer.is_valid(raise_exception=True)
             email = serializer.data.get('email')
             password = serializer.data.get('password')
-            user = authenticate(email=email, password=password)
-            if user.is_superuser == False:
-                return Response({"success": False, "status_code": 400, "message": "User is not a Superuser",
+            if  User.objects.filter(email=email).exists():
+                user = User.objects.filter(email=email).first()
+                if user.is_superuser:
+                    user = authenticate(email=email, password=password)
+                    token = get_tokens_for_user(user)
+                    return Response({"success": True, "status_code": 200, 'message': 'Login Success',
+                                     "data": {"token": token}}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"success": False, "status_code": 400, "message": "user is not superuser!",
+                                     "data": []}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"success": False, "status_code": 400, "message": "user does not exist!",
                                  "data": []}, status=status.HTTP_400_BAD_REQUEST)
-            token = get_tokens_for_user(user)
-            return Response({"success": True, "status_code": 200, 'message': 'Login Success',
-                             "data": {"token": token}}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"success": False, "status_code": 400, "message": e.args[0],
-                             "data": []}, status=status.HTTP_400_BAD_REQUEST)
+                             "data": ["d"]}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserChangePasswrodView(APIView):
@@ -195,7 +202,7 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
 class UserCollection(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
-    def create(self, request, pk=None):
+    def create(self, request):
         try:
             data = request.data
             data['create_by'] = request.user.id
@@ -223,7 +230,7 @@ class UserCollection(viewsets.ViewSet):
                 "success": False, "status_code": 400, 'message': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
-    def partial_update(self, request, pk):
+    def partial_update(self, request, pk=None):
         try:
             collection = Collection.objects.get(id=pk)
             serializer = UserCollectionSerializer(collection, data=request.data, partial=True)
@@ -238,9 +245,3 @@ class UserCollection(viewsets.ViewSet):
                 "success": False, "status_code": 400, 'message': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
-    def destroy(self, request, pk):
-        collection = Collection.objects.get(id=pk)
-        collection.delete()
-        return Response({
-            "success": True, "status_code": 200, 'message': 'User Collection Delete Successfull',
-            "data": []}, status=status.HTTP_200_OK)

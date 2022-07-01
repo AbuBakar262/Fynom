@@ -5,7 +5,8 @@ from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeErr
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework import serializers
-from user.models import User, Collection
+from user.models import User
+from blockchain.models import Collection
 
 
 class UserLoginSerializer(serializers.ModelSerializer):
@@ -14,6 +15,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email', 'password']
+
 
 
 class UserChangePasswordSerializer(serializers.Serializer):
