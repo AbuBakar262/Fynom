@@ -10,6 +10,7 @@ STATE_CHOICES = (
     ('Suspend', 'Suspend'),
 )
 
+
 class User(AbstractUser):
     profile_picture = models.ImageField(upload_to='image/', null=True, blank=True)
     cover_picture = models.ImageField(upload_to='image/', null=True, blank=True)
@@ -23,8 +24,6 @@ class User(AbstractUser):
     reddit_link = models.CharField(max_length=50, null=True, blank=True)
     status = models.CharField(max_length=50, choices=STATE_CHOICES, default='Pending')
     status_reasons = models.TextField(blank=True, null=True)
-    # metamask_address = models.ForeignKey(UserWalletAddress, blank=True, null=True, related_name='user_in_wallet_address',
-    #                                     on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
