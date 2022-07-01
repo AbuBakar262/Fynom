@@ -44,7 +44,7 @@ class AdminLoginView(APIView):
                                  "data": []}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"success": False, "status_code": 400, "message": e.args[0],
-                             "data": ["d"]}, status=status.HTTP_400_BAD_REQUEST)
+                             "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserChangePasswrodView(APIView):
