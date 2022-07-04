@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from user.models import User
 from blockchain.models import Collection
-from user.serializers import AdminLoginSerializer, UserPassowrdResetSerializer, SendPasswordResetEmailSerializer, \
-    AdminChangePasswordSerializer, UserProfileSerializer, UserProfileStatusUpdateViewSerializer,\
+from user.serializers import AdminLoginSerializer, AdminChangePasswordSerializer, \
+    UserProfileSerializer, UserProfileStatusUpdateViewSerializer,\
     UserCollectionSerializer, UserProfileDetailsViewSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -35,16 +35,16 @@ class AdminLoginView(APIView):
                 if user.is_superuser:
                     user = authenticate(email=email, password=password)
                     if not user:
-                        return Response({"success": False, "status_code": 400, "message": "user not found",
+                        return Response({"success": False, "status_code": 400, "message": "Wrong email or password",
                                          "data": []}, status=status.HTTP_400_BAD_REQUEST)
                     token = get_tokens_for_user(user)
                     return Response({"success": True, "status_code": 200, 'message': 'Login Success',
                                      "data": {"token": token}}, status=status.HTTP_200_OK)
                 else:
-                    return Response({"success": False, "status_code": 400, "message": "user is not superuser!",
+                    return Response({"success": False, "status_code": 400, "message": "User is not Superuser!",
                                      "data": []}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({"success": False, "status_code": 400, "message": "user does not exist!",
+                return Response({"success": False, "status_code": 400, "message": "User does not exist!",
                                  "data": []}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"success": False, "status_code": 400, "message": e.args[0],
@@ -69,42 +69,6 @@ class AdminChangePasswrodView(APIView):
             return Response({
                 "success": False, "status_code": 400,
                 "message": e.args[0], "data": []}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class SendPasswordResetEmailView(APIView):
-    """
-    this view in only for admin that can do forget password
-    """
-    def post(self, request, *args, **kwargs):
-        try:
-            serializer = SendPasswordResetEmailSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            return Response({
-                "success": True, "status_code": 200,
-                'message': 'Password reset link send to the email please check your mail',
-                "data": []}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({
-                "success": True, "status_code": 400,
-                'message': e.args[0], "data": []}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class UserPasswordResetView(APIView):
-    """
-    admin only can reset his/her password
-    """
-    def post(self, request, uid, token, *args, **kwargs):
-        try:
-            serializer = UserPassowrdResetSerializer(data=request.data, context={'uid': uid, 'token': token})
-            serializer.is_valid(raise_exception=True)
-            # serializer.save()
-            return Response({
-                "success": True, "status_code": 200, 'message': 'Password Reset Successfullly',
-                "data": []}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({
-                "success": True, "status_code": 400, 'message': e.args[0],
-                "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserProfileListView(viewsets.ViewSet):

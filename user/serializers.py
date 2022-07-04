@@ -38,60 +38,6 @@ class AdminChangePasswordSerializer(serializers.Serializer):
         return attrs
 
 
-class SendPasswordResetEmailSerializer(serializers.Serializer):
-    email = serializers.EmailField(max_length=225)
-
-    class Meta:
-        fields = ['email']
-
-    def validate(self, attrs):
-        email = attrs.get('email')
-        if User.objects.filter(email=email).exists():
-            user = User.objects.get(email=email)
-            uid = urlsafe_base64_encode(force_bytes(user.id))
-            token = PasswordResetTokenGenerator().make_token(user)
-            link = 'http://website.url/api/user/reset/' + uid + '/' + token + '/'
-            # send email
-            body = "Click following link to reset your password " + link
-            data = {
-                'subject': 'Reset Your Password',
-                'body': body,
-                'to_email': user.email
-            }
-            Utill.send_email(data)
-            return attrs
-        else:
-            raise ValidationError("You are not registerd user")
-
-
-class UserPassowrdResetSerializer(serializers.Serializer):
-    password1 = serializers.CharField(max_length=255, style={'input_type': 'password'}, write_only=True)
-    password2 = serializers.CharField(max_length=255, style={'input_type': 'password'}, write_only=True)
-
-    class Meta:
-        fields = ['password1', 'password2']
-
-    def validate(self, attrs):
-        try:
-            password1 = attrs.get('password1')
-            password2 = attrs.get('password2')
-            uid = self.context.get('uid')
-            token = self.context.get('token')
-            if password1 != password2:
-                raise serializers.ValidationError("Password and Confirm Password does't match")
-            id = smart_str(urlsafe_base64_decode(uid))
-            user = User.objects.get(id=id)
-            if not PasswordResetTokenGenerator().check_token(user, token):
-                raise ValidationError("token is not valid ro expire")
-            user.set_password(password1)
-            user.save()
-            return attrs
-        except DjangoUnicodeDecodeError as identifier:
-            PasswordResetTokenGenerator().check_token(user, token)
-            raise ValidationError("token is not valid ro expire")
-
-
-
 class UserProfileSerializer(serializers.ModelSerializer):
     # metamaskAddress = UserWalletAddressSerializer(many=False)
     # metamask = serializers.SerializerMethodField('get_metamask')
