@@ -1,12 +1,11 @@
 from rest_framework.exceptions import ValidationError
-
 from user.utils import *
 from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework import serializers
 from user.models import User
-from blockchain.models import Collection
+from blockchain.models import Collection, UserWalletAddress
 
 
 class UserLoginSerializer(serializers.ModelSerializer):
@@ -50,7 +49,7 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
             user = User.objects.get(email=email)
             uid = urlsafe_base64_encode(force_bytes(user.id))
             token = PasswordResetTokenGenerator().make_token(user)
-            link = 'http://website.url/api/user/reset/' + uid + '/' + token + '/'
+            link = 'http://website.url/rest_password/' + uid + '/' + token + '/'
             # send email
             body = "Click following link to reset your password " + link
             data = {
@@ -90,32 +89,36 @@ class UserPassowrdResetSerializer(serializers.Serializer):
             PasswordResetTokenGenerator().check_token(user, token)
             raise ValidationError("token is not valid ro expire")
 
+    def create(self, validated_data):
+        return User.objects.create(**validated_data)
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     # metamaskAddress = UserWalletAddressSerializer(many=False)
-    metamask = serializers.SerializerMethodField('get_metamask')
+    # metamask = serializers.SerializerMethodField('get_metamask')
 
     class Meta:
         model = User
-        fields = ["id", "profile_picture", "cover_picture", "name", "username", "email", "facebook_link", "twitter_link",
-                  "discord_link", "instagram_link", "reddit_link", "metamask"]
+        fields = ["id", "profile_picture", "cover_picture", "name", "username", "email", "facebook_link",
+                  "twitter_link", "discord_link", "instagram_link", "reddit_link"]
         # fields = "__all__"
 
-    def get_metamask(self, obj):
-        try:
-            return obj.metamaskAddress.walletAddress
-        except:
-            return None
+    # def get_metamask(self, obj):
+    #     try:
+    #         return obj.metamaskAddress.walletAddress
+    #     except:
+    #         return None
 
 
-class UserStatusViewSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["id", "status"]
+# class UserStatusViewSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ["id", "status"]
+
+# class UserWalletAddressSerializer(serializers.ModelSerializer):
 
 
-class UserProfileStatusViewSerializer(serializers.ModelSerializer):
+class UserProfileDetailsViewSerializer(serializers.ModelSerializer):
     wallet_addres = serializers.SerializerMethodField('get_metamask')
 
     class Meta:
@@ -124,7 +127,9 @@ class UserProfileStatusViewSerializer(serializers.ModelSerializer):
 
     def get_metamask(self, obj):
         try:
-            return obj.metamask_address.wallet_address
+            wallet = UserWalletAddress.objects.filter(user_wallet__id=obj.id).first()
+            if wallet:
+                return wallet.wallet_address
         except:
             return None
 
