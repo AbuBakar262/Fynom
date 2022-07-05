@@ -40,7 +40,7 @@ class Collection(models.Model):
     instagram_url = models.CharField(max_length=80, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    create_by = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    create_by = models.ForeignKey(User, blank=False, null=False, on_delete=models.CASCADE)
     collection_category = models.ForeignKey(NFTCategory, blank=True, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -79,7 +79,9 @@ class CreateNFT(models.Model):
     royality = models.FloatField(blank=True, null=True)
     hash = models.CharField(max_length=50, blank=True, null=True)
     contract_id = models.CharField(max_length=50, blank=True, null=True)
-    nft_owner = models.ForeignKey(UserWalletAddress, blank=True, null=True, related_name='nftOwner_wallet_address',
+    nft_creator = models.ForeignKey(UserWalletAddress, blank=True, null=True, related_name='nft_creator_in_create_nft',
+                                  on_delete=models.CASCADE)
+    nft_owner = models.ForeignKey(UserWalletAddress, blank=True, null=True, related_name='nft_owner_in_create_nft',
                                   on_delete=models.CASCADE)
     nft_status = models.CharField(max_length=50, choices=NFT_STATUS, default='Pending')
     status_remarks = models.TextField(blank=True, null=True)

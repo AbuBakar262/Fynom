@@ -3,21 +3,29 @@ from rest_framework import status
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from user.models import User
-from blockchain.models import Collection
+from blockchain.models import Collection, UserWalletAddress
 from user.serializers import AdminLoginSerializer, AdminChangePasswordSerializer, \
-    UserProfileSerializer, UserProfileStatusUpdateViewSerializer,\
-    UserCollectionSerializer, UserProfileDetailsViewSerializer
+    UserProfileSerializer, UserProfileStatusUpdateViewSerializer, \
+    UserCollectionSerializer, UserProfileDetailsViewSerializer, UserLoginSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import viewsets
-
+from user.custom_permissions import IsApprovedUser
 
 def get_tokens_for_user(user):
+    print("1")
     refresh = RefreshToken.for_user(user)
+    print("2")
     return {
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     }
+# def get_tokens_for_user(wallet_address):
+#     refresh = RefreshToken.for_user(wallet_address)
+#     return {
+#         'refresh': str(refresh),
+#         'access': str(refresh.access_token),
+#     }
 
 
 class AdminLoginView(APIView):
@@ -69,6 +77,35 @@ class AdminChangePasswrodView(APIView):
             return Response({
                 "success": False, "status_code": 400,
                 "message": e.args[0], "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserLogin(APIView):
+    """
+    login with matamask for user, give it access token if user create or not created then create
+    """
+    def post(self, request, *args, **kwargs):
+        try:
+            wallet_address = request.data.get('wallet_address')
+            if UserWalletAddress.objects.filter(wallet_address=wallet_address).exists():
+                wallet_address = UserWalletAddress.objects.filter(wallet_address=wallet_address).first()
+                serializer = UserLoginSerializer(wallet_address)
+                token = get_tokens_for_user(wallet_address)
+                return Response({
+                    "success": True, "status_code": 200, 'message': 'User address exists already',
+                    "data": serializer.data, "token": token}, status=status.HTTP_200_OK)
+            else:
+                serializer = UserLoginSerializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                wallet_address = UserWalletAddress.objects.get(wallet_address=wallet_address)
+                token = get_tokens_for_user(wallet_address)
+                return Response({
+                    "success": True, "status_code": 200, 'message': 'User address saved successfully',
+                    "data": serializer.data, "token": token}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "success": False, "status_code": 400, 'message': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserProfileListView(viewsets.ViewSet):
@@ -199,20 +236,10 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
 
 class UserCollection(viewsets.ViewSet):
     """
-    only user can creat collection, can retrieve, list and update
+    only user can creat collection, and update
     """
-    permission_classes = [IsAuthenticated]
-    def list(self, request, *args, **kwargs):
-        try:
-            collections = Collection.objects.all()
-            serializer = UserCollectionSerializer(collections, many=True)
-            return Response({
-                "success": True, "status_code": 200, 'message': 'User Collection Listed Successfully',
-                "data": serializer.data}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({
-                "success": False, "status_code": 400, 'message': e.args[0],
-                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+    permission_classes = [IsApprovedUser]
+
     def create(self, request, *args, **kwargs):
         try:
             data = request.data
@@ -222,6 +249,40 @@ class UserCollection(viewsets.ViewSet):
             serializer.save()
             return Response({
                 "success": True, "status_code": 200, 'message': 'User Collection Created Successfully',
+                "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "success": False, "status_code": 400, 'message': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def partial_update(self, request, *args, **kwargs):
+        try:
+            id = self.kwargs.get('pk')
+            collection_id = Collection.objects.get(id=id)
+            # collection = Collection.objects.get(id=pk)
+            serializer = UserCollectionSerializer(collection_id, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({
+                "success": True, "status_code": 200, 'message': 'User Collection Update Successfully',
+                "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "success": False, "status_code": 400, 'message': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+class ListUserCollection(viewsets.ViewSet):
+    """
+    any user can see(list) collection, and retrieve
+    """
+    permission_classes = [AllowAny]
+    def list(self, request, *args, **kwargs):
+        try:
+            collections = Collection.objects.all()
+            serializer = UserCollectionSerializer(collections, many=True)
+            return Response({
+                "success": True, "status_code": 200, 'message': 'User Collection Listed Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -242,19 +303,4 @@ class UserCollection(viewsets.ViewSet):
                 "success": False, "status_code": 400, 'message': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
-    def partial_update(self, request, *args, **kwargs):
-        try:
-            id = self.kwargs.get('pk')
-            collection_id = Collection.objects.get(id=id)
-            # collection = Collection.objects.get(id=pk)
-            serializer = UserCollectionSerializer(collection_id, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response({
-                "success": True, "status_code": 200, 'message': 'User Collection Update Successfully',
-                "data": serializer.data}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({
-                "success": False, "status_code": 400, 'message': e.args[0],
-                "data": []}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -1,9 +1,3 @@
-from rest_framework.exceptions import ValidationError
-
-from user.utils import *
-from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework import serializers
 from user.models import User
 from blockchain.models import Collection, UserWalletAddress
@@ -36,6 +30,16 @@ class AdminChangePasswordSerializer(serializers.Serializer):
         user.set_password(password1)
         user.save()
         return attrs
+
+
+class UserLoginSerializer(serializers.ModelSerializer):
+    wallet_address = serializers.CharField(max_length=255)
+    class Meta:
+        model = UserWalletAddress
+        # fields = '__all__'
+        fields = ["id", "wallet_address", "user_wallet"]
+
+
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
