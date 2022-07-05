@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-c3#abih-$eck=lxde0uuy^oo%%r7u94=^95%+gbr0-#(j1z0_@
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-
+CORS_ORIGIN_ALLOW_ALL = True
 # Application definition
 
 INSTALLED_APPS = [
