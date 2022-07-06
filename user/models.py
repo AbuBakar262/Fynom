@@ -14,9 +14,10 @@ STATE_CHOICES = (
 class User(AbstractUser):
     profile_picture = models.ImageField(upload_to='image/', null=True, blank=True)
     cover_picture = models.ImageField(upload_to='image/', null=True, blank=True)
-    name = models.CharField(max_length=50, blank=False, null=False, unique=False)
-    username = models.CharField(max_length=50, blank=False, null=False, unique=True)  # use as display name
-    email = models.EmailField(_('email address'), unique=True, blank=False, null=False)
+    name = models.CharField(max_length=50, null=True, blank=True, unique=False)
+    username = models.CharField(max_length=50, null=True, blank=True, unique=True)  # use as display name
+    email = models.EmailField(_('email address'), unique=True, null=True, blank=True)
+    password = models.CharField(_('password'), max_length=128, blank=True, null=True)
     facebook_link = models.CharField(max_length=50, null=True, blank=True)
     twitter_link = models.CharField(max_length=50, null=True, blank=True)
     discord_link = models.CharField(max_length=50, null=True, blank=True)
@@ -28,7 +29,12 @@ class User(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', 'username']
+    REQUIRED_FIELDS = ['username']
+    def __str__(self):
+        if self.name:
+            return self.name
+        else:
+            return str(self.id)
 
 
 
