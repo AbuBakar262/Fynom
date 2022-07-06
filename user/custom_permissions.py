@@ -1,4 +1,6 @@
 from rest_framework import permissions
+from rest_framework.permissions import BasePermission
+
 
 class IsApprovedUser(permissions.BasePermission):
 
@@ -6,3 +8,4 @@ class IsApprovedUser(permissions.BasePermission):
         if request.user.status == 'Approve':
             return True
         return False
+

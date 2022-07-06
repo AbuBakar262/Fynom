@@ -17,11 +17,9 @@ router.register('list_user_collection', views.ListUserCollection, basename='list
 urlpatterns = [
     path('', include(router.urls)),
     path('profile/', UserProfileListView.as_view({'get': 'get'}), name="profile"),
-    path('profile_create/', UserProfileCreateView.as_view({'post': 'post'}), name="profile_create"),
     path('profile_update/<int:pk>/', UserProfileUpdateView.as_view({'patch': 'patch'}), name="profile_update"),
     path('admin_login/', AdminLoginView.as_view(), name="login"),
     path('change_password/', AdminChangePasswrodView.as_view(), name="change_password"),
     path('user_login/', UserLogin.as_view(), name="user_login"),
 
-    # path('user_status/', views.UserStatusView.as_view(), name="user_status"),
 ]
