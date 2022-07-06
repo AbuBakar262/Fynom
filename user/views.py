@@ -8,24 +8,16 @@ from user.serializers import AdminLoginSerializer, AdminChangePasswordSerializer
     UserProfileSerializer, UserProfileStatusUpdateViewSerializer, \
     UserCollectionSerializer, UserProfileDetailsViewSerializer, UserLoginSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework import viewsets
 from user.custom_permissions import IsApprovedUser
 
 def get_tokens_for_user(user):
-    print("1")
     refresh = RefreshToken.for_user(user)
-    print("2")
     return {
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     }
-# def get_tokens_for_user(wallet_address):
-#     refresh = RefreshToken.for_user(wallet_address)
-#     return {
-#         'refresh': str(refresh),
-#         'access': str(refresh.access_token),
-#     }
 
 
 class AdminLoginView(APIView):
@@ -86,22 +78,32 @@ class UserLogin(APIView):
     def post(self, request, *args, **kwargs):
         try:
             wallet_address = request.data.get('wallet_address')
-            if UserWalletAddress.objects.filter(wallet_address=wallet_address).exists():
+            address = UserWalletAddress.objects.filter(wallet_address=wallet_address)
+            if address.exists():
                 wallet_address = UserWalletAddress.objects.filter(wallet_address=wallet_address).first()
                 serializer = UserLoginSerializer(wallet_address)
-                token = get_tokens_for_user(wallet_address)
+                profile_id = User.objects.filter(id=wallet_address.user_wallet.id).first()
+                serializer_user = UserProfileSerializer(profile_id)
+                token = get_tokens_for_user(address.first())
                 return Response({
                     "success": True, "status_code": 200, 'message': 'User address exists already',
-                    "data": serializer.data, "token": token}, status=status.HTTP_200_OK)
+                    "data": serializer.data,"profile": serializer_user.data, "token": token}, status=status.HTTP_200_OK)
             else:
+                data = {'name': None}
+                serializer_user = UserProfileSerializer(data=data)
+                serializer_user.is_valid(raise_exception=True)
+                serializer_user.save()
+                last_id = User.objects.order_by('-id')[0]
+                profile_id = User.objects.filter(id=last_id.id).first()
                 serializer = UserLoginSerializer(data=request.data)
                 serializer.is_valid(raise_exception=True)
-                serializer.save()
+                serializer.save(user_wallet=profile_id)
                 wallet_address = UserWalletAddress.objects.get(wallet_address=wallet_address)
                 token = get_tokens_for_user(wallet_address)
                 return Response({
-                    "success": True, "status_code": 200, 'message': 'User address saved successfully',
-                    "data": serializer.data, "token": token}, status=status.HTTP_200_OK)
+                    "success": True, "status_code": 200, 'message': 'User address saved successfully and profile created',
+                    "data": serializer.data, "profile": serializer_user.data, "token": token}, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response({
                 "success": False, "status_code": 400, 'message': e.args[0],
@@ -120,27 +122,6 @@ class UserProfileListView(viewsets.ViewSet):
             serializer = UserProfileSerializer(user_id)
             return Response({
                 "success": True, "status_code": 200, 'message': 'User Profile Listed Successfull',
-                "data": serializer.data}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({
-                "success": False, "status_code": 400, 'message': e.args[0],
-                "data": []}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class UserProfileCreateView(viewsets.ViewSet):
-    """
-    user can create his/her profile
-    """
-    # permission_classes = [IsAuthenticated]
-    def post(self, request, *args, **kwargs):
-        try:
-            # user_id = User.objects.get(id=request.user.id)
-            # serializer = UserProfileSerializer(user_id, data=request.data)
-            serializer = UserProfileSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response({
-                "success": True, "status_code": 200, 'message': 'User Profile Created Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -167,28 +148,6 @@ class UserProfileUpdateView(viewsets.ViewSet):
             return Response({
                 "success": False, "status_code": 400, 'message': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# class UserStatusView(ListAPIView):
-#     """
-#     only for user that can see his/her profile status
-#     """
-#     queryset = User.objects.all()
-#     serializer_class = UserProfileStatusUpdateViewSerializer
-#     permission_classes = [IsAuthenticated]
-#
-#     def get(self, request, *args, **kwargs):
-#         try:
-#             user_id = User.objects.get(id=request.user.id)
-#             # queryset = self.get_queryset(id=id)
-#             serializer = self.serializer_class(user_id)
-#             return Response({
-#                 "success": True, "status_code": 200, 'message': 'User Status Retrieve Successfully',
-#                 "data": serializer.data}, status=status.HTTP_200_OK)
-#         except Exception as e:
-#             return Response({
-#                 "success": False, "status_code": 400, 'message': e.args[0],
-#                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 #
 class UserProfileDetailsView(viewsets.ViewSet):
@@ -276,7 +235,7 @@ class ListUserCollection(viewsets.ViewSet):
     """
     any user can see(list) collection, and retrieve
     """
-    permission_classes = [AllowAny]
+    # permission_classes = [IsAuthenticated]
     def list(self, request, *args, **kwargs):
         try:
             collections = Collection.objects.all()
@@ -293,7 +252,6 @@ class ListUserCollection(viewsets.ViewSet):
         try:
             id = self.kwargs.get('pk')
             collection_id = Collection.objects.get(id=id)
-            # collection = Collection.objects.get(id=pk)
             serializer = UserCollectionSerializer(collection_id)
             return Response({
                 "success": True, "status_code": 200, 'message': 'User Collection Retrieve Successfully',
