@@ -84,7 +84,7 @@ class UserLogin(APIView):
                 serializer = UserLoginSerializer(wallet_address)
                 profile_id = User.objects.filter(id=wallet_address.user_wallet.id).first()
                 serializer_user = UserProfileSerializer(profile_id)
-                token = get_tokens_for_user(address.first())
+                token = get_tokens_for_user(profile_id)
                 return Response({
                     "success": True, "status_code": 200, 'message': 'User address exists already',
                     "data": serializer.data,"profile": serializer_user.data, "token": token}, status=status.HTTP_200_OK)
@@ -98,8 +98,8 @@ class UserLogin(APIView):
                 serializer = UserLoginSerializer(data=request.data)
                 serializer.is_valid(raise_exception=True)
                 serializer.save(user_wallet=profile_id)
-                wallet_address = UserWalletAddress.objects.get(wallet_address=wallet_address)
-                token = get_tokens_for_user(wallet_address)
+                # wallet_address = UserWalletAddress.objects.get(wallet_address=wallet_address)
+                token = get_tokens_for_user(profile_id)
                 return Response({
                     "success": True, "status_code": 200, 'message': 'User address saved successfully and profile created',
                     "data": serializer.data, "profile": serializer_user.data, "token": token}, status=status.HTTP_200_OK)
@@ -235,7 +235,7 @@ class ListUserCollection(viewsets.ViewSet):
     """
     any user can see(list) collection, and retrieve
     """
-    # permission_classes = [IsAuthenticated]
+    # permission_classes = [AllowAny]
     def list(self, request, *args, **kwargs):
         try:
             collections = Collection.objects.all()
