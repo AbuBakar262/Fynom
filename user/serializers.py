@@ -11,7 +11,6 @@ class AdminLoginSerializer(serializers.ModelSerializer):
         fields = ['email', 'password']
 
 
-
 class AdminChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(max_length=255, style={'input_type': 'password'}, write_only=True)
     password1 = serializers.CharField(max_length=255, style={'input_type': 'password'}, write_only=True)
@@ -34,6 +33,7 @@ class AdminChangePasswordSerializer(serializers.Serializer):
 
 class UserLoginSerializer(serializers.ModelSerializer):
     wallet_address = serializers.CharField(max_length=255)
+    user_wallet = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field="id", required=False)
     class Meta:
         model = UserWalletAddress
         # fields = '__all__'
@@ -51,20 +51,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ["id", "profile_picture", "cover_picture", "name", "username", "email", "facebook_link",
                   "twitter_link", "discord_link", "instagram_link", "reddit_link"]
         # fields = "__all__"
-
-    # def get_metamask(self, obj):
-    #     try:
-    #         return obj.metamaskAddress.walletAddress
-    #     except:
-    #         return None
-
-
-# class UserStatusViewSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ["id", "status"]
-
-# class UserWalletAddressSerializer(serializers.ModelSerializer):
 
 
 class UserProfileDetailsViewSerializer(serializers.ModelSerializer):
@@ -92,4 +78,5 @@ class UserProfileStatusUpdateViewSerializer(serializers.ModelSerializer):
 class UserCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
-        fields = ["id", "logo_image", "featured_image", "cover_image", "name", "website_url", "instagram_url", "collection_category", "create_by"]
+        fields = ["id", "logo_image", "featured_image", "cover_image", "name", "website_url", "instagram_url",
+                  "collection_category", "create_by"]
