@@ -6,9 +6,9 @@ from user.models import User
 from blockchain.models import Collection, UserWalletAddress
 from user.serializers import AdminLoginSerializer, AdminChangePasswordSerializer, \
     UserProfileSerializer, UserProfileStatusUpdateViewSerializer, \
-    UserCollectionSerializer, UserProfileDetailsViewSerializer, UserLoginSerializer
+    UserCollectionSerializer, UserProfileDetailsViewSerializer, UserLoginSerializer, TermsAndPoliciesViewSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import viewsets
 from user.custom_permissions import IsApprovedUser
 
@@ -35,19 +35,19 @@ class AdminLoginView(APIView):
                 if user.is_superuser:
                     user = authenticate(email=email, password=password)
                     if not user:
-                        return Response({"success": False, "status_code": 400, "message": "Wrong email or password",
+                        return Response({"status": False, "status_code": 400, "msg": "Wrong email or password",
                                          "data": []}, status=status.HTTP_400_BAD_REQUEST)
                     token = get_tokens_for_user(user)
-                    return Response({"success": True, "status_code": 200, 'message': 'Login Success',
+                    return Response({"status": True, "status_code": 200, 'msg': 'Login Successfully',
                                      "data": {"token": token}}, status=status.HTTP_200_OK)
                 else:
-                    return Response({"success": False, "status_code": 400, "message": "User is not Superuser!",
+                    return Response({"status": False, "status_code": 400, "msg": "User is not Superuser!",
                                      "data": []}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({"success": False, "status_code": 400, "message": "User does not exist!",
+                return Response({"status": False, "status_code": 400, "msg": "User does not exist!",
                                  "data": []}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"success": False, "status_code": 400, "message": e.args[0],
+            return Response({"status": False, "status_code": 400, "msg": e.args[0],
                              "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -63,18 +63,19 @@ class AdminChangePasswrodView(APIView):
             serializer = AdminChangePasswordSerializer(data=request.data, context={'user': request.user})
             serializer.is_valid(raise_exception=True)
             return Response({
-                "success": True, "status_code": 200, "message": "Password Reset Successfully",
+                "status": True, "status_code": 200, "msg": "Password Reset Successfully",
                 "data": []}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                "success": False, "status_code": 400,
-                "message": e.args[0], "data": []}, status=status.HTTP_400_BAD_REQUEST)
+                "status": False, "status_code": 400,
+                "msg": e.args[0], "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserLogin(APIView):
     """
     login with matamask for user, give it access token if user create or not created then create
     """
+    permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
         try:
             wallet_address = request.data.get('wallet_address')
@@ -86,7 +87,7 @@ class UserLogin(APIView):
                 serializer_user = UserProfileSerializer(profile_id)
                 token = get_tokens_for_user(profile_id)
                 return Response({
-                    "success": True, "status_code": 200, 'message': 'User address exists already',
+                    "status": True, "status_code": 200, 'msg': 'User address exists already',
                     "data": serializer.data,"profile": serializer_user.data, "token": token}, status=status.HTTP_200_OK)
             else:
                 data = {'name': None}
@@ -101,31 +102,45 @@ class UserLogin(APIView):
                 # wallet_address = UserWalletAddress.objects.get(wallet_address=wallet_address)
                 token = get_tokens_for_user(profile_id)
                 return Response({
-                    "success": True, "status_code": 200, 'message': 'User address saved successfully and profile created',
+                    "status": True, "status_code": 200, 'msg': 'User address saved successfully and profile created',
                     "data": serializer.data, "profile": serializer_user.data, "token": token}, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response({
-                "success": False, "status_code": 400, 'message': e.args[0],
+                "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserProfileListView(viewsets.ViewSet):
     """
-    user can see his/her profile
+    any user can see his/her profile or the profile of other user, also gust user perform this task
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
-    def get(self, request, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         try:
-            user_id = User.objects.get(id=request.user.id)
-            serializer = UserProfileSerializer(user_id)
+            users = User.objects.all()
+            serializer = UserProfileSerializer(users, many=True)
             return Response({
-                "success": True, "status_code": 200, 'message': 'User Profile Listed Successfull',
+                "status": True, "status_code": 200, 'msg': 'User Profile Listed Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                "success": False, "status_code": 400, 'message': e.args[0],
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            id = self.kwargs.get('pk')
+            user = User.objects.get(id=id)
+            serializer = UserProfileSerializer(user)
+            return Response({
+                "status": True, "status_code": 200, 'msg': 'User Collection Retrieve Successfully',
+                "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -133,7 +148,7 @@ class UserProfileUpdateView(viewsets.ViewSet):
     """
     user can update some fields of his/her profile
     """
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def patch(self, request, *args, **kwargs):
         try:
             id = self.kwargs.get('pk')
@@ -142,11 +157,11 @@ class UserProfileUpdateView(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({
-                "success": True, "status_code": 200, 'message': 'User Profile Updated Successfully',
+                "status": True, "status_code": 200, 'msg': 'User Profile Updated Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                "success": False, "status_code": 400, 'message': e.args[0],
+                "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 #
@@ -159,14 +174,14 @@ class UserProfileDetailsView(viewsets.ViewSet):
 
     def list(self, request, *args, **kwargs):
         try:
-            user = User.objects.all()
+            user = User.objects.all().order_by('-id')
             serializer = UserProfileDetailsViewSerializer(user, many=True)
             return Response({
-                "success": True, "status_code": 200, 'message': 'Users Profiles Listed Successfully',
+                "status": True, "status_code": 200, 'msg': 'Users Profiles Listed Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                "success": False, "status_code": 400, 'message': e.args[0],
+                "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -185,11 +200,11 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({
-                "success": True, "status_code": 200, 'message': 'User Profiles Updated Successfully',
+                "status": True, "status_code": 200, 'msg': 'User Profiles Updated Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                "success": False, "status_code": 400, 'message': e.args[0],
+                "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -207,11 +222,11 @@ class UserCollection(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({
-                "success": True, "status_code": 200, 'message': 'User Collection Created Successfully',
+                "status": True, "status_code": 200, 'msg': 'User Collection Created Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                "success": False, "status_code": 400, 'message': e.args[0],
+                "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -224,11 +239,11 @@ class UserCollection(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({
-                "success": True, "status_code": 200, 'message': 'User Collection Update Successfully',
+                "status": True, "status_code": 200, 'msg': 'User Collection Update Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                "success": False, "status_code": 400, 'message': e.args[0],
+                "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 class ListUserCollection(viewsets.ViewSet):
@@ -241,11 +256,11 @@ class ListUserCollection(viewsets.ViewSet):
             collections = Collection.objects.all()
             serializer = UserCollectionSerializer(collections, many=True)
             return Response({
-                "success": True, "status_code": 200, 'message': 'User Collection Listed Successfully',
+                "status": True, "status_code": 200, 'msg': 'User Collection Listed Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                "success": False, "status_code": 400, 'message': e.args[0],
+                "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, *args, **kwargs):
@@ -254,11 +269,31 @@ class ListUserCollection(viewsets.ViewSet):
             collection_id = Collection.objects.get(id=id)
             serializer = UserCollectionSerializer(collection_id)
             return Response({
-                "success": True, "status_code": 200, 'message': 'User Collection Retrieve Successfully',
+                "status": True, "status_code": 200, 'msg': 'User Collection Retrieve Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                "success": False, "status_code": 400, 'message': e.args[0],
+                "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class TermsAndPoliciesView(viewsets.ViewSet):
+    """
+     This api is only use for user he/she will agree to the terms and condition
+     """
+    permission_classes = [IsAuthenticated]
+    def partial_update(self, request, *args, **kwargs):
+        try:
+            id = self.kwargs.get('pk')
+            user_id = User.objects.get(id=id)
+            # user = User.objects.get(id=pk)
+            serializer = TermsAndPoliciesViewSerializer(user_id, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({
+                "status": True, "status_code": 200, 'msg': 'User Agreed with terms and policies',
+                "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)

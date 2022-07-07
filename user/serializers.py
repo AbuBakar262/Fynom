@@ -40,25 +40,12 @@ class UserLoginSerializer(serializers.ModelSerializer):
         fields = ["id", "wallet_address", "user_wallet"]
 
 
-
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    # metamaskAddress = UserWalletAddressSerializer(many=False)
-    # metamask = serializers.SerializerMethodField('get_metamask')
-
-    class Meta:
-        model = User
-        fields = ["id", "profile_picture", "cover_picture", "name", "username", "email", "facebook_link",
-                  "twitter_link", "discord_link", "instagram_link", "reddit_link"]
-        # fields = "__all__"
-
-
 class UserProfileDetailsViewSerializer(serializers.ModelSerializer):
-    wallet_addres = serializers.SerializerMethodField('get_metamask')
+    user_address = serializers.SerializerMethodField('get_metamask')
 
     class Meta:
         model = User
-        fields = ["id", "name", "username", "wallet_addres", "created_at", "status"]
+        fields = ["id", "name", "username", "user_address", "created_at", "status"]
 
     def get_metamask(self, obj):
         try:
@@ -67,6 +54,25 @@ class UserProfileDetailsViewSerializer(serializers.ModelSerializer):
                 return wallet.wallet_address
         except:
             return None
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    # user_in_wallet_address = UserProfileDetailsViewSerializer(many=False)
+    user_wallet_address = serializers.SerializerMethodField('get_metamask')
+
+    class Meta:
+        model = User
+        fields = ["id", "user_wallet_address", "profile_picture", "cover_picture", "name", "username", "email",
+                  "facebook_link", "twitter_link", "discord_link", "instagram_link", "reddit_link"]
+        # fields = "__all__"
+    def get_metamask(self, obj):
+        try:
+            wallet = UserWalletAddress.objects.filter(user_wallet__id=obj.id).first()
+            if wallet:
+                return wallet.wallet_address
+        except:
+            return None
+
 
 
 class UserProfileStatusUpdateViewSerializer(serializers.ModelSerializer):
@@ -80,3 +86,9 @@ class UserCollectionSerializer(serializers.ModelSerializer):
         model = Collection
         fields = ["id", "logo_image", "featured_image", "cover_image", "name", "website_url", "instagram_url",
                   "collection_category", "create_by"]
+
+
+class TermsAndPoliciesViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "terms_policies"]

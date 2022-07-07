@@ -25,6 +25,7 @@ class User(AbstractUser):
     reddit_link = models.CharField(max_length=50, null=True, blank=True)
     status = models.CharField(max_length=50, choices=STATE_CHOICES, default='Pending')
     status_reasons = models.TextField(blank=True, null=True)
+    terms_policies = models.BooleanField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
