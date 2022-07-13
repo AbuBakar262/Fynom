@@ -75,7 +75,7 @@ class UserLogin(APIView):
     """
     login with matamask for user, give it access token if user create or not created then create
     """
-    permission_classes = [AllowAny]
+    # permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
         try:
             wallet_address = request.data.get('wallet_address')
@@ -212,7 +212,7 @@ class UserCollection(viewsets.ViewSet):
     """
     only user can creat collection, and update
     """
-    permission_classes = [IsApprovedUser]
+    permission_classes = [IsApprovedUser, IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         try:
@@ -250,7 +250,7 @@ class ListUserCollection(viewsets.ViewSet):
     """
     any user can see(list) collection, and retrieve
     """
-    # permission_classes = [AllowAny]
+    permission_classes = [AllowAny]
     def list(self, request, *args, **kwargs):
         try:
             collections = Collection.objects.all()

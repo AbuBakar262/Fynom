@@ -86,7 +86,7 @@ class CreateNFT(models.Model):
     nft_status = models.CharField(max_length=50, choices=NFT_STATUS, default='Pending')
     status_remarks = models.TextField(blank=True, null=True)
     top_nft = models.BooleanField()
-    nft_sell_type = models.CharField(max_length=50, choices=NFT_SELL_TYPE, default='Pending')
+    nft_sell_type = models.CharField(max_length=50, choices=NFT_SELL_TYPE)
     fix_price = models.FloatField(blank=True, null=True)
     starting_rice = models.FloatField(blank=True, null=True)
     start_dateTime = models.DateTimeField(blank=True, null=True)

@@ -2,7 +2,7 @@ from django.urls import path, include
 
 from . import views
 from .views import AdminLoginView, AdminChangePasswrodView, \
-    UserProfileListView, UserLogin, UserProfileUpdateView
+    UserLogin, UserProfileUpdateView, UserProfileListView
 
 from rest_framework.routers import DefaultRouter
 
