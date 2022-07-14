@@ -38,6 +38,7 @@ class Collection(models.Model):
     name = models.CharField(max_length=50, blank=False, null=False)
     website_url = models.CharField(max_length=80, null=True, blank=True)
     instagram_url = models.CharField(max_length=80, null=True, blank=True)
+    description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     create_by = models.ForeignKey(User, blank=False, null=False, on_delete=models.CASCADE)

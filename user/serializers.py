@@ -85,7 +85,7 @@ class UserCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
         fields = ["id", "logo_image", "featured_image", "cover_image", "name", "website_url", "instagram_url",
-                  "collection_category", "create_by"]
+                  "description","collection_category", "create_by"]
 
 
 class TermsAndPoliciesViewSerializer(serializers.ModelSerializer):

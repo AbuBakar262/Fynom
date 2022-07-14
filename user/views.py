@@ -2,7 +2,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
+
+from backend.pagination import CustomPageNumberPagination
 from user.models import User
+# from .pagination import CustomPagination
 from blockchain.models import Collection, UserWalletAddress
 from user.serializers import AdminLoginSerializer, AdminChangePasswordSerializer, \
     UserProfileSerializer, UserProfileStatusUpdateViewSerializer, \
@@ -116,7 +119,7 @@ class UserProfileListView(viewsets.ViewSet):
     any user can see his/her profile or the profile of other user, also gust user perform this task
     """
     permission_classes = [AllowAny]
-
+    # pagination_class = CustomPagination
     def list(self, request, *args, **kwargs):
         try:
             users = User.objects.all()
@@ -174,7 +177,8 @@ class UserProfileDetailsView(viewsets.ViewSet):
 
     def list(self, request, *args, **kwargs):
         try:
-            user = User.objects.all().order_by('-id')
+            # user = User.objects.all().order_by('-id')
+            user = User.objects.filter(status="Pending").order_by('-id')
             serializer = UserProfileDetailsViewSerializer(user, many=True)
             return Response({
                 "status": True, "status_code": 200, 'msg': 'Users Profiles Listed Successfully',
@@ -190,7 +194,7 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
      This api is only use for Admin
      can change the status of user profile
      """
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     def partial_update(self, request, *args, **kwargs):
         try:
             id = self.kwargs.get('pk')
@@ -256,13 +260,18 @@ class ListUserCollection(viewsets.ViewSet):
     any user can see(list) collection, and retrieve
     """
     permission_classes = [AllowAny]
+    # pagination_class = PageNumberPagination
     def list(self, request, *args, **kwargs):
         try:
             collections = Collection.objects.all()
-            serializer = UserCollectionSerializer(collections, many=True)
-            return Response({
-                "status": True, "status_code": 200, 'msg': 'User Collection Listed Successfully',
-                "data": serializer.data}, status=status.HTTP_200_OK)
+            # serializer = UserCollectionSerializer(collections, many=True)
+            paginator = CustomPageNumberPagination()
+            result = paginator.paginate_queryset(collections, request)
+            serializer = UserCollectionSerializer(result, many=True)
+            return paginator.get_paginated_response(serializer.data)
+            # return Response({
+            #     "status": True, "status_code": 200, 'msg': 'User Collection Listed Successfully',
+            #     "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],

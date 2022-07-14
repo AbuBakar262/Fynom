@@ -4,6 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 
 
 STATE_CHOICES = (
+    ('Not Requested', 'Not Requested'),
     ('Pending', 'Pending'),
     ('Approve', 'Approve'),
     ('Disapprove', 'Disapprove'),
@@ -23,7 +24,7 @@ class User(AbstractUser):
     discord_link = models.CharField(max_length=50, null=True, blank=True)
     instagram_link = models.CharField(max_length=50, null=True, blank=True)
     reddit_link = models.CharField(max_length=50, null=True, blank=True)
-    status = models.CharField(max_length=50, choices=STATE_CHOICES, default='Pending')
+    status = models.CharField(max_length=50, choices=STATE_CHOICES, default='Not Requested')
     status_reasons = models.TextField(blank=True, null=True)
     terms_policies = models.BooleanField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
