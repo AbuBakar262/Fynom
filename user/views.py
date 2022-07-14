@@ -234,13 +234,18 @@ class UserCollection(viewsets.ViewSet):
         try:
             id = self.kwargs.get('pk')
             collection_id = Collection.objects.get(id=id)
-            # collection = Collection.objects.get(id=pk)
-            serializer = UserCollectionSerializer(collection_id, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response({
-                "status": True, "status_code": 200, 'msg': 'User Collection Update Successfully',
-                "data": serializer.data}, status=status.HTTP_200_OK)
+            if request.user.id == collection_id.create_by.id:
+                # collection = Collection.objects.get(id=pk)
+                serializer = UserCollectionSerializer(collection_id, data=request.data, partial=True)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response({
+                    "status": True, "status_code": 200, 'msg': 'User Collection Update Successfully',
+                    "data": serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    "status": False, "status_code": 400, 'msg': 'User not creator of this Collection',
+                    "data": []}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
@@ -276,6 +281,24 @@ class ListUserCollection(viewsets.ViewSet):
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class UserCollectionListView(viewsets.ViewSet):
+    """
+    this view is for list/retrieve nfts of perticular user by its id
+    """
+    permission_classes = [AllowAny]
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            user_id = self.kwargs.get('pk')
+            collections = Collection.objects.filter(create_by=user_id)
+            serializer = UserCollectionSerializer(collections, many=True)
+            return Response({
+                "status": True, "status_code": 200, 'msg': 'User Collections Listed Successfully',
+                "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 class TermsAndPoliciesView(viewsets.ViewSet):
     """

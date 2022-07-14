@@ -32,9 +32,9 @@ class NFTSubCategory(models.Model):
 
 
 class Collection(models.Model):
-    logo_image = models.ImageField(upload_to='image/', null=True, blank=True)
-    featured_image = models.ImageField(upload_to='image/', null=True, blank=True)
-    cover_image = models.ImageField(upload_to='image/', null=True, blank=True)
+    logo_image = models.ImageField(upload_to='collection/', null=True, blank=True)
+    featured_image = models.ImageField(upload_to='collection/', null=True, blank=True)
+    cover_image = models.ImageField(upload_to='collection/', null=True, blank=True)
     name = models.CharField(max_length=50, blank=False, null=False)
     website_url = models.CharField(max_length=80, null=True, blank=True)
     instagram_url = models.CharField(max_length=80, null=True, blank=True)
@@ -66,10 +66,10 @@ SOLD_STATUS = (
 )
 
 
-class CreateNFT(models.Model):
-    thumbnail = models.ImageField(upload_to='image/', null=True, blank=True)
-    nft_picture = models.ImageField(upload_to='image/', null=True, blank=True)
-    teaser = models.FileField(upload_to='video/', null=True, blank=True)
+class NFT(models.Model):
+    thumbnail = models.ImageField(upload_to='nft/', null=True, blank=True)
+    nft_picture = models.ImageField(upload_to='nft/', null=True, blank=True)
+    teaser = models.FileField(upload_to='nft/', null=True, blank=True)
     nft_title = models.CharField(max_length=50, blank=True, null=True)
     nft_collection = models.ForeignKey(Collection, blank=True, null=True, related_name='nft_collection',
                                        on_delete=models.CASCADE)
@@ -88,7 +88,7 @@ class CreateNFT(models.Model):
     top_nft = models.BooleanField()
     nft_sell_type = models.CharField(max_length=50, choices=NFT_SELL_TYPE)
     fix_price = models.FloatField(blank=True, null=True)
-    starting_rice = models.FloatField(blank=True, null=True)
+    starting_price = models.FloatField(blank=True, null=True)
     start_dateTime = models.DateTimeField(blank=True, null=True)
     end_datetime = models.DateTimeField(blank=True, null=True)
     sold_status = models.CharField(max_length=50, choices=SOLD_STATUS, default='Pending')
@@ -102,15 +102,15 @@ class CreateNFT(models.Model):
 
 
 class SupportingDocuments(models.Model):
-    documents = models.FileField(upload_to='document/', null=True, blank=True)
-    nft_create_info = models.ForeignKey(CreateNFT, blank=True, null=True, on_delete=models.CASCADE)
+    documents = models.FileField(upload_to='supporting_document/', null=True, blank=True)
+    nft_create_info = models.ForeignKey(NFT, blank=True, null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 
 class Tags(models.Model):
     tag_title = models.CharField(max_length=50, blank=True, null=True)
-    nft_create_info = models.ForeignKey(CreateNFT, blank=True, null=True, on_delete=models.CASCADE)
+    nft_create_info = models.ForeignKey(NFT, blank=True, null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -119,7 +119,7 @@ class Tags(models.Model):
 
 
 class BidOnNFT(models.Model):
-    nft_detail = models.ForeignKey(CreateNFT, blank=True, null=True, on_delete=models.CASCADE)
+    nft_detail = models.ForeignKey(NFT, blank=True, null=True, on_delete=models.CASCADE)
     bid_by = models.ForeignKey(UserWalletAddress, blank=True, null=True, on_delete=models.CASCADE)
     bid_price = models.FloatField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

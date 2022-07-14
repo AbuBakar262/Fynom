@@ -12,8 +12,8 @@ STATE_CHOICES = (
 
 
 class User(AbstractUser):
-    profile_picture = models.ImageField(upload_to='image/', null=True, blank=True)
-    cover_picture = models.ImageField(upload_to='image/', null=True, blank=True)
+    profile_picture = models.ImageField(upload_to='profile/', null=True, blank=True)
+    cover_picture = models.ImageField(upload_to='profile/', null=True, blank=True)
     name = models.CharField(max_length=50, null=True, blank=True, unique=False)
     username = models.CharField(max_length=50, null=True, blank=True, unique=True)  # use as display name
     email = models.EmailField(_('email address'), unique=True, null=True, blank=True)

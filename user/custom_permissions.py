@@ -6,3 +6,4 @@ class IsApprovedUser(permissions.BasePermission):
         if request.user.status == 'Approve':
             return True
         return False
+

@@ -45,7 +45,7 @@ class UserProfileDetailsViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "name", "username", "user_address", "created_at", "status"]
+        fields = ["id", "profile_picture", "name", "username", "user_address", "created_at", "status"]
 
     def get_metamask(self, obj):
         try:
@@ -63,7 +63,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "user_wallet_address", "profile_picture", "cover_picture", "name", "username", "email",
-                  "facebook_link", "twitter_link", "discord_link", "instagram_link", "reddit_link"]
+                  "facebook_link", "twitter_link", "discord_link", "instagram_link", "reddit_link", "status"]
         # fields = "__all__"
     def get_metamask(self, obj):
         try:
