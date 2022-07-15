@@ -182,7 +182,7 @@ class UserProfileDetailsView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         try:
             # user = User.objects.all().order_by('-id')
-            user = User.objects.filter(status="Pending").order_by('-id')
+            user = User.objects.exclude(status="Not Requested").order_by('-id')
             # serializer = UserProfileDetailsViewSerializer(user, many=True)
             # return Response({
             #     "status": True, "status_code": 200, 'msg': 'Users Profiles Listed Successfully',

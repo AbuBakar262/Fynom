@@ -18,7 +18,7 @@ class NFTCategory(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.category_name
+        return self.id
 
 
 class NFTSubCategory(models.Model):
@@ -42,7 +42,7 @@ class Collection(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     create_by = models.ForeignKey(User, blank=False, null=False, on_delete=models.CASCADE)
-    collection_category = models.ForeignKey(NFTCategory, blank=True, null=True, on_delete=models.CASCADE)
+    collection_category = models.ForeignKey(NFTCategory, blank=False, null=False, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
