@@ -158,14 +158,43 @@ class UserProfileUpdateView(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
     def patch(self, request, *args, **kwargs):
         try:
-            id = self.kwargs.get('pk')
-            user_id = User.objects.get(id=id)
-            serializer = UserProfileSerializer(user_id, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response({
-                "status": True, "status_code": 200, 'msg': 'User Profile Updated Successfully',
-                "data": serializer.data}, status=status.HTTP_200_OK)
+            user = request.user
+            if user.status!="Pending" and user.status!="Disapprove":
+                if user.status!="Approve":
+                    id = self.kwargs.get('pk')
+                    user_id = User.objects.get(id=id)
+                    serializer = UserProfileSerializer(user_id, data=request.data, partial=True)
+                    serializer.is_valid(raise_exception=True)
+                    serializer.save()
+                    return Response({
+                        "status": True, "status_code": 200, 'msg': 'User Profile Updated Successfully',
+                        "data": serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    id = self.kwargs.get('pk')
+                    user_id = User.objects.get(id=id)
+                    profile_picture = request.data.get('profile_picture')
+                    cover_picture = request.data.get('cover_picture')
+                    name = request.data.get('name')
+                    username = request.data.get('username')
+                    email = request.data.get('email')
+                    context ={
+                        "profile_picture" : profile_picture,
+                        "cover_picture" : cover_picture,
+                        "name" : name,
+                        "username" : username,
+                        "email" : email
+                    }
+                    serializer = UserProfileSerializer(user_id, data=context, partial=True)
+                    serializer.is_valid(raise_exception=True)
+                    serializer.save()
+                    return Response({
+                        "status": True, "status_code": 200, 'msg': 'User Profile Updated Successfully',
+                        "data": serializer.data}, status=status.HTTP_200_OK)
+
+            else:
+                return Response({
+                    "status": False, "status_code": 400, 'msg': "Your Profile is not Approved",
+                    "data": []}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
