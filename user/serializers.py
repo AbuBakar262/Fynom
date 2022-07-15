@@ -82,10 +82,23 @@ class UserProfileStatusUpdateViewSerializer(serializers.ModelSerializer):
 
 
 class UserCollectionSerializer(serializers.ModelSerializer):
+    # user_in_collection = UserProfileSerializer(many=True, read_only=True)
+    # user = serializers.SerializerMethodField('get_user')
+    # wallet_address = serializers.SlugRelatedField(queryset=UserWalletAddress.objects.all(), slug_field='wallet_address')
+
     class Meta:
         model = Collection
         fields = ["id", "logo_image", "featured_image", "cover_image", "name", "website_url", "instagram_url",
                   "description","collection_category", "create_by"]
+
+    def to_representation(self, instance):
+        representation = super(UserCollectionSerializer, self).to_representation(instance)
+        if instance:
+            representation["create_by"] = User.objects.filter(id=instance.create_by.id).values("id",
+                    "profile_picture", "cover_picture", "name", "username", "email",
+                  "facebook_link", "twitter_link", "discord_link", "instagram_link", "reddit_link", "status")
+            # representation["address"] = UserWalletAddress.objects.filter(id=instance.create_by.id).values("wallet_address")
+        return representation
 
 
 class TermsAndPoliciesViewSerializer(serializers.ModelSerializer):

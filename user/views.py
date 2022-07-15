@@ -123,10 +123,14 @@ class UserProfileListView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         try:
             users = User.objects.all()
-            serializer = UserProfileSerializer(users, many=True)
-            return Response({
-                "status": True, "status_code": 200, 'msg': 'User Profile Listed Successfully',
-                "data": serializer.data}, status=status.HTTP_200_OK)
+            # serializer = UserProfileSerializer(users, many=True)
+            # return Response({
+            #     "status": True, "status_code": 200, 'msg': 'User Profile Listed Successfully',
+            #     "data": serializer.data}, status=status.HTTP_200_OK)
+            paginator = CustomPageNumberPagination()
+            result = paginator.paginate_queryset(users, request)
+            serializer = UserProfileSerializer(result, many=True)
+            return paginator.get_paginated_response(serializer.data)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
@@ -139,7 +143,7 @@ class UserProfileListView(viewsets.ViewSet):
             user = User.objects.get(id=id)
             serializer = UserProfileSerializer(user)
             return Response({
-                "status": True, "status_code": 200, 'msg': 'User Collection Retrieve Successfully',
+                "status": True, "status_code": 200, 'msg': 'User Profile Retrieve Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -179,10 +183,14 @@ class UserProfileDetailsView(viewsets.ViewSet):
         try:
             # user = User.objects.all().order_by('-id')
             user = User.objects.filter(status="Pending").order_by('-id')
-            serializer = UserProfileDetailsViewSerializer(user, many=True)
-            return Response({
-                "status": True, "status_code": 200, 'msg': 'Users Profiles Listed Successfully',
-                "data": serializer.data}, status=status.HTTP_200_OK)
+            # serializer = UserProfileDetailsViewSerializer(user, many=True)
+            # return Response({
+            #     "status": True, "status_code": 200, 'msg': 'Users Profiles Listed Successfully',
+            #     "data": serializer.data}, status=status.HTTP_200_OK)
+            paginator = CustomPageNumberPagination()
+            result = paginator.paginate_queryset(user, request)
+            serializer = UserProfileDetailsViewSerializer(result, many=True)
+            return paginator.get_paginated_response(serializer.data)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
@@ -300,10 +308,14 @@ class UserCollectionListView(viewsets.ViewSet):
         try:
             user_id = self.kwargs.get('pk')
             collections = Collection.objects.filter(create_by=user_id)
-            serializer = UserCollectionSerializer(collections, many=True)
-            return Response({
-                "status": True, "status_code": 200, 'msg': 'User Collections Listed Successfully',
-                "data": serializer.data}, status=status.HTTP_200_OK)
+            # serializer = UserCollectionSerializer(collections, many=True)
+            # return Response({
+            #     "status": True, "status_code": 200, 'msg': 'User Collections Listed Successfully',
+            #     "data": serializer.data}, status=status.HTTP_200_OK)
+            paginator = CustomPageNumberPagination()
+            result = paginator.paginate_queryset(collections, request)
+            serializer = UserCollectionSerializer(result, many=True)
+            return paginator.get_paginated_response(serializer.data)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
