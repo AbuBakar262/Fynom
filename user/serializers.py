@@ -1,3 +1,4 @@
+from django.db.models import F
 from rest_framework import serializers
 from user.models import User
 from blockchain.models import Collection, UserWalletAddress
@@ -96,7 +97,7 @@ class UserCollectionSerializer(serializers.ModelSerializer):
         if instance:
             representation["create_by"] = User.objects.filter(id=instance.create_by.id).values("id",
                     "profile_picture", "cover_picture", "name", "username", "email",
-                  "facebook_link", "twitter_link", "discord_link", "instagram_link", "reddit_link", "status")
+                  "facebook_link", "twitter_link", "discord_link", "instagram_link", "reddit_link", "status", user_wallet=F("user_in_wallet_address__wallet_address"))
             # representation["address"] = UserWalletAddress.objects.filter(id=instance.create_by.id).values("wallet_address")
         return representation
 
