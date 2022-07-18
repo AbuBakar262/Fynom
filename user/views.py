@@ -92,7 +92,7 @@ class UserLogin(APIView):
                 serializer_user = UserProfileSerializer(profile_id)
                 token = get_tokens_for_user(profile_id)
                 return Response({
-                    "status": True, "status_code": 200, 'msg': 'User address exists already',
+                    "status": True, "status_code": 200, 'msg': 'User login successfully',
                     "data": serializer.data,"profile": serializer_user.data, "token": token}, status=status.HTTP_200_OK)
             else:
                 data = {'name': None}
