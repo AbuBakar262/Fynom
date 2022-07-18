@@ -7,3 +7,9 @@ class NFTViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = NFT
         fields = "__all__"
+
+
+class NFTCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NFTCategory
+        fields = "__all__"

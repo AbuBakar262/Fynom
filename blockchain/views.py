@@ -96,3 +96,23 @@ class UserNFTsListView(viewsets.ViewSet):
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class NFTCategoryView(viewsets.ViewSet):
+
+    # permission_classes = [IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        try:
+            nft_category = NFTCategory.objects.all()
+            serializer = NFTCategorySerializer(nft_category, many=True)
+            return Response({
+                "status": True, "status_code": 200, 'msg': 'NFT Category Listed Successfully',
+                "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
