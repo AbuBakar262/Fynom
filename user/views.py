@@ -179,13 +179,37 @@ class UserProfileUpdateView(viewsets.ViewSet):
                     name = request.data.get('name')
                     username = request.data.get('username')
                     email = request.data.get('email')
-                    context ={
-                        "profile_picture" : profile_picture,
-                        "cover_picture" : cover_picture,
-                        "name" : name,
-                        "username" : username,
-                        "email" : email
-                    }
+                    if profile_picture and cover_picture:
+                        context ={
+                            "profile_picture" : profile_picture,
+                            "cover_picture" : cover_picture,
+                            "name" : name,
+                            "username" : username,
+                            "email" : email
+                        }
+
+                    elif not profile_picture and not cover_picture:
+                        context = {
+                            "name": name,
+                            "username": username,
+                            "email": email
+                        }
+                    elif profile_picture:
+                        context = {
+                            "profile_picture": profile_picture,
+                            "name": name,
+                            "username": username,
+                            "email": email
+                        }
+                    elif cover_picture:
+                        context = {
+                            "name": name,
+                            "username": username,
+                            "email": email,
+                            "cover_picture": cover_picture,
+                        }
+
+
                     serializer = UserProfileSerializer(user_id, data=context, partial=True)
                     serializer.is_valid(raise_exception=True)
                     serializer.save()
