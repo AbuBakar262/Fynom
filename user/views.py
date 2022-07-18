@@ -107,7 +107,7 @@ class UserLogin(APIView):
                 # wallet_address = UserWalletAddress.objects.get(wallet_address=wallet_address)
                 token = get_tokens_for_user(profile_id)
                 return Response({
-                    "status": True, "status_code": 200, 'msg': 'User address saved successfully and profile created',
+                    "status": True, "status_code": 200, 'msg': 'User login successfully',
                     "data": serializer.data, "profile": serializer_user.data, "token": token}, status=status.HTTP_200_OK)
 
         except Exception as e:
