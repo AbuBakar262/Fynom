@@ -4,6 +4,7 @@ from user.models import User
 from blockchain.models import Collection, UserWalletAddress
 
 
+
 class AdminLoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=255)
 
@@ -80,6 +81,8 @@ class UserProfileStatusUpdateViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "status", "status_reasons"]
+
+
 
 
 class UserCollectionSerializer(serializers.ModelSerializer):

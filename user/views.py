@@ -13,7 +13,9 @@ from user.serializers import AdminLoginSerializer, AdminChangePasswordSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import viewsets
-from user.custom_permissions import IsApprovedUser
+from user.custom_permissions import IsApprovedUser, IsNotSuspendUser
+from user.utils import Utill
+
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -155,12 +157,12 @@ class UserProfileUpdateView(viewsets.ViewSet):
     """
     user can update some fields of his/her profile
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsNotSuspendUser]
     def patch(self, request, *args, **kwargs):
         try:
             user = request.user
-            if user.status!="Pending" and user.status!="Disapprove":
-                if user.status!="Approve":
+            if user.status!="Pending":
+                if user.status=="Not Requested" or user.status=="Disapprove":
                     id = self.kwargs.get('pk')
                     user_id = User.objects.get(id=id)
                     serializer = UserProfileSerializer(user_id, data=request.data, partial=True)
@@ -193,7 +195,7 @@ class UserProfileUpdateView(viewsets.ViewSet):
 
             else:
                 return Response({
-                    "status": False, "status_code": 400, 'msg': "Your Profile is not Approved",
+                    "status": False, "status_code": 400, 'msg': "Your can not update your profile still.",
                     "data": []}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({
@@ -236,10 +238,23 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
         try:
             id = self.kwargs.get('pk')
             user_id = User.objects.get(id=id)
-            # user = User.objects.get(id=pk)
+            profile_status = request.data['status']
             serializer = UserProfileStatusUpdateViewSerializer(user_id, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
+            if user_id.email != None:
+                # send email
+                body = None
+                if profile_status == 'Approve':
+                    body = "Congratulations your profile has bee approved..."
+                if profile_status == 'Disapprove':
+                    body = 'Sorry! your profile is not upto the standards of phynom please review your profile and try again later.'
+                data = {
+                    'subject': 'Your phynom profile status',
+                    'body': body,
+                    'to_email': user_id.email
+                }
+                Utill.send_email(data)
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User Profiles Updated Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)

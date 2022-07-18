@@ -7,3 +7,9 @@ class IsApprovedUser(permissions.BasePermission):
             return True
         return False
 
+class IsNotSuspendUser(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if request.user.status != 'Suspend':
+            return True
+        return False
