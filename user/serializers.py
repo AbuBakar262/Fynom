@@ -64,7 +64,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "user_wallet_address", "profile_picture", "cover_picture", "name", "username", "email",
-                  "facebook_link", "twitter_link", "discord_link", "instagram_link", "reddit_link", "status"]
+                  "facebook_link", "twitter_link", "discord_link", "instagram_link", "reddit_link", "status", "status_reasons"]
         # fields = "__all__"
     def get_metamask(self, obj):
         try:
