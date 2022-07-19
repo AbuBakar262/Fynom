@@ -6,8 +6,8 @@ from django.utils.translation import ugettext_lazy as _
 STATE_CHOICES = (
     ('Not Requested', 'Not Requested'),
     ('Pending', 'Pending'),
-    ('Approve', 'Approve'),
-    ('Disapprove', 'Disapprove'),
+    ('Approved', 'Approved'),
+    ('Disapproved', 'Disapproved'),
     ('Suspend', 'Suspend'),
 )
 

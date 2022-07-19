@@ -50,8 +50,8 @@ class Collection(models.Model):
 
 NFT_STATUS = (
     ('Pending', 'Pending'),
-    ('Approve', 'Approve'),
-    ('Disapprove', 'Disapprove'),
+    ('Approved', 'Approved'),
+    ('Disapproved', 'Disapproved'),
     ('Suspend', 'Suspend'),
 )
 
