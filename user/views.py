@@ -273,8 +273,7 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
                 if profile_status == 'Approved':
                     body = "Congratulations your profile has bee approved. " + status_reasons
                 if profile_status == 'Disapproved':
-                    body = 'Sorry! your profile is not upto the standards of phynom please review your profile ' \
-                           'and try again later. ' + status_reasons
+                    body = status_reasons
                 data = {
                     'subject': 'Your phynom profile status',
                     'body': body,
