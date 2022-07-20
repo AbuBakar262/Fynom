@@ -271,11 +271,9 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
                 # send email
                 body = None
                 if profile_status == 'Approved':
-                    body = "Congratulations! your profile has been Approved. You are now part " \
-                           "of our Platform. " + status_reasons
+                    body = "Congratulations your profile has bee approved. " + status_reasons
                 if profile_status == 'Disapproved':
-                    body = "We are Sorry! your profile has been Disapproved. Please edit your " \
-                           "profile and try again later. " + status_reasons
+                    body = status_reasons
                 data = {
                     'subject': 'Your phynom profile status',
                     'body': body,
