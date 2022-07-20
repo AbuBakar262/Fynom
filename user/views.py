@@ -124,7 +124,7 @@ class UserProfileListView(viewsets.ViewSet):
     # pagination_class = CustomPagination
     def list(self, request, *args, **kwargs):
         try:
-            users = User.objects.all()
+            users = User.objects.all().exclude(is_superuser=True).order_by('-id')
             # serializer = UserProfileSerializer(users, many=True)
             # return Response({
             #     "status": True, "status_code": 200, 'msg': 'User Profile Listed Successfully',
