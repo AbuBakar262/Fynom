@@ -43,10 +43,10 @@ class CreateUpdateNFTView(viewsets.ViewSet):
         try:
             user_id = request.user.id
             wallet_id = UserWalletAddress.objects.filter(user_wallet=user_id).first()
-            data = request.data
-            data['nft_creator'] = wallet_id.id
-            data['nft_owner'] = wallet_id.id
-            serializer = NFTViewSerializer(data=data)
+            request.data._mutable = True
+            request.data['nft_creator'] = wallet_id.id
+            request.data['nft_owner'] = wallet_id.id
+            serializer = NFTViewSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({
