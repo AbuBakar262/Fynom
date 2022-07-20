@@ -11,7 +11,7 @@ from user.custom_permissions import IsApprovedUser
 class ListRetrieveNFTView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         try:
-            list_nft = NFT.objects.filter(nft_status="Approve")
+            list_nft = NFT.objects.filter(nft_status="Approved")
             serializer = NFTViewSerializer(list_nft, many=True)
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User NFTs Listed Successfully',
@@ -87,7 +87,7 @@ class UserNFTsListView(viewsets.ViewSet):
         try:
             user_id = self.kwargs.get('pk')
             user_wallet = UserWalletAddress.objects.filter(user_wallet=user_id).first()
-            list_nft = NFT.objects.filter(nft_owner=user_wallet.id).filter(nft_status="Approve")
+            list_nft = NFT.objects.filter(nft_owner=user_wallet.id).filter(nft_status="Approved")
             serializer = NFTViewSerializer(list_nft, many=True)
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User NFTs Listed Successfully',

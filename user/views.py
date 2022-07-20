@@ -162,7 +162,7 @@ class UserProfileUpdateView(viewsets.ViewSet):
         try:
             user = request.user
             if user.status!="Pending":
-                if user.status=="Not Requested" or user.status=="Disapprove":
+                if user.status=="Not Requested" or user.status=="Disapproved":
                     id = self.kwargs.get('pk')
                     user_id = User.objects.get(id=id)
                     serializer = UserProfileSerializer(user_id, data=request.data, partial=True)
@@ -263,16 +263,18 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
             id = self.kwargs.get('pk')
             user_id = User.objects.get(id=id)
             profile_status = request.data['status']
+            status_reasons = request.data['status_reasons']
             serializer = UserProfileStatusUpdateViewSerializer(user_id, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             if user_id.email != None:
                 # send email
                 body = None
-                if profile_status == 'Approve':
-                    body = "Congratulations your profile has bee approved..."
-                if profile_status == 'Disapprove':
-                    body = 'Sorry! your profile is not upto the standards of phynom please review your profile and try again later.'
+                if profile_status == 'Approved':
+                    body = "Congratulations your profile has bee approved. " + status_reasons
+                if profile_status == 'Disapproved':
+                    body = 'Sorry! your profile is not upto the standards of phynom please review your profile ' \
+                           'and try again later. ' + status_reasons
                 data = {
                     'subject': 'Your phynom profile status',
                     'body': body,
