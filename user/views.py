@@ -7,10 +7,7 @@ from backend.pagination import CustomPageNumberPagination
 from user.models import User
 # from .pagination import CustomPagination
 from blockchain.models import Collection, UserWalletAddress
-from user.serializers import AdminLoginSerializer, AdminChangePasswordSerializer, \
-    UserProfileSerializer, UserProfileStatusUpdateViewSerializer, \
-    UserCollectionSerializer, UserProfileDetailsViewSerializer, UserLoginSerializer, TermsAndPoliciesViewSerializer, \
-    UserProfileBlockedViewSerializer
+from user.serializers import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import viewsets
@@ -102,7 +99,7 @@ class UserLogin(APIView):
                         "data": {'block':profile_id.block}}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 data = {'name': None}
-                serializer_user = UserProfileSerializer(data=data)
+                serializer_user = UserProfileCreateSerializer(data=data)
                 serializer_user.is_valid(raise_exception=True)
                 serializer_user.save()
                 last_id = User.objects.order_by('-id')[0]

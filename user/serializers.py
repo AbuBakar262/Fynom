@@ -78,7 +78,22 @@ class UserProfileSerializer(serializers.ModelSerializer):
         except:
             return None
 
+class UserProfileCreateSerializer(serializers.ModelSerializer):
+    # user_in_wallet_address = UserProfileDetailsViewSerializer(many=False)
+    user_wallet_address = serializers.SerializerMethodField('get_metamask')
 
+    class Meta:
+        model = User
+        fields = ["id", "user_wallet_address", "profile_picture", "cover_picture", "name", "username", "email",
+                  "facebook_link", "twitter_link", "discord_link", "instagram_link", "reddit_link", "status", "status_reasons"]
+        # fields = "__all__"
+    def get_metamask(self, obj):
+        try:
+            wallet = UserWalletAddress.objects.filter(user_wallet__id=obj.id).first()
+            if wallet:
+                return wallet.wallet_address
+        except:
+            return None
 
 class UserProfileStatusUpdateViewSerializer(serializers.ModelSerializer):
     class Meta:
