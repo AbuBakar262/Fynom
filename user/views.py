@@ -9,7 +9,8 @@ from user.models import User
 from blockchain.models import Collection, UserWalletAddress
 from user.serializers import AdminLoginSerializer, AdminChangePasswordSerializer, \
     UserProfileSerializer, UserProfileStatusUpdateViewSerializer, \
-    UserCollectionSerializer, UserProfileDetailsViewSerializer, UserLoginSerializer, TermsAndPoliciesViewSerializer
+    UserCollectionSerializer, UserProfileDetailsViewSerializer, UserLoginSerializer, TermsAndPoliciesViewSerializer, \
+    UserProfileBlockedViewSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import viewsets
@@ -89,11 +90,16 @@ class UserLogin(APIView):
                 wallet_address = UserWalletAddress.objects.filter(wallet_address=wallet_address).first()
                 serializer = UserLoginSerializer(wallet_address)
                 profile_id = User.objects.filter(id=wallet_address.user_wallet.id).first()
-                serializer_user = UserProfileSerializer(profile_id)
-                token = get_tokens_for_user(profile_id)
-                return Response({
-                    "status": True, "status_code": 200, 'msg': 'User login successfully',
-                    "data": serializer.data,"profile": serializer_user.data, "token": token}, status=status.HTTP_200_OK)
+                if profile_id.block == False:
+                    serializer_user = UserProfileSerializer(profile_id)
+                    token = get_tokens_for_user(profile_id)
+                    return Response({
+                        "status": True, "status_code": 200, 'msg': 'User login successfully',
+                        "data": serializer.data,"profile": serializer_user.data, "token": token}, status=status.HTTP_200_OK)
+                else:
+                    return Response({
+                        "status": False, "status_code": 400, 'msg': 'User Status is Blocked',
+                        "data": {'block':profile_id.block}}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 data = {'name': None}
                 serializer_user = UserProfileSerializer(data=data)
@@ -237,11 +243,16 @@ class UserProfileDetailsView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         try:
             # user = User.objects.all().order_by('-id')
-            user = User.objects.filter(status="Pending").order_by('-id')
+
+            if request.GET['status'] == "Pending":
+                user = User.objects.filter(status="Pending").order_by('-id')
             # serializer = UserProfileDetailsViewSerializer(user, many=True)
             # return Response({
             #     "status": True, "status_code": 200, 'msg': 'Users Profiles Listed Successfully',
             #     "data": serializer.data}, status=status.HTTP_200_OK)
+            else:
+                user = User.objects.all()
+
             paginator = CustomPageNumberPagination()
             result = paginator.paginate_queryset(user, request)
             serializer = UserProfileDetailsViewSerializer(result, many=True)
@@ -276,6 +287,43 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
                 if profile_status == 'Disapproved':
                     body = "We are Sorry! your profile has been Disapproved. Please edit your " \
                            "profile and try again later. " + status_reasons
+                data = {
+                    'subject': 'Your phynom profile status',
+                    'body': body,
+                    'to_email': user_id.email
+                }
+                Utill.send_email(data)
+            return Response({
+                "status": True, "status_code": 200, 'msg': 'User Profiles Updated Successfully',
+                "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserProfileStatusUpdateView(viewsets.ViewSet):
+    """
+     This api is only use for Admin
+     can change the status of user profile
+     """
+    permission_classes = [IsAuthenticated]
+    def partial_update(self, request, *args, **kwargs):
+        try:
+            id = self.kwargs.get('pk')
+            user_id = User.objects.get(id=id)
+            block = request.data['block']
+            serializer = UserProfileBlockedViewSerializer(user_id, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            if user_id.email != None:
+                # send email
+                body = None
+                if block == 'True':
+                    body = "We are sorry your profile has been blocked . Please review your recent activity and in " \
+                           "case of any query please contact the admin at admin@phynom.com"
+                if block == "False":
+                    body = "Congratulations! your profile has been unblocked , Please be careful next time with your " \
+                           "activities on phynom platform."
                 data = {
                     'subject': 'Your phynom profile status',
                     'body': body,

@@ -13,3 +13,10 @@ class IsNotSuspendUser(permissions.BasePermission):
         if request.user.status != 'Suspend':
             return True
         return False
+
+class IsNotBlockedUser(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if request.user.status != 'Block':
+            return True
+        return False

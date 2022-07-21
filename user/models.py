@@ -8,7 +8,6 @@ STATE_CHOICES = (
     ('Pending', 'Pending'),
     ('Approved', 'Approved'),
     ('Disapproved', 'Disapproved'),
-    ('Suspend', 'Suspend'),
 )
 
 
@@ -26,6 +25,7 @@ class User(AbstractUser):
     reddit_link = models.CharField(max_length=50, null=True, blank=True)
     status = models.CharField(max_length=50, choices=STATE_CHOICES, default='Not Requested')
     status_reasons = models.TextField(blank=True, null=True)
+    block = models.BooleanField(default=False)
     terms_policies = models.BooleanField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

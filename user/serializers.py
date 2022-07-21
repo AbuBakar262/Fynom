@@ -47,7 +47,7 @@ class UserProfileDetailsViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "profile_picture", "name", "username", "user_address", "created_at", "status"]
+        fields = ["id", "profile_picture", "name", "username", "user_address", "created_at", "status", "block"]
 
     def get_metamask(self, obj):
         try:
@@ -80,9 +80,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class UserProfileStatusUpdateViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "status", "status_reasons"]
+        fields = ["id", "status", "status_reasons", "block"]
 
-
+class UserProfileBlockedViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "block"]
 
 
 class UserCollectionSerializer(serializers.ModelSerializer):
