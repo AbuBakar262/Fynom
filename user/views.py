@@ -251,7 +251,7 @@ class UserProfileDetailsView(viewsets.ViewSet):
             #     "status": True, "status_code": 200, 'msg': 'Users Profiles Listed Successfully',
             #     "data": serializer.data}, status=status.HTTP_200_OK)
             else:
-                user = User.objects.all()
+                user = User.objects.all().exclude(is_superuser=True).order_by('-id')
 
             paginator = CustomPageNumberPagination()
             result = paginator.paginate_queryset(user, request)
@@ -306,7 +306,7 @@ class UserProfileBlockedView(viewsets.ViewSet):
      This api is only use for Admin
      can change the status of user profile
      """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
     def partial_update(self, request, *args, **kwargs):
         try:
             id = self.kwargs.get('pk')
