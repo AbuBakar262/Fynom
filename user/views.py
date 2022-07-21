@@ -301,7 +301,7 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
-class UserProfileStatusUpdateView(viewsets.ViewSet):
+class UserProfileBlockedView(viewsets.ViewSet):
     """
      This api is only use for Admin
      can change the status of user profile
@@ -319,8 +319,8 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
                 # send email
                 body = None
                 if block == 'True':
-                    body = "We are sorry your profile has been blocked . Please review your recent activity and in " \
-                           "case of any query please contact the admin at admin@phynom.com"
+                    body = "Your profile has been blocked. You have violated the terms and conditions of Phynom. Please " \
+                           "review the terms and conditions."
                 if block == "False":
                     body = "Congratulations! your profile has been unblocked , Please be careful next time with your " \
                            "activities on phynom platform."

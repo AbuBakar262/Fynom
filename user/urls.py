@@ -8,7 +8,7 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 
-router.register('user_block_unblock', views.UserProfileStatusUpdateView, basename='user_block_unblock')
+router.register('user_block_unblock', views.UserProfileBlockedView, basename='user_block_unblock')
 router.register('user_profile_details_view', views.UserProfileDetailsView, basename='user_profile_details_view')
 router.register('user_profile_status_update_view', views.UserProfileStatusUpdateView,
                 basename='user_profile_status_update_view')
