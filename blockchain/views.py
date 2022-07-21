@@ -46,12 +46,22 @@ class CreateUpdateNFTView(viewsets.ViewSet):
             request.data._mutable = True
             request.data['nft_creator'] = wallet_id.id
             request.data['nft_owner'] = wallet_id.id
-            serializer = NFTViewSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response({
-                "status": True, "status_code": 200, 'msg': 'User Collection Created Successfully',
-                "data": serializer.data}, status=status.HTTP_200_OK)
+            nft = NFTViewSerializer(data=request.data)
+            nft.is_valid(raise_exception=True)
+            if request.data.get('documents'):
+                nft.save()
+                last_id = NFT.objects.order_by('-id')[0]
+                all_docs = dict(request.data.lists())['documents']
+                documents = NFTSupportingDocumentsSerializer(data=request.data)
+                documents.is_valid(raise_exception=True)
+                # for doc in all_docs:
+                #     save_doc = {'nft_create_info':last_id.id, "documents":doc}
+                #     documents
+                return Response({
+                    "status": True, "status_code": 200, 'msg': 'User Collection Created Successfully',
+                    "data": ""}, status=status.HTTP_200_OK)
+            else:
+                return Response({'msg': 'upload docs'})
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],

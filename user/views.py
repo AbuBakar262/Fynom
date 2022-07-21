@@ -273,13 +273,14 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
         try:
             id = self.kwargs.get('pk')
             user_id = User.objects.get(id=id)
-            profile_status = request.data['status']
-            status_reasons = request.data['status_reasons']
-            serializer = UserProfileStatusUpdateViewSerializer(user_id, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            if user_id.email != None:
-                # send email
+            if user_id.email and user_id.username and user_id.name:
+                profile_status = request.data['status']
+                status_reasons = request.data['status_reasons']
+                serializer = UserProfileStatusUpdateViewSerializer(user_id, data=request.data, partial=True)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                # if user_id.email != None:
+                    # send email
                 body = None
                 if profile_status == 'Approved':
                     body = "Congratulations! your profile has been Approved. You are now part " \
@@ -293,9 +294,13 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
                     'to_email': user_id.email
                 }
                 Utill.send_email(data)
-            return Response({
-                "status": True, "status_code": 200, 'msg': 'User Profiles Updated Successfully',
-                "data": serializer.data}, status=status.HTTP_200_OK)
+                return Response({
+                    "status": True, "status_code": 200, 'msg': 'User Profiles Updated Successfully',
+                    "data": serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    "status": False, "status_code": 400, 'msg': "Please Complete Your Profile",
+                    "data": []}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
