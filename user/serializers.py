@@ -78,6 +78,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
         except:
             return None
 
+    def validate(self, attrs):
+        email = User.objects.filter(email=attrs.get('email'))
+        if email:
+            raise serializers.ValidationError("Email already exist.")
+        else:
+            return True
+
+
 class UserProfileCreateSerializer(serializers.ModelSerializer):
     # user_in_wallet_address = UserProfileDetailsViewSerializer(many=False)
     user_wallet_address = serializers.SerializerMethodField('get_metamask')
