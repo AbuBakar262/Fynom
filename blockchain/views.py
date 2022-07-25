@@ -13,7 +13,7 @@ from user.custom_permissions import IsApprovedUser
 class ListRetrieveNFTView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         try:
-            list_nft = NFT.objects.filter(nft_status="Approved")
+            list_nft = NFT.objects.filter(nft_status="Approved").order_by('-id')
             serializer = NFTViewSerializer(list_nft, many=True)
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User NFTs Listed Successfully',
@@ -45,10 +45,11 @@ class CreateUpdateNFTView(viewsets.ViewSet):
         try:
             user_id = request.user.id
             wallet_id = UserWalletAddress.objects.filter(user_wallet=user_id).first()
-            request.data._mutable = True
+            # request.data._mutable = True
             request.data['nft_creator'] = wallet_id.id
             request.data['nft_owner'] = wallet_id.id
-            serializer = NFTViewSerializer(data=request.data, context={"request": request})
+            # request.data['tags'] = request.data.get('tags').split(',')
+            serializer = NFTViewSerializer(data=request.data, context={'request':request})
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({
@@ -102,11 +103,11 @@ class UserNFTsListView(viewsets.ViewSet):
 
 class NFTCategoryView(viewsets.ViewSet):
 
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     def list(self, request, *args, **kwargs):
         try:
-            nft_category = NFTCategory.objects.all()
+            nft_category = NFTCategory.objects.all().order_by('-id')
             # nft_tags = Tags.objects.all()
             paginator = CustomPageNumberPagination()
             result = paginator.paginate_queryset(nft_category, request)
@@ -164,11 +165,11 @@ class NFTCategoryView(viewsets.ViewSet):
 
 class NFTTagView(viewsets.ViewSet):
 
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     def list(self, request, *args, **kwargs):
         try:
-            nft_tags = Tags.objects.all()
+            nft_tags = Tags.objects.all().order_by('-id')
             paginator = CustomPageNumberPagination()
             result = paginator.paginate_queryset(nft_tags, request)
             serializer = NftTagSerializer(result, many=True)

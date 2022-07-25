@@ -2,8 +2,7 @@ from django.contrib import admin
 # from models import UserWalletAddress, Collection, CreateNFT, SupportingDocuments, Tags, NFTCategory, \
 #     NFTSubCategory, BidOnNFT
 # Register your models here.
-from blockchain.models import UserWalletAddress, Collection, NFT, SupportingDocuments, Tags, \
-    NFTCategory, NFTSubCategory, BidOnNFT
+from blockchain.models import *
 
 admin.site.register(UserWalletAddress)
 admin.site.register(Collection)

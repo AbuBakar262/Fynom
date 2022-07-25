@@ -67,7 +67,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "user_wallet_address", "profile_picture", "cover_picture", "name", "username", "email",
+        fields = ["id", "user_wallet_address", "profile_picture", "cover_picture", "name", "username", "email", "block",
                   "facebook_link", "twitter_link", "discord_link", "instagram_link", "reddit_link", "status", "status_reasons"]
         # fields = "__all__"
     def get_metamask(self, obj):
@@ -78,12 +78,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
         except:
             return None
 
-    def validate(self, attrs):
-        email = User.objects.filter(email=attrs.get('email'))
-        if email:
-            raise serializers.ValidationError("Email already exist.")
-        else:
-            return True
+    # def validate(self, attrs):
+    #     email = User.objects.filter(email=attrs.get('email'))
+    #     if email.count()>1:
+    #         raise serializers.ValidationError("Email already exist.")
+    #     else:
+    #         return True
 
 
 class UserProfileCreateSerializer(serializers.ModelSerializer):
@@ -92,7 +92,7 @@ class UserProfileCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "user_wallet_address", "profile_picture", "cover_picture", "name", "username", "email",
+        fields = ["id", "user_wallet_address", "profile_picture", "cover_picture", "name", "username", "email", "block",
                   "facebook_link", "twitter_link", "discord_link", "instagram_link", "reddit_link", "status", "status_reasons"]
         # fields = "__all__"
     def get_metamask(self, obj):

@@ -104,6 +104,7 @@ class NFT(models.Model):
 
 class SupportingDocuments(models.Model):
     documents = models.FileField(upload_to='supporting_document/', null=True, blank=True)
+    # documents = models.CharField(max_length=255, null=True, blank=True)
     nft_create_info = models.ForeignKey(NFT, blank=True, null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -111,7 +112,7 @@ class SupportingDocuments(models.Model):
 
 class Tags(models.Model):
     tag_title = models.CharField(max_length=50, blank=True, null=True)
-    nft_create_info = models.ForeignKey(NFT, blank=True, null=True, on_delete=models.CASCADE)
+    nft_create_info = models.ManyToManyField(NFT, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
