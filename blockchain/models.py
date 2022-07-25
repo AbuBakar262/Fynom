@@ -84,6 +84,7 @@ class NFT(models.Model):
                                   on_delete=models.CASCADE)
     nft_owner = models.ForeignKey(UserWalletAddress, blank=True, null=True, related_name='nft_owner_in_create_nft',
                                   on_delete=models.CASCADE)
+    user = models.ForeignKey(User, blank=True, null=True, related_name='user_in_nft', on_delete=models.CASCADE)
     nft_status = models.CharField(max_length=50, choices=NFT_STATUS, default='Pending')
     status_remarks = models.TextField(blank=True, null=True)
     top_nft = models.BooleanField()

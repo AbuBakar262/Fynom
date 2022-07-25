@@ -15,42 +15,30 @@ class NftTagSerializer(serializers.ModelSerializer):
 #         fields = ['id', 'documents', 'nft_create_info']
 
 
+
 class NFTViewSerializer(serializers.ModelSerializer):
     # tags = serializers.ListField(child=serializers.CharField(required=True), allow_empty=False)
-    tag_title = serializers.CharField(required=True)
+    # tags = serializers.SerializerMethodField('get_tag')
 
     class Meta:
         model = NFT
         fields = ["id", "thumbnail", "nft_picture", "teaser", "nft_title", "nft_collection",
                   "description", "nft_category", "royality", "hash", "contract_id", 'top_nft', "nft_creator", "nft_owner",
-                  "nft_status", "status_remarks", "nft_sell_type", "fix_price", 'tag_title']
+                  "nft_status", "status_remarks", "nft_sell_type", "fix_price"]
 
     def create(self, validated_data):
         with transaction.atomic():
             nft_docs = dict(self.context['request'].data.lists())['documents']
-            nft_tags = validated_data.pop('tag_title').split(',')
-            # nft_tags = validated_data.pop('tags')
-            # document = validated_data.pop('document')
-            # nft_title = validated_data.get('nft_title')
+
             nft = NFT.objects.create(**validated_data)
-            # send_otp(validated_data.get('phone'), "Your Confirmation code is : ")
             for doc in nft_docs:
                 SupportingDocuments.objects.create(nft_create_info=nft, documents=doc)
-            # tag_obj = Tags.objects.create()
-            # for tag in nft_tags:
-            #     # Tags.objects.set(nft_create_info=nft, tag_title=tag)
-            #     # add_tag = Tags.objects.filter(tag_title__in=tag)
-            #     instance = Tags.objects.create(tag_title=tag)
-            #     instance.nft_create_info.add(*nft)
-            print()
-            nft.tags_set.add(*nft_tags)
             return nft
-
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
+        data['tag_title'] = NftTagSerializer(instance.tags_set.filter(nft_create_info__id=instance.id), many=True).data
         data['documents'] = SupportingDocuments.objects.filter(nft_create_info_id=instance.id).values('id', 'documents', 'nft_create_info')
-        # data['tag_title'] = Tags.objects.filter(nft_create_info__nft_id=instance.id)
         return data
 
 

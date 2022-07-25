@@ -13,7 +13,7 @@ from user.custom_permissions import IsApprovedUser
 class ListRetrieveNFTView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         try:
-            list_nft = NFT.objects.filter(nft_status="Approved").order_by('-id')
+            list_nft = NFT.objects.filter(nft_status="Pending").order_by('-id')
             serializer = NFTViewSerializer(list_nft, many=True)
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User NFTs Listed Successfully',
@@ -48,13 +48,15 @@ class CreateUpdateNFTView(viewsets.ViewSet):
             # request.data._mutable = True
             request.data['nft_creator'] = wallet_id.id
             request.data['nft_owner'] = wallet_id.id
+            request.data['tags_title'] = request.data.get('tag_title').split(',')
             # request.data['tags'] = request.data.get('tags').split(',')
             serializer = NFTViewSerializer(data=request.data, context={'request':request})
             serializer.is_valid(raise_exception=True)
-            serializer.save()
+            nft = serializer.save()
+            nft.tags_set.add(*request.data['tags_title'])
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User NFT Created Successfully',
-                "data": ""}, status=status.HTTP_200_OK)
+                "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
@@ -64,7 +66,11 @@ class CreateUpdateNFTView(viewsets.ViewSet):
         try:
             nft_id = self.kwargs.get('pk')
             nft_by_id = NFT.objects.get(id=nft_id)
-            if request.user.id == nft_by_id.nft_owner.id:
+            user_id = request.user.id
+            wallet_id = UserWalletAddress.objects.filter(user_wallet=user_id).first()
+            if wallet_id.id == nft_by_id.nft_owner.id:
+                request.data._mutable = True
+                request.data['tags_title'] = request.data.get('tag_title').split(',')
                 serializer = NFTViewSerializer(nft_by_id, data=request.data, partial=True)
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
