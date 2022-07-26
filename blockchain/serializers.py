@@ -7,7 +7,7 @@ from user.models import User
 class NftTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tags
-        fields = "__all__"
+        fields = ["id", "tag_title", "created_at", "updated_at"]
 
 # class NftSupportingDocumentsSerializer(serializers.ModelSerializer):
 #     class Meta:
@@ -15,6 +15,20 @@ class NftTagSerializer(serializers.ModelSerializer):
 #         fields = ['id', 'documents', 'nft_create_info']
 
 
+class UserDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = "__all__"
+
+class UserWalletAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserWalletAddress
+        fields = "__all__"
+
+class NFTCollectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Collection
+        fields = "__all__"
 
 class NFTViewSerializer(serializers.ModelSerializer):
     # tags = serializers.ListField(child=serializers.CharField(required=True), allow_empty=False)
@@ -22,7 +36,7 @@ class NFTViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NFT
-        fields = ["id", "thumbnail", "nft_picture", "teaser", "nft_title", "nft_collection",
+        fields = ["id", "thumbnail", "nft_picture", "teaser", "nft_title", "nft_collection", "nft_status", "user",
                   "description", "nft_category", "royality", "hash", "contract_id", 'top_nft', "nft_creator", "nft_owner",
                   "nft_status", "status_remarks", "nft_sell_type", "fix_price"]
 
@@ -35,10 +49,24 @@ class NFTViewSerializer(serializers.ModelSerializer):
                 SupportingDocuments.objects.create(nft_create_info=nft, documents=doc)
             return nft
 
+    def update(self, instance, validated_data):
+        with transaction.atomic():
+            nft_docs = dict(self.context['request'].data.lists())['documents']
+
+            nft = NFT.objects.update(**validated_data)
+            for doc in nft_docs:
+                SupportingDocuments.objects.update(nft_create_info=nft, documents=doc)
+            return instance
+
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['tag_title'] = NftTagSerializer(instance.tags_set.filter(nft_create_info__id=instance.id), many=True).data
         data['documents'] = SupportingDocuments.objects.filter(nft_create_info_id=instance.id).values('id', 'documents', 'nft_create_info')
+        data['user'] = UserDataSerializer(instance.user).data
+        data['nft_creator'] = UserWalletAddressSerializer(instance.nft_creator).data
+        data['nft_owner'] = UserWalletAddressSerializer(instance.nft_owner).data
+        data['nft_collection'] = UserWalletAddressSerializer(instance.nft_collection).data
         return data
 
 
@@ -63,3 +91,8 @@ class NFTCategorySerializer(serializers.ModelSerializer):
 #             return serializer.data
 #         except Exception as e:
 #             return None
+
+class UserNFTStatusUpdateViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NFT
+        fields = ["id", "nft_status", "status_remarks"]

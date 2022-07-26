@@ -10,6 +10,7 @@ router.register('user_nfts_list', views.UserNFTsListView, basename='user_nfts_li
 router.register('nfts_category', views.NFTCategoryView, basename='nfts_category')
 # router.register('nfts_category', views.NFTCategoryView, basename='nfts_category')
 router.register('nfts_tags', views.NFTTagView, basename='nfts_tags')
+router.register('user_nft_status_update', views.UserNFTStatusUpdateView, basename='user_nft_status_update')
 
 urlpatterns = [
     path('', include(router.urls)),

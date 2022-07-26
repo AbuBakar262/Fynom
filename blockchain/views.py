@@ -9,6 +9,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import viewsets
 from user.custom_permissions import IsApprovedUser
+from user.utils import Utill
+
 
 class ListRetrieveNFTView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
@@ -45,8 +47,9 @@ class CreateUpdateNFTView(viewsets.ViewSet):
         try:
             user_id = request.user.id
             wallet_id = UserWalletAddress.objects.filter(user_wallet=user_id).first()
-            # request.data._mutable = True
+            request.data._mutable = True
             request.data['nft_creator'] = wallet_id.id
+            request.data['user'] = request.user.id
             request.data['nft_owner'] = wallet_id.id
             request.data['tags_title'] = request.data.get('tag_title').split(',')
             # request.data['tags'] = request.data.get('tags').split(',')
@@ -62,25 +65,29 @@ class CreateUpdateNFTView(viewsets.ViewSet):
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
+
     def partial_update(self, request, *args, **kwargs):
         try:
             nft_id = self.kwargs.get('pk')
-            nft_by_id = NFT.objects.get(id=nft_id)
-            user_id = request.user.id
-            wallet_id = UserWalletAddress.objects.filter(user_wallet=user_id).first()
-            if wallet_id.id == nft_by_id.nft_owner.id:
+            user_wallet =  UserWalletAddress.objects.filter(user_wallet=request.user.id).first()
+            nft_by_id = NFT.objects.filter(id=nft_id, nft_creator__id=user_wallet.id).first()
+            if nft_by_id:
+                serializer = NFTViewSerializer(nft_by_id, data=request.data, context={'request':request}, partial=True)
                 request.data._mutable = True
                 request.data['tags_title'] = request.data.get('tag_title').split(',')
-                serializer = NFTViewSerializer(nft_by_id, data=request.data, partial=True)
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
-                return Response({
-                    "status": True, "status_code": 200, 'msg': 'User NFTs Updated Successfully',
-                    "data": serializer.data}, status=status.HTTP_200_OK)
-            else:
-                return Response({
-                    "status": False, "status_code": 400, 'msg': 'User not owner of this NFT',
-                    "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+                if serializer.is_valid(raise_exception=True):
+                    nft = serializer.save()
+                    # tags = Tags.objects.create()
+
+                    nft.tags_set.add(*request.data['tags_title'])
+                    return Response({
+                        "status": True, "status_code": 200, 'msg': 'User NFTs Updated Successfully',
+                        "data": serializer.data}, status=status.HTTP_200_OK)
+            return Response({
+            "status": False, "status_code": 400, 'msg': 'User not owner of this NFT',
+            "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
@@ -219,6 +226,45 @@ class NFTTagView(viewsets.ViewSet):
             return Response({
                 "status": True, "status_code": 200, 'msg': 'NFT Tag is deleted Successfully',
                 "data": {}}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserNFTStatusUpdateView(viewsets.ViewSet):
+    """
+     This api is only use for Admin
+     can change the status of user NFT
+     """
+    # permission_classes = [IsAdminUser]
+    def partial_update(self, request, *args, **kwargs):
+        try:
+            id = self.kwargs.get('pk')
+            nft_instance = NFT.objects.filter(id=id).first()
+            # nft_instance = NFT.objects.filter(id = nft.id).first()
+            user = User.objects.filter(id = nft_instance.user.id).first()
+            profile_status = request.data['nft_status']
+            status_reasons = request.data['status_remarks']
+            serializer = UserNFTStatusUpdateViewSerializer(nft_instance, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            if user.email:
+            # send email
+                body = None
+                if profile_status == 'Approved':
+                    body = "Congratulations! your NFT has been Approved. " + status_reasons
+                if profile_status == 'Disapproved':
+                    body = "We are Sorry! your NFT has been Disapproved. " + status_reasons
+                data = {
+                    'subject': 'Your Phynom NFT Status',
+                    'body': body,
+                    'to_email': user.email
+                }
+                Utill.send_email(data)
+            return Response({
+                "status": True, "status_code": 200, 'msg': 'User NFT Status Update Successfully',
+                "data": serializer.data}, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],

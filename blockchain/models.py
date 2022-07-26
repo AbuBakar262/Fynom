@@ -111,6 +111,7 @@ class SupportingDocuments(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+
 class Tags(models.Model):
     tag_title = models.CharField(max_length=50, blank=True, null=True)
     nft_create_info = models.ManyToManyField(NFT, blank=True, null=True)
