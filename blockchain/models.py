@@ -18,7 +18,10 @@ class NFTCategory(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.id)
+        if self.category_name:
+            return self.category_name
+        else:
+            return str(self.id)
 
 
 class NFTSubCategory(models.Model):
@@ -109,7 +112,6 @@ class SupportingDocuments(models.Model):
     nft_create_info = models.ForeignKey(NFT, blank=True, null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 
 
 class Tags(models.Model):

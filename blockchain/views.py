@@ -67,20 +67,26 @@ class CreateUpdateNFTView(viewsets.ViewSet):
 
 
     def partial_update(self, request, *args, **kwargs):
+        """
+        this is used for update nft by id, docoments and tags will delete and auto insert
+        """
         try:
             nft_id = self.kwargs.get('pk')
             user_wallet =  UserWalletAddress.objects.filter(user_wallet=request.user.id).first()
             nft_by_id = NFT.objects.filter(id=nft_id, nft_creator__id=user_wallet.id).first()
             if nft_by_id:
                 serializer = NFTViewSerializer(nft_by_id, data=request.data, context={'request':request}, partial=True)
-                request.data._mutable = True
-                request.data['tags_title'] = request.data.get('tag_title').split(',')
-
+                # request.data._mutable = True
                 if serializer.is_valid(raise_exception=True):
                     nft = serializer.save()
+                    if request.data.get('tag_title'):
+                        tags_id = [i.id for i in NFT.objects.get(id=nft_id).tags_set.all()]
+                        for i in tags_id:
+                               nft.tags_set.remove(i) # remove nft tags form tags table
+                        tags_title = request.data.get('tag_title').split(',')
+                        nft.tags_set.add(*tags_title)
                     # tags = Tags.objects.create()
-
-                    nft.tags_set.add(*request.data['tags_title'])
+                    # nft.tags_set.add(*request.data['tags_title'])
                     return Response({
                         "status": True, "status_code": 200, 'msg': 'User NFTs Updated Successfully',
                         "data": serializer.data}, status=status.HTTP_200_OK)
@@ -99,11 +105,11 @@ class UserNFTsListView(viewsets.ViewSet):
     this view is for list/retrieve nfts of perticular user by its id
     """
     permission_classes = [AllowAny]
-    def retrieve(self, request, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         try:
-            user_id = self.kwargs.get('pk')
+            user_id = request.query_params.get('pk')
             user_wallet = UserWalletAddress.objects.filter(user_wallet=user_id).first()
-            list_nft = NFT.objects.filter(nft_owner=user_wallet.id).filter(nft_status="Approved")
+            list_nft = NFT.objects.filter(nft_owner=user_wallet.id).filter(nft_status="Pending")
             serializer = NFTViewSerializer(list_nft, many=True)
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User NFTs Listed Successfully',

@@ -52,10 +52,10 @@ class NFTViewSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         with transaction.atomic():
             nft_docs = dict(self.context['request'].data.lists())['documents']
-
-            nft = NFT.objects.update(**validated_data)
+            prev_doc = SupportingDocuments.objects.filter(nft_create_info__id=instance.id)
+            prev_doc.delete()
             for doc in nft_docs:
-                SupportingDocuments.objects.update(nft_create_info=nft, documents=doc)
+                SupportingDocuments.objects.create(nft_create_info=instance, documents=doc)
             return instance
 
 
