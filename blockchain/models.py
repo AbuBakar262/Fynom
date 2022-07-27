@@ -55,7 +55,7 @@ NFT_STATUS = (
     ('Pending', 'Pending'),
     ('Approved', 'Approved'),
     ('Disapproved', 'Disapproved'),
-    ('Suspend', 'Suspend'),
+    ('Minted', 'Minted'),
 )
 
 NFT_SELL_TYPE = (
@@ -90,7 +90,7 @@ class NFT(models.Model):
     user = models.ForeignKey(User, blank=True, null=True, related_name='user_in_nft', on_delete=models.CASCADE)
     nft_status = models.CharField(max_length=50, choices=NFT_STATUS, default='Pending')
     status_remarks = models.TextField(blank=True, null=True)
-    top_nft = models.BooleanField()
+    top_nft = models.BooleanField(default=False)
     nft_sell_type = models.CharField(max_length=50, choices=NFT_SELL_TYPE)
     fix_price = models.FloatField(blank=True, null=True)
     starting_price = models.FloatField(blank=True, null=True)

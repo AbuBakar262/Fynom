@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -106,10 +107,16 @@ class UserNFTsListView(viewsets.ViewSet):
     """
     permission_classes = [AllowAny]
     def list(self, request, *args, **kwargs):
+        global list_nft
         try:
-            user_id = request.query_params.get('pk')
+            user_id = request.query_params.get('id')
+            user_nft = request.query_params.get('search')
             user_wallet = UserWalletAddress.objects.filter(user_wallet=user_id).first()
-            list_nft = NFT.objects.filter(nft_owner=user_wallet.id).filter(nft_status="Pending")
+            if user_nft == "mynft":
+                # list_nft = NFT.objects.filter(nft_owner=user_wallet.id).filter(Q(nft_status="Pending") | Q(nft_status="Minted"))
+                list_nft = NFT.objects.filter(nft_owner=user_wallet.id).exclude(nft_status="Minted")
+            if user_nft == "listmynft":
+                list_nft = NFT.objects.filter(nft_owner=user_wallet.id).filter(nft_status="Minted")
             serializer = NFTViewSerializer(list_nft, many=True)
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User NFTs Listed Successfully',
