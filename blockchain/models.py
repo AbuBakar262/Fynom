@@ -54,8 +54,7 @@ class Collection(models.Model):
 NFT_STATUS = (
     ('Pending', 'Pending'),
     ('Approved', 'Approved'),
-    ('Disapproved', 'Disapproved'),
-    ('Minted', 'Minted'),
+    ('Disapproved', 'Disapproved')
 )
 
 NFT_SELL_TYPE = (
@@ -64,7 +63,6 @@ NFT_SELL_TYPE = (
 )
 
 SOLD_STATUS = (
-    ('Listed', 'Listed'),
     ('Sold', 'Sold'),
     ('Cancel', 'Cancel'),
 )
@@ -96,9 +94,10 @@ class NFT(models.Model):
     starting_price = models.FloatField(blank=True, null=True)
     start_dateTime = models.DateTimeField(blank=True, null=True)
     end_datetime = models.DateTimeField(blank=True, null=True)
-    sold_status = models.CharField(max_length=50, choices=SOLD_STATUS, default='Pending')
     sold_price = models.FloatField(blank=True, null=True)
     service_fee = models.FloatField(blank=True, null=True)
+    is_minted = models.BooleanField(default=False)
+    is_listed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, F
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -105,22 +105,78 @@ class UserNFTsListView(viewsets.ViewSet):
     """
     this view is for list/retrieve nfts of perticular user by its id
     """
+
     permission_classes = [AllowAny]
+
     def list(self, request, *args, **kwargs):
-        global list_nft
+        # user = ''
+        list_nft = ''
         try:
-            user_id = request.query_params.get('id')
+
+            user_id = request.query_params.get('user_id')
             user_nft = request.query_params.get('search')
-            user_wallet = UserWalletAddress.objects.filter(user_wallet=user_id).first()
-            if user_nft == "mynft":
-                # list_nft = NFT.objects.filter(nft_owner=user_wallet.id).filter(Q(nft_status="Pending") | Q(nft_status="Minted"))
-                list_nft = NFT.objects.filter(nft_owner=user_wallet.id).exclude(nft_status="Minted")
-            if user_nft == "listmynft":
-                list_nft = NFT.objects.filter(nft_owner=user_wallet.id).filter(nft_status="Minted")
-            serializer = NFTViewSerializer(list_nft, many=True)
-            return Response({
-                "status": True, "status_code": 200, 'msg': 'User NFTs Listed Successfully',
-                "data": serializer.data}, status=status.HTTP_200_OK)
+            nft_category_id = request.query_params.get('category')
+            if user_id and user_nft and nft_category_id:
+                user_wallet = UserWalletAddress.objects.filter(user_wallet=user_id).first()
+                if user_nft == "mynft":
+                    list_nft = NFT.objects.filter(Q(is_minted=True) | Q(is_minted=False), nft_owner=user_wallet.id,
+                                                  is_listed=False, nft_category=nft_category_id).values('id', 'thumbnail',
+                                                                                             'nft_picture',
+                                                                                             'nft_title',
+                                                                                             'fix_price',
+                                                                                             'nft_sell_type',
+                                                                                             'starting_price',
+                                                                                             'sold_price',
+                                                                                             'start_dateTime',
+                                                                                             'end_datetime',
+                                                                                             'is_minted',
+                                                                                             'is_listed',
+                                                                                             'nft_status',
+                                                                                             'status_remarks',
+                                                                                            'user_id',
+                                                                                            user_profile_pic=
+                                                                                             F('user__profile_picture'),
+                                                                                             user_nft_collection
+                                                                                            =F('nft_collection__'
+                                                                                               'name'),
+                                                                                             user_nft_category
+                                                                                            =F('nft_category__'
+                                                                                               'category_name'))
+
+                if user_nft == "listmynft":
+                    list_nft = NFT.objects.filter(is_minted=True, nft_owner=user_wallet.id,
+                                       is_listed=True, nft_category=nft_category_id).values('id', 'thumbnail',
+                                                                                             'nft_picture',
+                                                                                             'nft_title',
+                                                                                             'fix_price',
+                                                                                             'nft_sell_type',
+                                                                                             'starting_price',
+                                                                                             'sold_price',
+                                                                                             'start_dateTime',
+                                                                                             'end_datetime',
+                                                                                             'is_minted',
+                                                                                             'is_listed',
+                                                                                             'nft_status',
+                                                                                             'status_remarks',
+                                                                                            'user_id',
+                                                                                            user_profile_pic=
+                                                                                             F('user__profile_picture'),
+                                                                                             user_nft_collection
+                                                                                            =F('nft_collection__'
+                                                                                               'name'),
+                                                                                             user_nft_category
+                                                                                            =F('nft_category__'
+                                                                                               'category_name'),
+
+                                                                                        )
+                paginator = CustomPageNumberPagination()
+                result = paginator.paginate_queryset(list_nft, request)
+                return paginator.get_paginated_response(result)
+
+            else:
+                return Response({
+                    "status": False, "status_code": 400, 'msg': 'user_id, search and category params is required',
+                    "data": []}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],

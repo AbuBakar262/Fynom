@@ -96,3 +96,4 @@ class UserNFTStatusUpdateViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = NFT
         fields = ["id", "nft_status", "status_remarks"]
+
