@@ -3,6 +3,8 @@ from rest_framework import serializers
 
 from blockchain.models import *
 from user.models import User
+from user.serializers import UserProfileDetailsViewSerializer
+
 
 class NftTagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,15 +22,22 @@ class UserDataSerializer(serializers.ModelSerializer):
         model = User
         fields = "__all__"
 
-class UserWalletAddressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserWalletAddress
-        fields = "__all__"
+# class UserWalletAddressSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = UserWalletAddress
+#         fields = "__all__"
 
 class NFTCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
         fields = "__all__"
+
+class NFTCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NFTCategory
+        fields = "__all__"
+
+
 
 class NFTViewSerializer(serializers.ModelSerializer):
     # tags = serializers.ListField(child=serializers.CharField(required=True), allow_empty=False)
@@ -64,19 +73,20 @@ class NFTViewSerializer(serializers.ModelSerializer):
         data['tag_title'] = NftTagSerializer(instance.tags_set.filter(nft_create_info__id=instance.id), many=True).data
         data['documents'] = SupportingDocuments.objects.filter(nft_create_info_id=instance.id).values('id', 'documents', 'nft_create_info')
         data['user'] = UserDataSerializer(instance.user).data
-        data['nft_creator'] = UserWalletAddressSerializer(instance.nft_creator).data
-        data['nft_owner'] = UserWalletAddressSerializer(instance.nft_owner).data
-        data['nft_collection'] = UserWalletAddressSerializer(instance.nft_collection).data
+        data['nft_creator'] = UserProfileDetailsViewSerializer(instance.user).data
+        data['nft_owner'] = UserProfileDetailsViewSerializer(instance.user).data
+        data['nft_collection'] = NFTCollectionSerializer(instance.nft_collection).data
+        data['nft_category'] = NFTCategorySerializer(instance.nft_category).data
         return data
 
 
+class UserNFTViewSerializer(serializers.ModelSerializer):
 
-
-
-class NFTCategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = NFTCategory
-        fields = "__all__"
+        model = NFT
+        fields = ["id", "nft_status", "status_remarks"]
+
+
 
 # class NFTSerializerNew(serializers.ModelSerializer):
 #     document = serializers.SerializerMethodField('get_doc')

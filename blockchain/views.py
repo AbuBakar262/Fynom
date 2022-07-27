@@ -124,7 +124,7 @@ class UserNFTsListView(viewsets.ViewSet):
             user_wallet = UserWalletAddress.objects.filter(user_wallet=user_id).first()
             if user_nft == "mynft":
                 # list_nft = NFT.objects.filter(nft_owner=user_wallet.id).filter(Q(nft_status="Pending") | Q(nft_status="Minted"))
-                list_nft = NFT.objects.filter(nft_owner=user_wallet.id).exclude(nft_status="Listed")
+                list_nft = NFT.objects.filter(nft_owner=user_wallet.id).exclude(is_listed=False)
             if user_nft == "listmynft":
                 list_nft = NFT.objects.filter(nft_owner=user_wallet.id).filter(nft_status="Listed")
 

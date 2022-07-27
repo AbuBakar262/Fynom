@@ -91,6 +91,7 @@ class NFT(models.Model):
     nft_status = models.CharField(max_length=50, choices=NFT_STATUS, default='Pending')
     status_remarks = models.TextField(blank=True, null=True)
     top_nft = models.BooleanField(default=False)
+    is_listed = models.BooleanField(default=False)
     nft_sell_type = models.CharField(max_length=50, choices=NFT_SELL_TYPE)
     fix_price = models.FloatField(blank=True, null=True)
     starting_price = models.FloatField(blank=True, null=True)
