@@ -1,4 +1,4 @@
-from django.db.models import Q, F
+from django.db.models import Q, F, Count
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -109,18 +109,18 @@ class UserNFTsListView(viewsets.ViewSet):
     permission_classes = [AllowAny]
 
     def list(self, request, *args, **kwargs):
-        # user = ''
         list_nft = ''
         try:
 
             user_id = request.query_params.get('user_id')
             user_nft = request.query_params.get('search')
             nft_category_id = request.query_params.get('category')
-            if user_id and user_nft and nft_category_id:
+            if user_id and user_nft == 'mynft' or user_nft == 'listmynft' and nft_category_id and user_nft != 'admin':
                 user_wallet = UserWalletAddress.objects.filter(user_wallet=user_id).first()
                 if user_nft == "mynft":
                     list_nft = NFT.objects.filter(Q(is_minted=True) | Q(is_minted=False), nft_owner=user_wallet.id,
-                                                  is_listed=False, nft_category=nft_category_id).values('id', 'thumbnail',
+                                                  is_listed=False, nft_category=nft_category_id).values('id',
+                                                                                                        'thumbnail',
                                                                                              'nft_picture',
                                                                                              'nft_title',
                                                                                              'fix_price',
@@ -141,7 +141,8 @@ class UserNFTsListView(viewsets.ViewSet):
                                                                                                'name'),
                                                                                              user_nft_category
                                                                                             =F('nft_category__'
-                                                                                               'category_name'))
+                                                                                               'category_name'))\
+                        .order_by('-id')
 
                 if user_nft == "listmynft":
                     list_nft = NFT.objects.filter(is_minted=True, nft_owner=user_wallet.id,
@@ -166,9 +167,24 @@ class UserNFTsListView(viewsets.ViewSet):
                                                                                                'name'),
                                                                                              user_nft_category
                                                                                             =F('nft_category__'
-                                                                                               'category_name'),
+                                                                                               'category_name')
+                                                                                            ).order_by('-id')
 
-                                                                                        )
+                paginator = CustomPageNumberPagination()
+                result = paginator.paginate_queryset(list_nft, request)
+                return paginator.get_paginated_response(result)
+            elif user_nft == "admin":
+                list_nft = NFT.objects.filter(nft_status='Pending')\
+                    .annotate(document_count=Count('nft_in_supportingdocument')).values('id', 'thumbnail',
+                                                                                        'nft_title',
+                                                                                        'document_count',
+                                                                                        real_name=F('user__name'),
+                                                                                        display_name=F('user__username'),
+                                                                                        wallet_address=F('nft_owner__wallet_address'),
+                                                                                        user_nft_category
+                                                                                        =F('nft_category__'
+                                                                                           'category_name')
+                                                                                        ).order_by('-id')
                 paginator = CustomPageNumberPagination()
                 result = paginator.paginate_queryset(list_nft, request)
                 return paginator.get_paginated_response(result)
