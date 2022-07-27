@@ -15,12 +15,21 @@ from user.utils import Utill
 
 class ListRetrieveNFTView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
+        global list_nft
         try:
-            list_nft = NFT.objects.filter(nft_status="Pending").order_by('-id')
-            serializer = NFTViewSerializer(list_nft, many=True)
-            return Response({
-                "status": True, "status_code": 200, 'msg': 'User NFTs Listed Successfully',
-                "data": serializer.data}, status=status.HTTP_200_OK)
+            user_type = request.query_params.get('user')
+            if user_type=="admin":
+                list_nft = NFT.objects.filter(nft_status="Pending").order_by('-id')
+            if user_type=="user":
+                list_nft = NFT.objects.all().order_by('-id')
+            # serializer = NFTViewSerializer(list_nft, many=True)
+            paginator = CustomPageNumberPagination()
+            result = paginator.paginate_queryset(list_nft, request)
+            serializer = NFTViewSerializer(result, many=True)
+            return paginator.get_paginated_response(serializer.data)
+            # return Response({
+            #     "status": True, "status_code": 200, 'msg': 'User NFTs Listed Successfully',
+            #     "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
@@ -109,18 +118,24 @@ class UserNFTsListView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         global list_nft
         try:
+
             user_id = request.query_params.get('id')
             user_nft = request.query_params.get('search')
             user_wallet = UserWalletAddress.objects.filter(user_wallet=user_id).first()
             if user_nft == "mynft":
                 # list_nft = NFT.objects.filter(nft_owner=user_wallet.id).filter(Q(nft_status="Pending") | Q(nft_status="Minted"))
-                list_nft = NFT.objects.filter(nft_owner=user_wallet.id).exclude(nft_status="Minted")
+                list_nft = NFT.objects.filter(nft_owner=user_wallet.id).exclude(nft_status="Listed")
             if user_nft == "listmynft":
-                list_nft = NFT.objects.filter(nft_owner=user_wallet.id).filter(nft_status="Minted")
-            serializer = NFTViewSerializer(list_nft, many=True)
-            return Response({
-                "status": True, "status_code": 200, 'msg': 'User NFTs Listed Successfully',
-                "data": serializer.data}, status=status.HTTP_200_OK)
+                list_nft = NFT.objects.filter(nft_owner=user_wallet.id).filter(nft_status="Listed")
+
+            paginator = CustomPageNumberPagination()
+            result = paginator.paginate_queryset(list_nft, request)
+            serializer = NFTViewSerializer(result, many=True)
+            return paginator.get_paginated_response(serializer.data)
+            # serializer = NFTViewSerializer(list_nft, many=True)
+            # return Response({
+            #     "status": True, "status_code": 200, 'msg': 'User NFTs Listed Successfully',
+            #     "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
