@@ -18,9 +18,19 @@ class NftTagSerializer(serializers.ModelSerializer):
 
 
 class UserDataSerializer(serializers.ModelSerializer):
+    user_address = serializers.SerializerMethodField('get_metamask')
+
     class Meta:
         model = User
-        fields = ["id", "profile_picture", "name", "username", "created_at", "status", "block"]
+        fields = ["id", "profile_picture", "name", "username", "user_address", "created_at", "status", "block"]
+
+    def get_metamask(self, obj):
+        try:
+            wallet = UserWalletAddress.objects.filter(user_wallet__id=obj.id).first()
+            if wallet:
+                return wallet.wallet_address
+        except:
+            return None
 
 class UserWalletAddressSerializer(serializers.ModelSerializer):
     class Meta:
