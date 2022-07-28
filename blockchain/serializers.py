@@ -3,6 +3,8 @@ from rest_framework import serializers
 
 from blockchain.models import *
 from user.models import User
+from user.serializers import UserProfileDetailsViewSerializer
+
 
 class NftTagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,13 +66,11 @@ class NFTViewSerializer(serializers.ModelSerializer):
         data['tag_title'] = NftTagSerializer(instance.tags_set.filter(nft_create_info__id=instance.id), many=True).data
         data['documents'] = SupportingDocuments.objects.filter(nft_create_info_id=instance.id).values('id', 'documents', 'nft_create_info')
         data['user'] = UserDataSerializer(instance.user).data
-        data['nft_creator'] = UserWalletAddressSerializer(instance.nft_creator).data
-        data['nft_owner'] = UserWalletAddressSerializer(instance.nft_owner).data
-        data['nft_collection'] = UserWalletAddressSerializer(instance.nft_collection).data
+        data['nft_creator'] = UserProfileDetailsViewSerializer(instance.user).data
+        data['nft_owner'] = UserProfileDetailsViewSerializer(instance.user).data
+        data['nft_collection'] = NFTCollectionSerializer(instance.nft_collection).data
+        data['nft_category'] = NFTCategorySerializer(instance.nft_category).data
         return data
-
-
-
 
 
 class NFTCategorySerializer(serializers.ModelSerializer):
@@ -95,5 +95,5 @@ class NFTCategorySerializer(serializers.ModelSerializer):
 class UserNFTStatusUpdateViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = NFT
-        fields = ["id", "nft_status", "status_remarks"]
+        fields = ["id", "nft_status", "nft_subject", "status_remarks"]
 

@@ -126,12 +126,13 @@ class UserNFTsListView(viewsets.ViewSet):
                                                                                              'fix_price',
                                                                                              'nft_sell_type',
                                                                                              'starting_price',
-                                                                                             'sold_price',
+                                                                                             'ending_price',
                                                                                              'start_dateTime',
                                                                                              'end_datetime',
                                                                                              'is_minted',
                                                                                              'is_listed',
                                                                                              'nft_status',
+                                                                                             'nft_subject',
                                                                                              'status_remarks',
                                                                                             'user_id',
                                                                                             user_profile_pic=
@@ -152,12 +153,13 @@ class UserNFTsListView(viewsets.ViewSet):
                                                                                              'fix_price',
                                                                                              'nft_sell_type',
                                                                                              'starting_price',
-                                                                                             'sold_price',
+                                                                                             'ending_price',
                                                                                              'start_dateTime',
                                                                                              'end_datetime',
                                                                                              'is_minted',
                                                                                              'is_listed',
                                                                                              'nft_status',
+                                                                                            'nft_subject',
                                                                                              'status_remarks',
                                                                                             'user_id',
                                                                                             user_profile_pic=
@@ -177,6 +179,7 @@ class UserNFTsListView(viewsets.ViewSet):
                 list_nft = NFT.objects.filter(nft_status='Pending')\
                     .annotate(document_count=Count('nft_in_supportingdocument')).values('id', 'thumbnail',
                                                                                         'nft_title',
+                                                                                        'nft_status',
                                                                                         'document_count',
                                                                                         real_name=F('user__name'),
                                                                                         display_name=F('user__username'),
@@ -329,6 +332,7 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
             # nft_instance = NFT.objects.filter(id = nft.id).first()
             user = User.objects.filter(id = nft_instance.user.id).first()
             profile_status = request.data['nft_status']
+            nft_subject = request.data['nft_subject']
             status_reasons = request.data['status_remarks']
             serializer = UserNFTStatusUpdateViewSerializer(nft_instance, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
@@ -337,9 +341,9 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
             # send email
                 body = None
                 if profile_status == 'Approved':
-                    body = "Congratulations! your NFT has been Approved. " + status_reasons
+                    body = "Congratulations! your NFT has been Approved. " + nft_subject + "\n" + status_reasons
                 if profile_status == 'Disapproved':
-                    body = "We are Sorry! your NFT has been Disapproved. " + status_reasons
+                    body = "We are Sorry! your NFT has been Disapproved. " + nft_subject + "\n" + status_reasons
                 data = {
                     'subject': 'Your Phynom NFT Status',
                     'body': body,
