@@ -50,7 +50,7 @@ class NFTViewSerializer(serializers.ModelSerializer):
         model = NFT
         fields = ["id", "thumbnail", "nft_picture", "teaser", "nft_title", "nft_collection", "nft_status", "user",
                   "description", "nft_category", "royality", "hash", "contract_id", 'top_nft', "nft_creator", "nft_owner",
-                  "nft_status", "status_remarks", "nft_sell_type", "fix_price"]
+                  "nft_status","nft_subject", "nft_subject", "status_remarks", "nft_sell_type", "fix_price"]
 
     def create(self, validated_data):
         with transaction.atomic():
