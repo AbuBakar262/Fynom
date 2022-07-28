@@ -107,3 +107,16 @@ class UserNFTStatusUpdateViewSerializer(serializers.ModelSerializer):
         model = NFT
         fields = ["id", "nft_status", "nft_subject", "status_remarks"]
 
+
+class ListTransectionNFTSerializer(serializers.ModelSerializer):
+    # nft_picture = serializers.SlugRelatedField(read_only=True, slug_field='nft.nft_picture')
+    nft_title = serializers.ReadOnlyField(source='nft.nft_title')
+    nft_picture = serializers.URLField(source='nft.nft_picture')
+    # nft_thumbnail = serializers.ReadOnlyField(source='nft.thumbnail')
+    seller_address = serializers.ReadOnlyField(source='seller.wallet_address')
+    buyer_address = serializers.ReadOnlyField(source='buyer.wallet_address')
+    class Meta:
+        model = Transection
+        read_only_fields = ('nft_title','nft_picture', 'seller_address', 'seller_address', 'buyer_address')
+        fields = ["id", "nft_title", "nft_picture", "seller_address", "buyer_address", "sold_price", "created_at"]
+
