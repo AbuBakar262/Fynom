@@ -326,6 +326,7 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
      """
     permission_classes = [IsAuthenticated]
     def partial_update(self, request, *args, **kwargs):
+        global nft_subject, status_reasons
         try:
             id = self.kwargs.get('pk')
             nft_instance = NFT.objects.filter(id=id).first()
@@ -333,10 +334,11 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
             user = User.objects.filter(id = nft_instance.user.id).first()
             if request.user.is_superuser:
                 profile_status = request.data['nft_status']
+                nft_subject = request.data['nft_subject']
+                status_reasons = request.data['status_remarks']
             else:
                 profile_status = "Pending"
-            nft_subject = request.data['nft_subject']
-            status_reasons = request.data['status_remarks']
+
             serializer = UserNFTStatusUpdateViewSerializer(nft_instance, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -348,7 +350,7 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
                 if profile_status == 'Disapproved':
                     body = "We are Sorry! your NFT has been Disapproved. " + nft_subject + "\n" + status_reasons
                 if profile_status == 'Pending':
-                    body = "Your NFT is Pending now due to some updates. " + nft_subject + "\n" + status_reasons
+                    body = "Your NFT is Pending now due to some updates. "
                 data = {
                     'subject': 'Your Phynom NFT Status',
                     'body': body,
