@@ -324,7 +324,7 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
      This api is only use for Admin
      can change the status of user NFT
      """
-    # permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]
     def partial_update(self, request, *args, **kwargs):
         try:
             id = self.kwargs.get('pk')

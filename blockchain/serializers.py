@@ -40,7 +40,7 @@ class UserWalletAddressSerializer(serializers.ModelSerializer):
 class NFTCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
-        fields = "__all__"
+        fields = ["id", "name", "create_by"]
 
 class NFTViewSerializer(serializers.ModelSerializer):
     # tags = serializers.ListField(child=serializers.CharField(required=True), allow_empty=False)
