@@ -20,7 +20,7 @@ class NftTagSerializer(serializers.ModelSerializer):
 class UserDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = "__all__"
+        fields = ["id", "profile_picture", "name", "username", "created_at", "status", "block"]
 
 class UserWalletAddressSerializer(serializers.ModelSerializer):
     class Meta:
@@ -66,8 +66,8 @@ class NFTViewSerializer(serializers.ModelSerializer):
         data['tag_title'] = NftTagSerializer(instance.tags_set.filter(nft_create_info__id=instance.id), many=True).data
         data['documents'] = SupportingDocuments.objects.filter(nft_create_info_id=instance.id).values('id', 'documents', 'nft_create_info')
         data['user'] = UserDataSerializer(instance.user).data
-        data['nft_creator'] = UserProfileDetailsViewSerializer(instance.user).data
-        data['nft_owner'] = UserProfileDetailsViewSerializer(instance.user).data
+        # data['nft_creator'] = UserWalletAddressSerializer(instance.user).data
+        # data['nft_owner'] = UserWalletAddressSerializer(instance.user).data
         data['nft_collection'] = NFTCollectionSerializer(instance.nft_collection).data
         data['nft_category'] = NFTCategorySerializer(instance.nft_category).data
         return data
