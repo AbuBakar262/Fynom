@@ -42,7 +42,7 @@ class ListRetrieveNFTView(viewsets.ViewSet):
 
 class CreateUpdateNFTView(viewsets.ViewSet):
 
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         try:
@@ -324,14 +324,17 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
      This api is only use for Admin
      can change the status of user NFT
      """
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     def partial_update(self, request, *args, **kwargs):
         try:
             id = self.kwargs.get('pk')
             nft_instance = NFT.objects.filter(id=id).first()
             # nft_instance = NFT.objects.filter(id = nft.id).first()
             user = User.objects.filter(id = nft_instance.user.id).first()
-            profile_status = request.data['nft_status']
+            if request.user.is_superuser:
+                profile_status = request.data['nft_status']
+            else:
+                profile_status = "Pending"
             nft_subject = request.data['nft_subject']
             status_reasons = request.data['status_remarks']
             serializer = UserNFTStatusUpdateViewSerializer(nft_instance, data=request.data, partial=True)
@@ -344,6 +347,8 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
                     body = "Congratulations! your NFT has been Approved. " + nft_subject + "\n" + status_reasons
                 if profile_status == 'Disapproved':
                     body = "We are Sorry! your NFT has been Disapproved. " + nft_subject + "\n" + status_reasons
+                if profile_status == 'Pending':
+                    body = "Your NFT is Pending now due to some updates. " + nft_subject + "\n" + status_reasons
                 data = {
                     'subject': 'Your Phynom NFT Status',
                     'body': body,
@@ -353,6 +358,21 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User NFT Status Update Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ListTransectionNFTView(viewsets.ViewSet):
+    def list(self, request, *args, **kwargs):
+        try:
+            nft_transection = Transection.objects.all().order_by("-id")
+            paginator = CustomPageNumberPagination()
+            result = paginator.paginate_queryset(nft_transection, request)
+            serializer = ListTransectionNFTSerializer(result, many=True)
+            return paginator.get_paginated_response(serializer.data)
 
         except Exception as e:
             return Response({
