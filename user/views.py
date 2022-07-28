@@ -392,7 +392,7 @@ class ListUserCollection(viewsets.ViewSet):
     # pagination_class = PageNumberPagination
     def list(self, request, *args, **kwargs):
         try:
-            collections = Collection.objects.all()
+            collections = Collection.objects.all().order_by("-id")
             # serializer = UserCollectionSerializer(collections, many=True)
             paginator = CustomPageNumberPagination()
             result = paginator.paginate_queryset(collections, request)
@@ -408,7 +408,7 @@ class ListUserCollection(viewsets.ViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         try:
-            id = self.kwargs.get('pk')
+            id = self.kwargs.get('pk').order_by("-id")
             collection_id = Collection.objects.get(id=id)
             serializer = UserCollectionSerializer(collection_id)
             return Response({
