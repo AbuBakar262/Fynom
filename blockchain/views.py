@@ -72,10 +72,13 @@ class CreateUpdateNFTView(viewsets.ViewSet):
         """
         this is used for update nft by id, docoments and tags will delete and auto insert
         """
+        global body
         try:
             nft_id = self.kwargs.get('pk')
             user_wallet =  UserWalletAddress.objects.filter(user_wallet=request.user.id).first()
             nft_by_id = NFT.objects.filter(id=nft_id, nft_creator__id=user_wallet.id).first()
+            # profile_status = request.data['nft_status']
+            profile_status = request.data['nft_status']
             if nft_by_id:
                 serializer = NFTViewSerializer(nft_by_id, data=request.data, context={'request':request}, partial=True)
                 # request.data._mutable = True
@@ -87,6 +90,15 @@ class CreateUpdateNFTView(viewsets.ViewSet):
                                nft.tags_set.remove(i) # remove nft tags form tags table
                         tags_title = request.data.get('tag_title').split(',')
                         nft.tags_set.add(*tags_title)
+                    if request.user.email:
+                        if profile_status == 'Pending':
+                            body = "Your NFT is Pending now due to some updates. "
+                        data = {
+                            'subject': 'Your Phynom NFT Status',
+                            'body': body,
+                            'to_email': request.user.email
+                        }
+                        Utill.send_email(data)
                     # tags = Tags.objects.create()
                     # nft.tags_set.add(*request.data['tags_title'])
                     return Response({
@@ -121,8 +133,7 @@ class UserNFTsListView(viewsets.ViewSet):
                 if user_nft == "mynft":
                     list_nft = NFT.objects.filter(Q(is_minted=True) | Q(is_minted=False), nft_owner=user_wallet.id,
                                                   is_listed=False, nft_category=nft_category_id).values('id',
-                                                                                                        'thumbnail',
-                                                                                             'nft_picture',
+
                                                                                              'nft_title',
                                                                                              'fix_price',
                                                                                              'nft_sell_type',
@@ -135,21 +146,33 @@ class UserNFTsListView(viewsets.ViewSet):
                                                                                              'nft_status',
                                                                                              'nft_subject',
                                                                                              'status_remarks',
-                                                                                            'user_id',
-                                                                                            user_profile_pic=
-                                                                                             F('user__profile_picture'),
+                                                                                            nft_user_id=F('user__id'),
+                                                                                            # user_profile_pic=
+                                                                                            #  F('user__profile_picture'),
                                                                                              user_nft_collection
                                                                                             =F('nft_collection__'
                                                                                                'name'),
                                                                                              user_nft_category
                                                                                             =F('nft_category__'
-                                                                                               'category_name'))\
+                                                                                               'category_name'),
+                    nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("thumbnail"),
+                                           output_field=CharField()),
+                                    nft_pic = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("nft_picture"),
+                                                     output_field=CharField()),
+                                                                                                    user_profile_pic=Concat(
+                                                                                                            Value(
+                                                                                                                os.getenv(
+                                                                                                                    'STAGING_PHYNOM_BUCKET_URL')),
+                                                                                                            F("user__profile_picture"),
+                                                                                                            output_field=CharField())
+                    )\
                         .order_by('-id')
 
                 if user_nft == "listmynft":
                     list_nft = NFT.objects.filter(is_minted=True, nft_owner=user_wallet.id,
-                                       is_listed=True, nft_category=nft_category_id).values('id', 'thumbnail',
-                                                                                             'nft_picture',
+                                       is_listed=True, nft_category=nft_category_id).values('id',
+                                                                                            # 'thumbnail',
+                                                                                            #  'nft_picture',
                                                                                              'nft_title',
                                                                                              'fix_price',
                                                                                              'nft_sell_type',
@@ -162,15 +185,25 @@ class UserNFTsListView(viewsets.ViewSet):
                                                                                              'nft_status',
                                                                                             'nft_subject',
                                                                                              'status_remarks',
-                                                                                            'user_id',
-                                                                                            user_profile_pic=
-                                                                                             F('user__profile_picture'),
+                                                                                            nft_user_id=F('user__id'),
+                                                                                            # user_profile_pic=
+                                                                                            #  F('user__profile_picture'),
                                                                                              user_nft_collection
                                                                                             =F('nft_collection__'
                                                                                                'name'),
                                                                                              user_nft_category
                                                                                             =F('nft_category__'
-                                                                                               'category_name')
+                                                                                               'category_name'),
+                    nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("thumbnail"),
+                                           output_field=CharField()),
+                                    nft_pic = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("nft_picture"),
+                                                     output_field=CharField()),
+                                                                                                    user_profile_pic=Concat(
+                                                                                                            Value(
+                                                                                                                os.getenv(
+                                                                                                                    'STAGING_PHYNOM_BUCKET_URL')),
+                                                                                                            F("user__profile_picture"),
+                                                                                                            output_field=CharField())
                                                                                             ).order_by('-id')
 
                 paginator = CustomPageNumberPagination()
@@ -182,6 +215,7 @@ class UserNFTsListView(viewsets.ViewSet):
                                                                                         'nft_title',
                                                                                         'nft_status',
                                                                                         'document_count',
+                                                                                        nft_user_id=F('user__id'),
                                                                                         real_name=F('user__name'),
                                                                                         display_name=F('user__username'),
                                                                                         wallet_address=F('nft_owner__wallet_address'),
@@ -326,7 +360,7 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
      This api is only use for Admin
      can change the status of user NFT
      """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
     def partial_update(self, request, *args, **kwargs):
         global nft_subject, status_reasons
         try:
@@ -334,12 +368,9 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
             nft_instance = NFT.objects.filter(id=id).first()
             # nft_instance = NFT.objects.filter(id = nft.id).first()
             user = User.objects.filter(id = nft_instance.user.id).first()
-            if request.user.is_superuser:
-                profile_status = request.data['nft_status']
-                nft_subject = request.data['nft_subject']
-                status_reasons = request.data['status_remarks']
-            else:
-                profile_status = "Pending"
+            profile_status = request.data['nft_status']
+            nft_subject = request.data['nft_subject']
+            status_reasons = request.data['status_remarks']
 
             serializer = UserNFTStatusUpdateViewSerializer(nft_instance, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)

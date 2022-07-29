@@ -62,18 +62,18 @@ class NFTViewSerializer(serializers.ModelSerializer):
                 SupportingDocuments.objects.create(nft_create_info=nft, documents=doc)
             return nft
 
-    def update(self, instance, validated_data):
-        # obj = NFT.objects.update(
-        #     nft_status = validated_data['nft_status']
-        # )
-        # obj.update()
-        with transaction.atomic():
-            nft_docs = dict(self.context['request'].data.lists())['documents']
-            prev_doc = SupportingDocuments.objects.filter(nft_create_info__id=instance.id)
-            prev_doc.delete()
-            for doc in nft_docs:
-                SupportingDocuments.objects.create(nft_create_info=instance, documents=doc)
-            return instance
+    # def update(self, instance, validated_data):
+    #     # obj = NFT.objects.update(
+    #     #     nft_status = validated_data['nft_status']
+    #     # )
+    #     # obj.update()
+    #     with transaction.atomic():
+    #         nft_docs = dict(self.context['request'].data.lists())['documents']
+    #         prev_doc = SupportingDocuments.objects.filter(nft_create_info__id=instance.id)
+    #         prev_doc.delete()
+    #         for doc in nft_docs:
+    #             SupportingDocuments.objects.create(nft_create_info=instance, documents=doc)
+    #         return instance
 
 
     def to_representation(self, instance):
