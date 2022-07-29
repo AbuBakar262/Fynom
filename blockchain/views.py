@@ -13,11 +13,10 @@ from rest_framework import viewsets
 from user.custom_permissions import IsApprovedUser
 from user.utils import Utill
 
-
 class ListRetrieveNFTView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         try:
-            list_nft = NFT.objects.filter(nft_status="Pending").order_by('-id')
+            list_nft = NFT.objects.filter(nft_status="Approved").order_by('-id')
             serializer = NFTViewSerializer(list_nft, many=True)
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User NFTs Listed Successfully',
@@ -93,12 +92,12 @@ class CreateUpdateNFTView(viewsets.ViewSet):
                     if request.user.email:
                         if profile_status == 'Pending':
                             body = "Your NFT is Pending now due to some updates. "
-                        data = {
-                            'subject': 'Your Phynom NFT Status',
-                            'body': body,
-                            'to_email': request.user.email
-                        }
-                        Utill.send_email(data)
+                            data = {
+                                'subject': 'Your Phynom NFT Status',
+                                'body': body,
+                                'to_email': request.user.email
+                            }
+                            Utill.send_email(data)
                     # tags = Tags.objects.create()
                     # nft.tags_set.add(*request.data['tags_title'])
                     return Response({
@@ -155,8 +154,7 @@ class UserNFTsListView(viewsets.ViewSet):
                                                                                              user_nft_category
                                                                                             =F('nft_category__'
                                                                                                'category_name'),
-                    nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("thumbnail"),
-                                           output_field=CharField()),
+                    nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("thumbnail"), output_field=CharField()),
                                     nft_pic = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("nft_picture"),
                                                      output_field=CharField()),
                                                                                                     user_profile_pic=Concat(

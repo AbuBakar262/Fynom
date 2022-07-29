@@ -118,13 +118,20 @@ class UserNFTStatusUpdateViewSerializer(serializers.ModelSerializer):
 
 class ListTransectionNFTSerializer(serializers.ModelSerializer):
     # nft_picture = serializers.SlugRelatedField(read_only=True, slug_field='nft.nft_picture')
-    nft_title = serializers.ReadOnlyField(source='nft.nft_title')
-    nft_picture = serializers.URLField(source='nft.nft_picture')
-    # nft_thumbnail = serializers.ReadOnlyField(source='nft.thumbnail')
-    seller_address = serializers.ReadOnlyField(source='seller.wallet_address')
-    buyer_address = serializers.ReadOnlyField(source='buyer.wallet_address')
+    # nft_title = serializers.ReadOnlyField(source='nft.nft_title')
+    # nft_picture = serializers.URLField(source='nft.nft_picture')
+    # # nft_thumbnail = serializers.ReadOnlyField(source='nft.thumbnail')
+    # seller_address = serializers.ReadOnlyField(source='seller.wallet_address')
+    # buyer_address = serializers.ReadOnlyField(source='buyer.wallet_address')
     class Meta:
         model = Transection
-        read_only_fields = ('nft_title','nft_picture', 'seller_address', 'seller_address', 'buyer_address')
-        fields = ["id", "nft_title", "nft_picture", "seller_address", "buyer_address", "sold_price", "created_at"]
+        # read_only_fields = ('nft_title','nft_picture', 'seller_address', 'seller_address', 'buyer_address')
+        fields = ["id", "nft", "seller", "buyer", "sold_price", "created_at"]
 
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        from django.db.models import F, Value, CharField
+        import os
+        data['nft'] = NFT.objects.filter(id=instance.nft.id).values('id', 'nft_title')
+              # nft_documents=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("documents"), output_field=CharField() ))
