@@ -82,7 +82,7 @@ class NFTViewSerializer(serializers.ModelSerializer):
         from django.db.models import F, Value, CharField
         import os
         data['documents'] = SupportingDocuments.objects.filter(nft_create_info_id=instance.id).values('id',
-              'nft_create_info', nft_documents=Concat(Value(os.getenv('BUCKET_URL')), F("documents"), output_field=CharField() ))
+              'nft_create_info', nft_documents=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("documents"), output_field=CharField() ))
         data['user'] = UserDataSerializer(instance.user).data
         # data['nft_creator'] = UserWalletAddressSerializer(instance.user).data
         # data['nft_owner'] = UserWalletAddressSerializer(instance.user).data

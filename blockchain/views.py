@@ -188,7 +188,7 @@ class UserNFTsListView(viewsets.ViewSet):
                                                                                         user_nft_category
                                                                                         =F('nft_category__'
                                                                                            'category_name'),
-                nft_thumbnail = Concat(Value(os.getenv('BUCKET_URL')), F("thumbnail"), output_field=CharField())
+                nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("thumbnail"), output_field=CharField())
                                                                                         ).order_by('-id')
                 paginator = CustomPageNumberPagination()
                 result = paginator.paginate_queryset(list_nft, request)
