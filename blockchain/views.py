@@ -1,7 +1,8 @@
-from django.db.models import Q, F, Count
+from django.db.models import Q, F, Count, CharField
 from rest_framework.response import Response
 from rest_framework import status
-
+from django.db.models import F, Value, CharField
+import os
 from backend.pagination import CustomPageNumberPagination
 from blockchain.serializers import *
 from blockchain.models import *
@@ -177,7 +178,7 @@ class UserNFTsListView(viewsets.ViewSet):
                 return paginator.get_paginated_response(result)
             elif user_nft == "admin":
                 list_nft = NFT.objects.filter(nft_status='Pending')\
-                    .annotate(document_count=Count('nft_in_supportingdocument')).values('id', 'thumbnail',
+                    .annotate(document_count=Count('nft_in_supportingdocument')).values('id',
                                                                                         'nft_title',
                                                                                         'nft_status',
                                                                                         'document_count',
@@ -186,7 +187,8 @@ class UserNFTsListView(viewsets.ViewSet):
                                                                                         wallet_address=F('nft_owner__wallet_address'),
                                                                                         user_nft_category
                                                                                         =F('nft_category__'
-                                                                                           'category_name')
+                                                                                           'category_name'),
+                nft_thumbnail = Concat(Value(os.getenv('BUCKET_URL')), F("thumbnail"), output_field=CharField())
                                                                                         ).order_by('-id')
                 paginator = CustomPageNumberPagination()
                 result = paginator.paginate_queryset(list_nft, request)
