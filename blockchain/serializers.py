@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models.functions import Concat
 from rest_framework import serializers
 
 from blockchain.models import *
@@ -50,18 +51,22 @@ class NFTViewSerializer(serializers.ModelSerializer):
         model = NFT
         fields = ["id", "thumbnail", "nft_picture", "teaser", "nft_title", "nft_collection", "nft_status", "user",
                   "description", "nft_category", "royality", "hash", "contract_id", 'top_nft', "nft_creator", "nft_owner",
-                  "nft_status","nft_subject", "nft_subject", "status_remarks", "nft_sell_type", "fix_price"]
+                  "nft_status","nft_subject", "nft_subject", "status_remarks", "nft_sell_type", "fix_price", "is_minted",
+                  "is_listed"]
 
     def create(self, validated_data):
         with transaction.atomic():
             nft_docs = dict(self.context['request'].data.lists())['documents']
-
             nft = NFT.objects.create(**validated_data)
             for doc in nft_docs:
                 SupportingDocuments.objects.create(nft_create_info=nft, documents=doc)
             return nft
 
     def update(self, instance, validated_data):
+        # obj = NFT.objects.update(
+        #     nft_status = validated_data['nft_status']
+        # )
+        # obj.update()
         with transaction.atomic():
             nft_docs = dict(self.context['request'].data.lists())['documents']
             prev_doc = SupportingDocuments.objects.filter(nft_create_info__id=instance.id)
@@ -74,7 +79,10 @@ class NFTViewSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['tag_title'] = NftTagSerializer(instance.tags_set.filter(nft_create_info__id=instance.id), many=True).data
-        data['documents'] = SupportingDocuments.objects.filter(nft_create_info_id=instance.id).values('id', 'documents', 'nft_create_info')
+        from django.db.models import F, Value, CharField
+        import os
+        data['documents'] = SupportingDocuments.objects.filter(nft_create_info_id=instance.id).values('id',
+              'nft_create_info', nft_documents=Concat(Value(os.getenv('BUCKET_URL')), F("documents"), output_field=CharField() ))
         data['user'] = UserDataSerializer(instance.user).data
         # data['nft_creator'] = UserWalletAddressSerializer(instance.user).data
         # data['nft_owner'] = UserWalletAddressSerializer(instance.user).data
