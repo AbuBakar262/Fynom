@@ -124,7 +124,7 @@ class ListTransectionNFTSerializer(serializers.ModelSerializer):
     # seller_address = serializers.ReadOnlyField(source='seller.wallet_address')
     # buyer_address = serializers.ReadOnlyField(source='buyer.wallet_address')
     class Meta:
-        model = Transection
+        model = Transaction
         # read_only_fields = ('nft_title','nft_picture', 'seller_address', 'seller_address', 'buyer_address')
         fields = ["id", "nft", "seller", "buyer", "sold_price", "created_at"]
 
