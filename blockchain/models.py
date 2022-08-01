@@ -134,11 +134,11 @@ class BidOnNFT(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class Transection(models.Model):
-    nft = models.ForeignKey(NFT, blank=True, null=True, related_name='nft_in_transection', on_delete=models.CASCADE)
+class Transaction(models.Model):
+    nft = models.ForeignKey(NFT, blank=True, null=True, related_name='nft_in_transaction', on_delete=models.CASCADE)
     nft_token_id = models.CharField(max_length=250, blank=True, null=True)
-    seller = models.ForeignKey(UserWalletAddress, blank=True, null=True,  related_name='seller_in_transection', on_delete=models.CASCADE)
-    buyer = models.ForeignKey(UserWalletAddress, blank=True, null=True,  related_name='buyer_in_transection', on_delete=models.CASCADE)
+    seller = models.ForeignKey(UserWalletAddress, blank=True, null=True,  related_name='seller_in_transaction', on_delete=models.CASCADE)
+    buyer = models.ForeignKey(UserWalletAddress, blank=True, null=True,  related_name='buyer_in_transaction', on_delete=models.CASCADE)
     sold_price = models.FloatField(blank=True, null=True)
     # sold_date_time = models.
     created_at = models.DateTimeField(auto_now_add=True)
