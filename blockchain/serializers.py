@@ -12,6 +12,12 @@ class NftTagSerializer(serializers.ModelSerializer):
         model = Tags
         fields = ["id", "tag_title", "created_at", "updated_at"]
 
+
+class NFTCommissionViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Commission
+        fields = ["id", "set_commission", "created_at", "updated_at"]
+
 # class NftSupportingDocumentsSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = SupportingDocuments
@@ -135,3 +141,5 @@ class ListTransectionNFTSerializer(serializers.ModelSerializer):
         import os
         data['nft'] = NFT.objects.filter(id=instance.nft.id).values('id', 'nft_title')
               # nft_documents=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("documents"), output_field=CharField() ))
+
+

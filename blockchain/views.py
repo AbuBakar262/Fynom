@@ -401,13 +401,56 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
 class ListTransectionNFTView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         try:
-            nft_transection = Transection.objects.all().order_by("-id")
+            nft_transaction = Transaction.objects.all().order_by("-id")
             paginator = CustomPageNumberPagination()
-            result = paginator.paginate_queryset(nft_transection, request)
+            result = paginator.paginate_queryset(nft_transaction, request)
             serializer = ListTransectionNFTSerializer(result, many=True)
             return paginator.get_paginated_response(serializer.data)
 
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class NFTCommissionView(viewsets.ViewSet):
+
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        try:
+            set_commission = Commission.objects.all().order_by('-id')
+            serializer = NFTCommissionViewSerializer(set_commission, many=True)
+            return Response({
+                "status": True, "status_code": 200, 'msg': "Commission listed",
+                "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+    def create(self, request, *args, **kwargs):
+        try:
+            serializer = NFTCommissionViewSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({
+                "status": True, "status_code": 200, 'msg': 'NFT Commission Created Successfully',
+                "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+    def update(self, request, *args, **kwargs):
+        try:
+            id = self.kwargs.get('pk')
+            item_id = Commission.objects.get(id=id)
+            serializer = NFTCommissionViewSerializer(item_id, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({
+                "status": True, "status_code": 200, 'msg': 'NFT Commission Updated Successfully',
+                "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400,'error':'Sorry Your data did not updated', 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)

@@ -82,6 +82,7 @@ class NFT(models.Model):
     hash = models.CharField(max_length=50, blank=True, null=True)
     contract_id = models.CharField(max_length=50, blank=True, null=True)
     token_id = models.CharField(max_length=250, blank=True, null=True)
+    commission = models.FloatField(blank=True, null=True)
     nft_creator = models.ForeignKey(UserWalletAddress, blank=True, null=True, related_name='nft_creator_in_create_nft',
                                   on_delete=models.CASCADE)
     nft_owner = models.ForeignKey(UserWalletAddress, blank=True, null=True, related_name='nft_owner_in_create_nft',
@@ -145,3 +146,9 @@ class Transaction(models.Model):
 
     def __str__(self):
             return str(self.id)
+
+
+class Commission(models.Model):
+    set_commission = models.FloatField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
