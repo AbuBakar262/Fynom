@@ -76,8 +76,11 @@ class CreateUpdateNFTView(viewsets.ViewSet):
             nft_id = self.kwargs.get('pk')
             user_wallet =  UserWalletAddress.objects.filter(user_wallet=request.user.id).first()
             nft_by_id = NFT.objects.filter(id=nft_id, nft_creator__id=user_wallet.id).first()
-            # profile_status = request.data['nft_status']
-            profile_status = request.data['nft_status']
+            nft_status = "Pending"
+            # nft_status = request.data['nft_status']
+            request.data._mutable = True
+            request.data['nft_status'] = nft_status
+
             if nft_by_id:
                 serializer = NFTViewSerializer(nft_by_id, data=request.data, context={'request':request}, partial=True)
                 # request.data._mutable = True
@@ -90,7 +93,7 @@ class CreateUpdateNFTView(viewsets.ViewSet):
                         tags_title = request.data.get('tag_title').split(',')
                         nft.tags_set.add(*tags_title)
                     if request.user.email:
-                        if profile_status == 'Pending':
+                        if nft_status == 'Pending':
                             body = "Your NFT is Pending now due to some updates. "
                             data = {
                                 'subject': 'Your Phynom NFT Status',
@@ -289,7 +292,7 @@ class NFTCategoryView(viewsets.ViewSet):
             category_by_id = NFTCategory.objects.get(id=category_id)
             category_by_id.delete()
             return Response({
-                "status": True, "status_code": 200, 'msg': 'NFT Tag is deleted Successfully',
+                "status": True, "status_code": 200, 'msg': 'NFT Category is deleted Successfully',
                 "data": {}}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -363,7 +366,7 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
         global nft_subject, status_reasons
         try:
             id = self.kwargs.get('pk')
-            nft_instance = NFT.objects.filter(id=id).first()
+            nft_instance = NFT.objects.get(id=id)
             # nft_instance = NFT.objects.filter(id = nft.id).first()
             user = User.objects.filter(id = nft_instance.user.id).first()
             profile_status = request.data['nft_status']

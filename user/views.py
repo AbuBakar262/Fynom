@@ -408,7 +408,7 @@ class ListUserCollection(viewsets.ViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         try:
-            id = self.kwargs.get('pk').order_by("-id")
+            id = self.kwargs.get('pk')
             collection_id = Collection.objects.get(id=id)
             serializer = UserCollectionSerializer(collection_id)
             return Response({
