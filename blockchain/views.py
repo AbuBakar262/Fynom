@@ -381,16 +381,23 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
                 body = None
                 if profile_status == 'Approved':
                     body = "Congratulations! your NFT has been Approved. " + nft_subject + "\n" + status_reasons
+                    data = {
+                        'subject': 'Your Phynom NFT Status',
+                        'body': body,
+                        'to_email': user.email
+                    }
+                    Utill.send_email(data)
                 if profile_status == 'Disapproved':
                     body = "We are Sorry! your NFT has been Disapproved. " + nft_subject + "\n" + status_reasons
+                    data = {
+                        'subject': 'Your Phynom NFT Status',
+                        'body': body,
+                        'to_email': user.email
+                    }
+                    Utill.send_email(data)
                 # if profile_status == 'Pending':
                 #     body = "Your NFT is Pending now due to some updates. "
-                data = {
-                    'subject': 'Your Phynom NFT Status',
-                    'body': body,
-                    'to_email': user.email
-                }
-                Utill.send_email(data)
+
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User NFT Status Update Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)

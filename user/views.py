@@ -279,19 +279,26 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
                 serializer.save()
                 # if user_id.email != None:
                     # send email
+
                 body = None
                 if profile_status == 'Approved':
                     body = "Congratulations! your profile has been Approved. You are now part " \
                            "of our Platform. " + status_reasons
+                    data = {
+                        'subject': 'Your phynom profile status',
+                        'body': body,
+                        'to_email': user_id.email
+                    }
+                    Utill.send_email(data)
                 if profile_status == 'Disapproved':
                     body = "We are Sorry! your profile has been Disapproved. Please edit your " \
                            "profile and try again later. " + status_reasons
-                data = {
-                    'subject': 'Your phynom profile status',
-                    'body': body,
-                    'to_email': user_id.email
-                }
-                Utill.send_email(data)
+                    data = {
+                        'subject': 'Your phynom profile status',
+                        'body': body,
+                        'to_email': user_id.email
+                    }
+                    Utill.send_email(data)
                 return Response({
                     "status": True, "status_code": 200, 'msg': 'User Profiles Updated Successfully',
                     "data": serializer.data}, status=status.HTTP_200_OK)
@@ -324,15 +331,22 @@ class UserProfileBlockedView(viewsets.ViewSet):
                 if block == 'True':
                     body = "Your profile has been blocked. You have violated the terms and conditions of Phynom. Please " \
                            "review the terms and conditions."
+                    data = {
+                        'subject': 'Your phynom profile status',
+                        'body': body,
+                        'to_email': user_id.email
+                    }
+                    Utill.send_email(data)
                 if block == "False":
                     body = "Congratulations! your profile has been unblocked , Please be careful next time with your " \
                            "activities on phynom platform."
-                data = {
-                    'subject': 'Your phynom profile status',
-                    'body': body,
-                    'to_email': user_id.email
-                }
-                Utill.send_email(data)
+                    data = {
+                        'subject': 'Your phynom profile status',
+                        'body': body,
+                        'to_email': user_id.email
+                    }
+                    Utill.send_email(data)
+
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User Profiles Updated Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
