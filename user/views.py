@@ -162,6 +162,7 @@ class UserProfileUpdateView(viewsets.ViewSet):
     """
     permission_classes = [IsAuthenticated, IsNotSuspendUser]
     def patch(self, request, *args, **kwargs):
+        global context
         try:
             user = request.user
             if user.status!="Pending":
