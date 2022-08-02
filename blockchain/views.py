@@ -76,10 +76,10 @@ class CreateUpdateNFTView(viewsets.ViewSet):
             nft_id = self.kwargs.get('pk')
             user_wallet =  UserWalletAddress.objects.filter(user_wallet=request.user.id).first()
             nft_by_id = NFT.objects.filter(id=nft_id, nft_owner__id=user_wallet.id).first()
-            nft_status = "Pending"
-            # nft_status = request.data['nft_status']
-            request.data._mutable = True
-            request.data['nft_status'] = nft_status
+            # nft_status = "Pending"
+            nft_status = request.data['nft_status']
+            # request.data._mutable = True
+            # request.data['nft_status'] = nft_status
 
             if nft_by_id:
                 serializer = NFTViewSerializer(nft_by_id, data=request.data, context={'request':request}, partial=True)
@@ -383,8 +383,8 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
                     body = "Congratulations! your NFT has been Approved. " + nft_subject + "\n" + status_reasons
                 if profile_status == 'Disapproved':
                     body = "We are Sorry! your NFT has been Disapproved. " + nft_subject + "\n" + status_reasons
-                if profile_status == 'Pending':
-                    body = "Your NFT is Pending now due to some updates. "
+                # if profile_status == 'Pending':
+                #     body = "Your NFT is Pending now due to some updates. "
                 data = {
                     'subject': 'Your Phynom NFT Status',
                     'body': body,
