@@ -75,7 +75,7 @@ class CreateUpdateNFTView(viewsets.ViewSet):
         try:
             nft_id = self.kwargs.get('pk')
             user_wallet =  UserWalletAddress.objects.filter(user_wallet=request.user.id).first()
-            nft_by_id = NFT.objects.filter(id=nft_id, nft_creator__id=user_wallet.id).first()
+            nft_by_id = NFT.objects.filter(id=nft_id, nft_owner__id=user_wallet.id).first()
             nft_status = "Pending"
             # nft_status = request.data['nft_status']
             request.data._mutable = True
