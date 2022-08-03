@@ -2,6 +2,8 @@ from django.urls import path, include
 from . import views
 from rest_framework.routers import DefaultRouter
 
+from .views import *
+
 router = DefaultRouter()
 
 router.register('list_retrieve_nft_view', views.ListRetrieveNFTView, basename='list_retrieve_nft_view')
@@ -16,5 +18,6 @@ router.register('nft_commission', views.NFTCommissionView, basename='nft_commiss
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('listed_nft_details/<int:pk>', ListedNFTDetailsView.as_view({'get': 'retrieve'}), name="listed_nft_details"),
     # path('profile/', UserProfileListView.as_view({'get': 'get'}), name="profile"),
 ]
