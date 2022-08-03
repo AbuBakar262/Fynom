@@ -57,7 +57,8 @@ class NFTViewSerializer(serializers.ModelSerializer):
         model = NFT
         fields = ["id", "thumbnail", "nft_picture", "teaser", "nft_title", "nft_collection", "nft_status", "user",
                   "description", "nft_category", "royality", "hash", "contract_id", "token_id", 'top_nft', "nft_creator",
-                  "nft_owner", "starting_price", "ending_price", "nft_status", "nft_subject", "created_at", "updated_at",
+                  "nft_owner", "starting_price", "ending_price","start_dateTime","end_datetime",
+                  "nft_status", "nft_subject", "created_at", "updated_at",
                    "nft_subject", "status_remarks", "nft_sell_type", "fix_price", "is_minted", "is_listed", ]
 
     def create(self, validated_data):

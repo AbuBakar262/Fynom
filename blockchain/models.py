@@ -96,8 +96,8 @@ class NFT(models.Model):
     fix_price = models.FloatField(blank=True, null=True)
     starting_price = models.FloatField(blank=True, null=True)
     ending_price = models.FloatField(blank=True, null=True)
-    start_dateTime = models.DateTimeField(blank=True, null=True)
-    end_datetime = models.DateTimeField(blank=True, null=True)
+    start_dateTime = models.CharField(max_length=50, blank=True, null=True)
+    end_datetime = models.CharField(max_length=50, blank=True, null=True)
     sold_price = models.FloatField(blank=True, null=True)
     service_fee = models.FloatField(blank=True, null=True)
     is_minted = models.BooleanField(default=False)
@@ -131,6 +131,7 @@ class BidOnNFT(models.Model):
     nft_detail = models.ForeignKey(NFT, blank=True, null=True, on_delete=models.CASCADE)
     bid_by = models.ForeignKey(UserWalletAddress, blank=True, null=True, on_delete=models.CASCADE)
     bid_price = models.FloatField(blank=True, null=True)
+    # bid_datetime = models.CharField(max_length=50, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
