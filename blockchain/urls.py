@@ -18,6 +18,7 @@ router.register('nft_commission', views.NFTCommissionView, basename='nft_commiss
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('claim_nft/<int:pk>/', ClaimNFTView.as_view({'patch': 'partial_update'}), name="claim_nft"),
     path('bid_on_nft_details/<int:pk>/', BidOnNFTDetailsView.as_view({'get': 'retrieve'}), name="bid_on_nft_details"),
     path('do_bid_on_nft/', DoBidOnNFTView.as_view({'post': 'create'}), name="do_bid_on_nft"),
     # path('profile/', UserProfileListView.as_view({'get': 'get'}), name="profile"),

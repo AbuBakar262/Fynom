@@ -160,3 +160,8 @@ class BidOnNFTDetailsSerializer(serializers.ModelSerializer):
     #     data = super().to_representation(instance)
     #     data['nft_creator'] = UserDataSerializer(instance.creator).data
     #     data['nft_owner'] = UserDataSerializer(instance.owner).data
+
+class ClaimNFTSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NFT
+        fields = ["id","nft_status", "nft_creator", "nft_owner", "user", "nft_sell_type", "is_listed", "updated_at"]

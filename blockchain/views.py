@@ -495,6 +495,7 @@ class BidOnNFTDetailsView(viewsets.ModelViewSet):
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class DoBidOnNFTView(viewsets.ModelViewSet):
     queryset = BidOnNFT.objects.all()
     serializer_class = BidOnNFTDetailsSerializer
@@ -513,6 +514,54 @@ class DoBidOnNFTView(viewsets.ModelViewSet):
             return Response({
                 "status": True, "status_code": 200, 'msg': 'Bid successfully created on NFT',
                 "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ClaimNFTView(viewsets.ModelViewSet):
+    queryset = NFT.objects.all()
+    serializer_class = ClaimNFTSerializer
+    permission_classes = [IsAuthenticated]
+    def partial_update(self, request, *args, **kwargs):
+        """
+        this is used when user will claim his nft and shift ownership
+        """
+        global body
+        try:
+            nft_id = self.kwargs.get('pk')
+            user_wallet =  UserWalletAddress.objects.filter(user_wallet=request.user.id).first()
+            nft_by_id = NFT.objects.filter(id=nft_id).first()
+
+            request.data["is_listed"]= False
+            request.data['user'] = request.user.id
+            request.data['nft_owner'] = user_wallet.id
+
+
+            if nft_by_id:
+                serializer = NFTViewSerializer(nft_by_id, data=request.data, partial=True)
+                # request.data._mutable = True
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                if request.user.email:
+                    if serializer.validated_data['is_listed'] is False:
+                        body = "Your NFT is Pending now due to some updates. "
+                        data = {
+                            'subject': 'Your Phynom NFT Status',
+                            'body': body,
+                            'to_email': request.user.email
+                        }
+                        Utill.send_email(data)
+                # tags = Tags.objects.create()
+                # nft.tags_set.add(*request.data['tags_title'])
+                return Response({
+                    "status": True, "status_code": 200, 'msg': 'User NFTs Updated Successfully',
+                    "data": serializer.data}, status=status.HTTP_200_OK)
+            return Response({
+            "status": False, "status_code": 400, 'msg': 'User not fsdfowner of this NFT',
+            "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
