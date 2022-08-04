@@ -149,8 +149,7 @@ class ListedNFTDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = NFT
         fields = ["id","nft_title", "thumbnail", "nft_picture", "teaser", "nft_creator", "nft_owner",
-                "description", "royality", "hash", "contract_id", "token_id",
-                "starting_price", "ending_price", "start_dateTime", "end_datetime","nft_sell_type"]
+                "description", "royality", "hash", "contract_id", "token_id",]
 
     # def to_representation(self, instance):
     #     data = super().to_representation(instance)

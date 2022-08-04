@@ -129,9 +129,10 @@ class Tags(models.Model):
 
 class BidOnNFT(models.Model):
     nft_detail = models.ForeignKey(NFT, blank=True, null=True, on_delete=models.CASCADE)
-    bid_by = models.ForeignKey(UserWalletAddress, blank=True, null=True, on_delete=models.CASCADE)
+    bidder_wallet = models.ForeignKey(UserWalletAddress, blank=True, null=True, on_delete=models.CASCADE)
+    bidder_profile = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     bid_price = models.FloatField(blank=True, null=True)
-    # bid_datetime = models.CharField(max_length=50, blank=True, null=True)
+    bid_datetime = models.CharField(max_length=50, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
