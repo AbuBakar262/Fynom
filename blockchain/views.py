@@ -494,3 +494,26 @@ class BidOnNFTDetailsView(viewsets.ModelViewSet):
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+class DoBidOnNFTView(viewsets.ModelViewSet):
+    queryset = BidOnNFT.objects.all()
+    serializer_class = BidOnNFTDetailsSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        try:
+            # nft_id = self.kwargs.get('pk')
+            wallet_id = UserWalletAddress.objects.filter(user_wallet=request.user.id).first()
+            # request.data._mutable = True
+            request.data['bidder_wallet'] = wallet_id.id
+            request.data['bidder_profile'] = request.user.id
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({
+                "status": True, "status_code": 200, 'msg': 'Bid successfully created on NFT',
+                "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
