@@ -176,8 +176,7 @@ class UserNFTsListView(viewsets.ViewSet):
                                                                                                                     'STAGING_PHYNOM_BUCKET_URL')),
                                                                                                             F("user__profile_picture"),
                                                                                                             output_field=CharField())
-                    )\
-                        .order_by('-id')
+                    ).order_by('-id')
 
                 if user_nft == "listmynft":
                     list_nft = NFT.objects.filter(is_minted=True, nft_owner=user_wallet.id,
