@@ -476,29 +476,21 @@ class NFTCommissionView(viewsets.ViewSet):
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ListedNFTDetailsView(viewsets.ModelViewSet):
-    queryset = NFT.objects.all()
-    serializer_class = ListedNFTDetailsSerializer
+class BidOnNFTDetailsView(viewsets.ModelViewSet):
+    queryset = BidOnNFT.objects.all()
+    serializer_class = BidOnNFTDetailsSerializer
 
     def retrieve(self, request, *args, **kwargs):
         try:
             nft_id = self.kwargs.get('pk')
             # nft_by_id = NFT.objects.get(id=nft_id)
             # serializer = NFTViewSerializer(nft_by_id)
-            queryset = self.queryset.get(id=nft_id)
-            # creator_wallet = UserWalletAddress.objects.filter(id=queryset.nft_creator_id).first()
-            creator_wallet = UserWalletAddress.objects.filter(user_wallet=queryset.nft_creator.user_wallet.id).first()
-            creator_user = User.objects.filter(id=creator_wallet.user_wallet.id).values("id", "username", "name", "discord_link",
-                 user_picture = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("profile_picture"), output_field=CharField()))
+            queryset = self.queryset.filter(nft_detail=nft_id).order_by("-id")
 
-            owner_wallet = UserWalletAddress.objects.filter(user_wallet=queryset.nft_owner.user_wallet.id).first()
-            owner_user = User.objects.filter(id=owner_wallet.user_wallet.id).values("id", "username", "name","discord_link",
-                    user_picture=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("profile_picture"),output_field=CharField()))
-
-            serializer = self.serializer_class(queryset, many=False, read_only=True)
+            serializer = self.serializer_class(queryset, many=True)
             return Response({
-                "status": True, "status_code": 200, 'msg': 'User NFTs Retrieve Successfully',
-                "data": serializer.data, "creator_user":creator_user, "owner_user":owner_user}, status=status.HTTP_200_OK)
+                "status": True, "status_code": 200, 'msg': 'Bid on NFT Retrieve Successfully',
+                "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],

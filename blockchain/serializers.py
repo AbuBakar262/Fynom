@@ -144,12 +144,17 @@ class ListTransectionNFTSerializer(serializers.ModelSerializer):
               # nft_documents=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("documents"), output_field=CharField() ))
 
 
-class ListedNFTDetailsSerializer(serializers.ModelSerializer):
+class BidOnNFTDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = NFT
-        fields = ["id","nft_title", "thumbnail", "nft_picture", "teaser", "nft_creator", "nft_owner",
-                "description", "royality", "hash", "contract_id", "token_id",]
+        model = BidOnNFT
+        fields = ["id","nft_detail", "bidder_wallet", "bidder_profile", "bid_price", "bid_datetime", "created_at"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['bidder_wallet'] = UserWalletAddress.objects.filter(id=instance.bidder_wallet.id).values('id', "wallet_address")
+        data['bidder_profile'] = User.objects.filter(id=instance.bidder_profile.id).values('id',"name", "username")
+        return data
 
     # def to_representation(self, instance):
     #     data = super().to_representation(instance)
