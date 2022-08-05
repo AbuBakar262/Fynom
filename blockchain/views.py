@@ -112,6 +112,9 @@ class CreateUpdateNFTView(viewsets.ViewSet):
                                 'to_email': request.user.email
                             }
                             Utill.send_email(data)
+                            return Response({
+                                "status": True, "status_code": 200, 'msg': 'Requested for approval',
+                                "data": serializer.data}, status=status.HTTP_200_OK)
                     # tags = Tags.objects.create()
                     # nft.tags_set.add(*request.data['tags_title'])
                     return Response({
