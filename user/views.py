@@ -169,6 +169,18 @@ class UserProfileUpdateView(viewsets.ViewSet):
                 if user.status=="Not Requested" or user.status=="Disapproved":
                     id = self.kwargs.get('pk')
                     user_id = User.objects.get(id=id)
+                    username = request.data.get('username')
+                    email = request.data.get('email')
+                    user_email = User.objects.filter(email=email).exclude(email=request.user.email)
+                    user_username = User.objects.filter(username=username).exclude(username=request.user.username)
+                    if user_email:
+                        return Response({
+                            "status": False, "status_code": 400, 'msg': "Please enter unique email.",
+                            "data": []}, status=status.HTTP_400_BAD_REQUEST)
+                    if user_username:
+                        return Response({
+                            "status": False, "status_code": 400, 'msg': "Please enter unique username.",
+                            "data": []}, status=status.HTTP_400_BAD_REQUEST)
                     serializer = UserProfileSerializer(user_id, data=request.data, partial=True)
                     serializer.is_valid(raise_exception=True)
                     serializer.save()
@@ -212,8 +224,16 @@ class UserProfileUpdateView(viewsets.ViewSet):
                             "email": email,
                             "cover_picture": cover_picture,
                         }
-
-
+                    user_email = User.objects.filter(email=email).exclude(email=request.user.email)
+                    user_username = User.objects.filter(username=username).exclude(username=request.user.username)
+                    if user_email:
+                        return Response({
+                            "status": False, "status_code": 400, 'msg': "Please enter unique email.",
+                            "data": []}, status=status.HTTP_400_BAD_REQUEST)
+                    if user_username:
+                        return Response({
+                            "status": False, "status_code": 400, 'msg': "Please enter unique username.",
+                            "data": []}, status=status.HTTP_400_BAD_REQUEST)
                     serializer = UserProfileSerializer(user_id, data=context, partial=True)
                     serializer.is_valid(raise_exception=True)
                     serializer.save()

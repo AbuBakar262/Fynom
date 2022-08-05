@@ -79,8 +79,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
             return None
 
     # def validate(self, attrs):
-    #     email = User.objects.filter(email=attrs.get('email'))
-    #     if email.count()>1:
+    #     user = User.objects.filter(email=attrs.get('email')).first()
+    #     if user.email:
+    #         raise serializers.ValidationError("Email already exist.")
+    #     if user.username:
     #         raise serializers.ValidationError("Email already exist.")
     #     else:
     #         return True

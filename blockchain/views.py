@@ -11,6 +11,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import viewsets
 from user.custom_permissions import IsApprovedUser
+from user.serializers import UserCollectionSerializer
 from user.utils import Utill
 
 class ListRetrieveNFTView(viewsets.ViewSet):
@@ -538,6 +539,28 @@ class ClaimNFTView(viewsets.ModelViewSet):
             request.data['user'] = request.user.id
             request.data['nft_owner'] = user_wallet.id
 
+            category = NFTCategory.objects.all().first()
+
+            collection = Collection.objects.filter(create_by=request.user.id, name="Default").first()
+
+            if collection is None:
+                data = {
+                    "name" : "Default",
+                    "create_by": request.user.id,
+                    "collection_category": category.id,
+                    "website_url": "None",
+                    "instagram_url": "None",
+                    "description": "None"
+                }
+                serializer = UserCollectionSerializer(data=data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+
+            collection = Collection.objects.filter(create_by=request.user.id, name="Default").first()
+
+            request.data['nft_collection'] = collection.id
+            # request.data['nft_category'] = category.id
+
 
             if nft_by_id:
                 serializer = NFTViewSerializer(nft_by_id, data=request.data, partial=True)
@@ -546,7 +569,7 @@ class ClaimNFTView(viewsets.ModelViewSet):
                 serializer.save()
                 if request.user.email:
                     if serializer.validated_data['is_listed'] is False:
-                        body = "Your NFT is Pending now due to some updates. "
+                        body = "Your have purchased an NFT."
                         data = {
                             'subject': 'Your Phynom NFT Status',
                             'body': body,
@@ -556,10 +579,10 @@ class ClaimNFTView(viewsets.ModelViewSet):
                 # tags = Tags.objects.create()
                 # nft.tags_set.add(*request.data['tags_title'])
                 return Response({
-                    "status": True, "status_code": 200, 'msg': 'User NFTs Updated Successfully',
+                    "status": True, "status_code": 200, 'msg': 'User NFTs Purchased Successfully',
                     "data": serializer.data}, status=status.HTTP_200_OK)
             return Response({
-            "status": False, "status_code": 400, 'msg': 'User not fsdfowner of this NFT',
+            "status": False, "status_code": 400, 'msg': 'Something wrong!',
             "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
