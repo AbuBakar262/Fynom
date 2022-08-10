@@ -70,7 +70,7 @@ class CreateUpdateNFTView(viewsets.ViewSet):
             nft = serializer.save()
             nft.tags_set.add(*request.data['tags_title'])
             return Response({
-                "status": True, "status_code": 200, 'msg': 'User NFT Created Successfully',
+                "status": True, "status_code": 200, 'msg': 'NFT submitted successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -105,7 +105,8 @@ class CreateUpdateNFTView(viewsets.ViewSet):
                         nft.tags_set.add(*tags_title)
                     if request.user.email:
                         if nft_status == 'Pending':
-                            body = "Your NFT is Pending now due to some updates. "
+                            body = f"Your NFT '{nft_by_id.nft_title}' is Pending now due to some updates. To visit your " \
+                                   f"NFT click on link given below " + os.getenv('FRONTEND_SITE_URL') + nft_id
                             data = {
                                 'subject': 'Your Phynom NFT Status',
                                 'body': body,
@@ -144,100 +145,64 @@ class UserNFTsListView(viewsets.ViewSet):
             user_id = request.query_params.get('user_id')
             user_nft = request.query_params.get('search')
             nft_category_id = request.query_params.get('category')
+
             if user_id and user_nft == 'mynft' or user_nft == 'listmynft' and nft_category_id and user_nft != 'admin':
+
                 user_wallet = UserWalletAddress.objects.filter(user_wallet=user_id).first()
+
                 if user_nft == "mynft":
                     list_nft = NFT.objects.filter(Q(is_minted=True) | Q(is_minted=False), nft_owner=user_wallet.id,
                                                   is_listed=False, nft_category=nft_category_id).values('id',
-
-                                                                                             'nft_title',
-                                                                                             'fix_price',
-                                                                                             'nft_sell_type',
-                                                                                             'starting_price',
-                                                                                             'ending_price',
-                                                                                             'start_dateTime',
-                                                                                             'end_datetime',
-                                                                                             'is_minted',
-                                                                                             'is_listed',
-                                                                                             'nft_status',
-                                                                                             'nft_subject',
-                                                                                             'status_remarks',
-                                                                                            nft_user_id=F('user__id'),
-                                                                                            # user_profile_pic=
-                                                                                            #  F('user__profile_picture'),
-                                                                                             user_nft_collection
-                                                                                            =F('nft_collection__'
-                                                                                               'name'),
-                                                                                             user_nft_category
-                                                                                            =F('nft_category__'
-                                                                                               'category_name'),
-                    nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("thumbnail"), output_field=CharField()),
+                             'nft_title','fix_price','nft_sell_type','starting_price','ending_price','start_dateTime',
+                             'end_datetime','is_minted','is_listed','nft_status','nft_subject','status_remarks',
+                                    nft_user_id=F('user__id'),
+                                                # user_profile_pic=
+                                                #  F('user__profile_picture'),
+                                                 user_nft_collection=F('nft_collection__name'),
+                                                 user_nft_category=F('nft_category__category_name'),
+                                    nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
+                                           F("thumbnail"), output_field=CharField()),
                                     nft_pic = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("nft_picture"),
                                                      output_field=CharField()),
-                                                                                                    user_profile_pic=Concat(
-                                                                                                            Value(
-                                                                                                                os.getenv(
-                                                                                                                    'STAGING_PHYNOM_BUCKET_URL')),
-                                                                                                            F("user__profile_picture"),
-                                                                                                            output_field=CharField())
-                    ).order_by('-id')
+                                                    user_profile_pic=Concat(Value(os.getenv(
+                                                                    'STAGING_PHYNOM_BUCKET_URL')),
+                                                            F("user__profile_picture"),
+                                                            output_field=CharField())).order_by('-id')
 
                 if user_nft == "listmynft":
                     list_nft = NFT.objects.filter(is_minted=True, nft_owner=user_wallet.id,
-                                       is_listed=True, nft_category=nft_category_id).values('id',
-                                                                                            # 'thumbnail',
-                                                                                            #  'nft_picture',
-                                                                                             'nft_title',
-                                                                                             'fix_price',
-                                                                                             'nft_sell_type',
-                                                                                             'starting_price',
-                                                                                             'ending_price',
-                                                                                             'start_dateTime',
-                                                                                             'end_datetime',
-                                                                                             'is_minted',
-                                                                                             'is_listed',
-                                                                                             'nft_status',
-                                                                                            'nft_subject',
-                                                                                             'status_remarks',
-                                                                                            nft_user_id=F('user__id'),
-                                                                                            # user_profile_pic=
-                                                                                            #  F('user__profile_picture'),
-                                                                                             user_nft_collection
-                                                                                            =F('nft_collection__'
-                                                                                               'name'),
-                                                                                             user_nft_category
-                                                                                            =F('nft_category__'
-                                                                                               'category_name'),
-                    nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("thumbnail"),
-                                           output_field=CharField()),
-                                    nft_pic = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("nft_picture"),
+                                   is_listed=True, nft_category=nft_category_id).values('id','nft_title',
+                                         'fix_price','nft_sell_type','starting_price','ending_price','start_dateTime',
+                                         'end_datetime','is_minted','is_listed','nft_status','nft_subject','status_remarks',
+                                                        nft_user_id=F('user__id'),
+                                                        # user_profile_pic=
+                                                        #  F('user__profile_picture'),
+                                                         user_nft_collection=F('nft_collection__name'),
+                                                         user_nft_category=F('nft_category__category_name'),
+                                        nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
+                                                       F("thumbnail"),output_field=CharField()),
+                                        nft_pic = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("nft_picture"),
                                                      output_field=CharField()),
-                                                                                                    user_profile_pic=Concat(
-                                                                                                            Value(
-                                                                                                                os.getenv(
-                                                                                                                    'STAGING_PHYNOM_BUCKET_URL')),
-                                                                                                            F("user__profile_picture"),
-                                                                                                            output_field=CharField())
-                                                                                            ).order_by('-id')
+                                                            user_profile_pic=Concat(Value(os.getenv(
+                                                                            'STAGING_PHYNOM_BUCKET_URL')),
+                                                                    F("user__profile_picture"),
+                                                                    output_field=CharField())).order_by('-id')
 
                 paginator = CustomPageNumberPagination()
                 result = paginator.paginate_queryset(list_nft, request)
                 return paginator.get_paginated_response(result)
+
             elif user_nft == "admin":
                 list_nft = NFT.objects.filter(nft_status='Pending')\
-                    .annotate(document_count=Count('nft_in_supportingdocument')).values('id',
-                                                                                        'nft_title',
-                                                                                        'nft_status',
-                                                                                        'document_count',
-                                                                                        nft_user_id=F('user__id'),
-                                                                                        real_name=F('user__name'),
-                                                                                        display_name=F('user__username'),
-                                                                                        wallet_address=F('nft_owner__wallet_address'),
-                                                                                        user_nft_category
-                                                                                        =F('nft_category__'
-                                                                                           'category_name'),
-                nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("thumbnail"), output_field=CharField())
-                                                                                        ).order_by('-id')
+                    .annotate(document_count=Count('nft_in_supportingdocument')).values('id','nft_title',
+                                                                            'nft_status','document_count',
+                                            nft_user_id=F('user__id'),
+                                            real_name=F('user__name'),
+                                            display_name=F('user__username'),
+                                            wallet_address=F('nft_owner__wallet_address'),
+                                            user_nft_category=F('nft_category__category_name'),
+                            nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
+                                               F("thumbnail"), output_field=CharField())).order_by('-id')
                 paginator = CustomPageNumberPagination()
                 result = paginator.paginate_queryset(list_nft, request)
                 return paginator.get_paginated_response(result)
@@ -393,7 +358,9 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
             # send email
                 body = None
                 if profile_status == 'Approved':
-                    body = "Congratulations! your NFT has been Approved. " + nft_subject + "\n" + status_reasons
+                    body = f"Congratulations! your NFT '{nft_instance.nft_title}' has been Approved.\n" + nft_subject + \
+                           "\n" + status_reasons + "\nPlease visit the website and launch the minting of your NFT ready " \
+                                        "for sale by click on the given link " + os.getenv('FRONTEND_SITE_URL') + id
                     data = {
                         'subject': 'Your Phynom NFT Status',
                         'body': body,
@@ -401,7 +368,9 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
                     }
                     Utill.send_email(data)
                 if profile_status == 'Disapproved':
-                    body = "We are Sorry! your NFT has been Disapproved. " + nft_subject + "\n" + status_reasons
+                    body = f"We are Sorry! your NFT '{nft_instance.nft_title}' has been Disapproved. " + nft_subject + \
+                           "\n" + status_reasons + "\nPlease visit the website and update your NFT by click on the " \
+                                                   "given link " + os.getenv('FRONTEND_SITE_URL') + id
                     data = {
                         'subject': 'Your Phynom NFT Status',
                         'body': body,
@@ -572,7 +541,8 @@ class ClaimNFTView(viewsets.ModelViewSet):
                 serializer.save()
                 if request.user.email:
                     if serializer.validated_data['is_listed'] is False:
-                        body = "Your have purchased an NFT."
+                        body = f"You have purchased NFT '{nft_by_id.nft_title}'. To visit your " \
+                                   f"NFT click on link given below " + os.getenv('FRONTEND_SITE_URL') + nft_id
                         data = {
                             'subject': 'Your Phynom NFT Status',
                             'body': body,
@@ -591,4 +561,20 @@ class ClaimNFTView(viewsets.ModelViewSet):
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteDocs(viewsets.ViewSet):
+    def destroy(self, request, *args, **kwargs):
+        try:
+            id = self.kwargs.get('pk')
+            doc = SupportingDocuments.objects.get(id=id)
+            doc.delete()
+            return Response({
+                "status": True, "status_code": 200, 'msg': 'Document delete successfully',
+                "data": []}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': "Something is wrong with this document",
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)

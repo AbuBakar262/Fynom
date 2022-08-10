@@ -15,6 +15,7 @@ router.register('nfts_tags', views.NFTTagView, basename='nfts_tags')
 router.register('user_nft_status_update', views.UserNFTStatusUpdateView, basename='user_nft_status_update')
 router.register('list_transactions_of_nft', views.ListTransectionNFTView, basename='list_transactions_of_nft')
 router.register('nft_commission', views.NFTCommissionView, basename='nft_commission')
+router.register('delete_doc', views.DeleteDocs, basename='delete_doc')
 
 urlpatterns = [
     path('', include(router.urls)),
