@@ -70,7 +70,7 @@ class CreateUpdateNFTView(viewsets.ViewSet):
             nft = serializer.save()
             nft.tags_set.add(*request.data['tags_title'])
             return Response({
-                "status": True, "status_code": 200, 'msg': 'User NFT Created Successfully',
+                "status": True, "status_code": 200, 'msg': 'NFT submitted successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -105,7 +105,9 @@ class CreateUpdateNFTView(viewsets.ViewSet):
                         nft.tags_set.add(*tags_title)
                     if request.user.email:
                         if nft_status == 'Pending':
-                            body = "Your NFT is Pending now due to some updates. "
+                            body = f"Your NFT '{nft_by_id.nft_title}' is Pending now due to some updates. To visit your " \
+                                   f"NFT click on link given below " + os.getenv('FRONTEND_SITE_URL') + nft_id
+
                             data = {
                                 'subject': 'Your Phynom NFT Status',
                                 'body': body,
@@ -489,7 +491,11 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
             # send email
                 body = None
                 if profile_status == 'Approved':
-                    body = "Congratulations! your NFT has been Approved. " + nft_subject + "\n" + status_reasons
+                    body = f"Congratulations! your NFT '{nft_instance.nft_title}' has been Approved.\n" + nft_subject + \
+                           "\n" + status_reasons + "\nPlease visit the website and launch the minting of your NFT ready " \
+                                                   "for sale by click on the given link " + os.getenv(
+                        'FRONTEND_SITE_URL') + id
+
                     data = {
                         'subject': 'Your Phynom NFT Status',
                         'body': body,
@@ -497,7 +503,10 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
                     }
                     Utill.send_email(data)
                 if profile_status == 'Disapproved':
-                    body = "We are Sorry! your NFT has been Disapproved. " + nft_subject + "\n" + status_reasons
+                    body = f"We are Sorry! your NFT '{nft_instance.nft_title}' has been Disapproved. " + nft_subject + \
+                           "\n" + status_reasons + "\nPlease visit the website and update your NFT by click on the " \
+                                                   "given link " + os.getenv('FRONTEND_SITE_URL') + id
+
                     data = {
                         'subject': 'Your Phynom NFT Status',
                         'body': body,
@@ -668,7 +677,9 @@ class ClaimNFTView(viewsets.ModelViewSet):
                 serializer.save()
                 if request.user.email:
                     if serializer.validated_data['is_listed'] is False:
-                        body = "Your have purchased an NFT."
+                        body = f"You have purchased NFT '{nft_by_id.nft_title}'. To visit your " \
+                               f"NFT click on link given below " + os.getenv('FRONTEND_SITE_URL') + nft_id
+
                         data = {
                             'subject': 'Your Phynom NFT Status',
                             'body': body,
@@ -688,3 +699,19 @@ class ClaimNFTView(viewsets.ModelViewSet):
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+class DeleteDocs(viewsets.ViewSet):
+    def destroy(self, request, *args, **kwargs):
+        try:
+            id = self.kwargs.get('pk')
+            doc = SupportingDocuments.objects.get(id=id)
+            doc.delete()
+            return Response({
+                "status": True, "status_code": 200, 'msg': 'Document delete successfully',
+                "data": []}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': "Something is wrong with this document",
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
