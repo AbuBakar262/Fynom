@@ -1,4 +1,4 @@
-from django.db.models import Q, F, Count, CharField
+from django.db.models import Q, Count
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import F, Value, CharField
@@ -7,12 +7,12 @@ from backend.pagination import CustomPageNumberPagination
 from blockchain.serializers import *
 from blockchain.models import *
 from user.models import User
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import viewsets
-from user.custom_permissions import IsApprovedUser
 from user.serializers import UserCollectionSerializer
 from user.utils import Utill
+import boto3
+from backend.settings import *
 
 class ListRetrieveNFTView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
@@ -705,7 +705,13 @@ class DeleteDocs(viewsets.ViewSet):
         try:
             id = self.kwargs.get('pk')
             doc = SupportingDocuments.objects.get(id=id)
-            doc.delete()
+            client = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                  aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+            bucket = AWS_STORAGE_BUCKET_NAME
+            key = doc.documents
+            if doc.documents:
+                client.delete_object(Bucket=bucket, Key=str(key))
+                doc.delete()
             return Response({
                 "status": True, "status_code": 200, 'msg': 'Document delete successfully',
                 "data": []}, status=status.HTTP_200_OK)
