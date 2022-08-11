@@ -13,7 +13,7 @@ class UserWalletAddress(models.Model):
 
 
 class NFTCategory(models.Model):
-    category_name = models.CharField(max_length=50, blank=True, null=True)
+    category_name = models.CharField(max_length=150, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -38,9 +38,9 @@ class Collection(models.Model):
     logo_image = models.ImageField(upload_to='collection/', null=True, blank=True)
     featured_image = models.ImageField(upload_to='collection/', null=True, blank=True)
     cover_image = models.ImageField(upload_to='collection/', null=True, blank=True)
-    name = models.CharField(max_length=50, blank=False, null=False)
-    website_url = models.CharField(max_length=80, null=True, blank=True)
-    instagram_url = models.CharField(max_length=80, null=True, blank=True)
+    name = models.CharField(max_length=150, blank=False, null=False)
+    website_url = models.CharField(max_length=250, null=True, blank=True)
+    instagram_url = models.CharField(max_length=250, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -72,15 +72,15 @@ class NFT(models.Model):
     thumbnail = models.ImageField(upload_to='nft/', null=True, blank=True)
     nft_picture = models.ImageField(upload_to='nft/', null=True, blank=True)
     teaser = models.FileField(upload_to='nft/', null=True, blank=True)
-    nft_title = models.CharField(max_length=50, blank=True, null=True)
+    nft_title = models.CharField(max_length=150, blank=True, null=True)
     nft_collection = models.ForeignKey(Collection, blank=True, null=True, related_name='nft_collection',
                                        on_delete=models.CASCADE)
     description = models.TextField(blank=True, null=True)
     nft_category = models.ForeignKey(NFTCategory, blank=True, null=True, related_name='nft_category',
                                      on_delete=models.CASCADE)
     royality = models.FloatField(blank=True, null=True)
-    hash = models.CharField(max_length=50, blank=True, null=True)
-    contract_id = models.CharField(max_length=50, blank=True, null=True)
+    hash = models.CharField(max_length=250, blank=True, null=True)
+    contract_id = models.CharField(max_length=250, blank=True, null=True)
     token_id = models.CharField(max_length=250, blank=True, null=True)
     commission = models.FloatField(blank=True, null=True)
     nft_creator = models.ForeignKey(UserWalletAddress, blank=True, null=True, related_name='nft_creator_in_create_nft',
