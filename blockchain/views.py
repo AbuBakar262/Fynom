@@ -106,7 +106,7 @@ class CreateUpdateNFTView(viewsets.ViewSet):
                     if request.user.email:
                         if nft_status == 'Pending':
                             body = f"Your NFT '{nft_by_id.nft_title}' is Pending now due to some updates. To visit your " \
-                                   f"NFT click on link given below " + os.getenv('FRONTEND_SITE_URL') + nft_id
+                                   f"NFT click on link given below " + os.getenv('FRONTEND_SITE_URL') + str(nft_id)
 
                             data = {
                                 'subject': 'Your Phynom NFT Status',
@@ -494,7 +494,7 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
                     body = f"Congratulations! your NFT '{nft_instance.nft_title}' has been Approved.\n" + nft_subject + \
                            "\n" + status_reasons + "\nPlease visit the website and launch the minting of your NFT ready " \
                                                    "for sale by click on the given link " + os.getenv(
-                        'FRONTEND_SITE_URL') + id
+                        'FRONTEND_SITE_URL') + str(id)
 
                     data = {
                         'subject': 'Your Phynom NFT Status',
@@ -505,7 +505,7 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
                 if profile_status == 'Disapproved':
                     body = f"We are Sorry! your NFT '{nft_instance.nft_title}' has been Disapproved. " + nft_subject + \
                            "\n" + status_reasons + "\nPlease visit the website and update your NFT by click on the " \
-                                                   "given link " + os.getenv('FRONTEND_SITE_URL') + id
+                                                   "given link " + os.getenv('FRONTEND_SITE_URL') + str(id)
 
                     data = {
                         'subject': 'Your Phynom NFT Status',
@@ -678,7 +678,7 @@ class ClaimNFTView(viewsets.ModelViewSet):
                 if request.user.email:
                     if serializer.validated_data['is_listed'] is False:
                         body = f"You have purchased NFT '{nft_by_id.nft_title}'. To visit your " \
-                               f"NFT click on link given below " + os.getenv('FRONTEND_SITE_URL') + nft_id
+                               f"NFT click on link given below " + os.getenv('FRONTEND_SITE_URL') + str(nft_id)
 
                         data = {
                             'subject': 'Your Phynom NFT Status',
@@ -689,7 +689,7 @@ class ClaimNFTView(viewsets.ModelViewSet):
                 # tags = Tags.objects.create()
                 # nft.tags_set.add(*request.data['tags_title'])
                 return Response({
-                    "status": True, "status_code": 200, 'msg': 'User NFTs Purchased Successfully',
+                    "status": True, "status_code": 200, 'msg': 'NFTs Purchased Successfully',
                     "data": serializer.data}, status=status.HTTP_200_OK)
             return Response({
             "status": False, "status_code": 400, 'msg': 'Something wrong!',

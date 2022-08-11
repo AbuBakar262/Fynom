@@ -133,14 +133,23 @@ class ListTransectionNFTSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         # read_only_fields = ('nft_title','nft_picture', 'seller_address', 'seller_address', 'buyer_address')
-        fields = ["id", "nft", "seller", "buyer", "sold_price", "created_at"]
-
+        fields = ["id", "nft", "seller", "seller_user", "buyer", "buyer_user", "sold_price", "created_at"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         from django.db.models import F, Value, CharField
         import os
-        data['nft'] = NFT.objects.filter(id=instance.nft.id).values('id', 'nft_title')
+        data['nft'] = NFT.objects.filter(id=instance.nft.id).values('id', 'nft_title')[0]
+        data['seller'] = UserWalletAddress.objects.filter(id=instance.seller.id).values('id', 'wallet_address')[0]
+        data['seller_user'] = User.objects.filter(id=instance.seller_user.id).values("id", "name", "username",
+                                user_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("profile_picture"),
+                                                             output_field=CharField()))[0]
+        data['buyer'] = UserWalletAddress.objects.filter(id=instance.buyer.id).values('id', 'wallet_address')[0]
+        data['buyer_user'] = User.objects.filter(id=instance.buyer_user.id).values("id", "name", "username",
+                                user_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("profile_picture"),
+                                                             output_field=CharField()))[0]
+
+        return data
               # nft_documents=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("documents"), output_field=CharField() ))
 
 

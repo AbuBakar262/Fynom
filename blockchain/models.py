@@ -146,7 +146,9 @@ class Transaction(models.Model):
     nft = models.ForeignKey(NFT, blank=True, null=True, related_name='nft_in_transaction', on_delete=models.CASCADE)
     nft_token_id = models.CharField(max_length=250, blank=True, null=True)
     seller = models.ForeignKey(UserWalletAddress, blank=True, null=True,  related_name='seller_in_transaction', on_delete=models.CASCADE)
+    seller_user = models.ForeignKey(User, blank=True, null=True,  related_name='seller_user_in_transaction', on_delete=models.CASCADE)
     buyer = models.ForeignKey(UserWalletAddress, blank=True, null=True,  related_name='buyer_in_transaction', on_delete=models.CASCADE)
+    buyer_user = models.ForeignKey(User, blank=True, null=True,  related_name='buyer_user_in_transaction', on_delete=models.CASCADE)
     sold_price = models.FloatField(blank=True, null=True)
     # sold_date_time = models.
     nft_status = models.CharField(max_length=50, choices=STATUS, default='Pending')
