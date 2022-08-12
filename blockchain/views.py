@@ -563,7 +563,7 @@ class NFTCommissionView(viewsets.ViewSet):
 
     def list(self, request, *args, **kwargs):
         try:
-            set_commission = Commission.objects.all().order_by('-id').first()
+            set_commission = Commission.objects.first()
             serializer = NFTCommissionViewSerializer(set_commission)
             return Response({
                 "status": True, "status_code": 200, 'msg': "Commission listed",
@@ -574,29 +574,16 @@ class NFTCommissionView(viewsets.ViewSet):
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
     def create(self, request, *args, **kwargs):
         try:
-            serializer = NFTCommissionViewSerializer(data=request.data)
+            commission = Commission.objects.first()
+            serializer = NFTCommissionViewSerializer(commission, data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({
-                "status": True, "status_code": 200, 'msg': 'NFT Commission Created Successfully',
+                "status": True, "status_code": 200, 'msg': 'NFT Commission Update Successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
-                "data": []}, status=status.HTTP_400_BAD_REQUEST)
-    def update(self, request, *args, **kwargs):
-        try:
-            id = self.kwargs.get('pk')
-            item_id = Commission.objects.get(id=id)
-            serializer = NFTCommissionViewSerializer(item_id, data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response({
-                "status": True, "status_code": 200, 'msg': 'NFT Commission Updated Successfully',
-                "data": serializer.data}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({
-                "status": False, "status_code": 400,'error':'Sorry Your data did not updated', 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
