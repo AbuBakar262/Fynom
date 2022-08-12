@@ -150,6 +150,8 @@ class Transaction(models.Model):
     buyer = models.ForeignKey(UserWalletAddress, blank=True, null=True,  related_name='buyer_in_transaction', on_delete=models.CASCADE)
     buyer_user = models.ForeignKey(User, blank=True, null=True,  related_name='buyer_user_in_transaction', on_delete=models.CASCADE)
     sold_price = models.FloatField(blank=True, null=True)
+    commission_percentage = models.FloatField(blank=True, null=True)
+    commission_amount = models.FloatField(blank=True, null=True)
     # sold_date_time = models.
     nft_status = models.CharField(max_length=50, choices=STATUS, default='Sold')
     created_at = models.DateTimeField(auto_now_add=True)

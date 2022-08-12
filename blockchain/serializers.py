@@ -58,7 +58,7 @@ class NFTViewSerializer(serializers.ModelSerializer):
         fields = ["id", "thumbnail", "nft_picture", "teaser", "nft_title", "nft_collection", "nft_status", "user",
                   "description", "nft_category", "royality", "hash", "contract_id", "token_id", 'top_nft', "nft_creator",
                   "nft_owner", "starting_price", "ending_price","start_dateTime","end_datetime",
-                  "nft_status", "nft_subject", "created_at", "updated_at",
+                  "nft_status", "nft_subject", "created_at", "updated_at", "service_fee",
                    "nft_subject", "status_remarks", "nft_sell_type", "fix_price", "is_minted", "is_listed", ]
 
     def create(self, validated_data):
@@ -133,7 +133,8 @@ class TransactionNFTSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         # read_only_fields = ('nft_title','nft_picture', 'seller_address', 'seller_address', 'buyer_address')
-        fields = ["id", "nft", "nft_token_id", "seller", "seller_user", "buyer", "buyer_user", "sold_price", "created_at"]
+        fields = ["id", "nft", "nft_token_id", "seller", "seller_user", "buyer", "buyer_user", "sold_price",
+                  "commission_percentage","commission_amount","created_at"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

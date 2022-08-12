@@ -65,6 +65,8 @@ class CreateUpdateNFTView(viewsets.ViewSet):
             request.data['nft_owner'] = wallet_id.id
             request.data['tags_title'] = request.data.get('tag_title').split(',')
             # request.data['tags'] = request.data.get('tags').split(',')
+            nft_commission = Commission.objects.all().order_by('-id').first()
+            request.data["service_fee"] = nft_commission.set_commission
             serializer = NFTViewSerializer(data=request.data, context={'request':request})
             serializer.is_valid(raise_exception=True)
             nft = serializer.save()
@@ -561,7 +563,7 @@ class NFTCommissionView(viewsets.ViewSet):
 
     def list(self, request, *args, **kwargs):
         try:
-            set_commission = Commission.objects.all().order_by('-id')
+            set_commission = Commission.objects.all().order_by('-id').first()
             serializer = NFTCommissionViewSerializer(set_commission, many=True)
             return Response({
                 "status": True, "status_code": 200, 'msg': "Commission listed",
@@ -657,36 +659,34 @@ class ClaimNFTView(viewsets.ModelViewSet):
             user_wallet =  UserWalletAddress.objects.filter(user_wallet=request.user.id).first()
             nft_by_id = NFT.objects.filter(id=nft_id).first()
 
+            request.data["nft"] = nft_by_id.id
+            request.data["nft_token_id"] = nft_by_id.token_id
+            request.data["seller"] = nft_by_id.nft_owner.id
+            request.data["seller_user"] = nft_by_id.user.id
+            request.data["buyer"] = user_wallet.id
+            request.data["buyer_user"] = request.user.id
+            request.data["commission_percentage"] = nft_by_id.service_fee
+
+
             if nft_by_id.nft_sell_type == "Fixed Price":
-                request.data["nft"] = nft_by_id.id
-                request.data["nft_token_id"] = nft_by_id.token_id
-                request.data["seller"] = nft_by_id.nft_owner.id
-                request.data["seller_user"] = nft_by_id.user.id
-                request.data["buyer"] = user_wallet.id
-                request.data["buyer_user"] = request.user.id
                 request.data["sold_price"] = nft_by_id.fix_price
-                serializer_transaction = TransactionNFTSerializer(data=request.data, partial=True)
-                serializer_transaction.is_valid(raise_exception=True)
-                serializer_transaction.save()
 
             if nft_by_id.nft_sell_type == "Timed Auction":
-                request.data["nft"] = nft_by_id.id
-                request.data["nft_token_id"] = nft_by_id.token_id
-                request.data["seller"] = nft_by_id.nft_owner.id
-                request.data["seller_user"] = nft_by_id.user.id
-                request.data["buyer"] = user_wallet.id
-                request.data["buyer_user"] = request.user.id
                 last_bid = BidOnNFT.objects.filter(nft_detail=nft_id, bidder_wallet=user_wallet.id,
                                                    bidder_profile=request.user.id).order_by('-id').first()
                 request.data["sold_price"] = last_bid.bid_price
-                serializer_transaction = TransactionNFTSerializer(data=request.data)
-                serializer_transaction.is_valid(raise_exception=True)
-                serializer_transaction.save()
+            request.data["commission_amount"] = (float(request.data["sold_price"])/100)*float(nft_by_id.service_fee)
+            serializer_transaction = TransactionNFTSerializer(data=request.data)
+            serializer_transaction.is_valid(raise_exception=True)
+            serializer_transaction.save()
 
 
             request.data["is_listed"]= False
             request.data['user'] = request.user.id
             request.data['nft_owner'] = user_wallet.id
+
+            nft_commission = Commission.objects.all().order_by('-id').first()
+            request.data["service_fee"] = nft_commission.set_commission
 
             category = NFTCategory.objects.all().first()
 
