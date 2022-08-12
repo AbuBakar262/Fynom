@@ -70,7 +70,7 @@ SOLD_STATUS = (
 
 class NFT(models.Model):
     thumbnail = models.ImageField(upload_to='nft/', null=True, blank=True)
-    nft_picture = models.ImageField(upload_to='nft/', null=True, blank=True)
+    nft_picture = models.FileField(upload_to='nft/', null=True, blank=True)
     teaser = models.FileField(upload_to='nft/', null=True, blank=True)
     nft_title = models.CharField(max_length=150, blank=True, null=True)
     nft_collection = models.ForeignKey(Collection, blank=True, null=True, related_name='nft_collection',
