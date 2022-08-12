@@ -564,7 +564,7 @@ class NFTCommissionView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         try:
             set_commission = Commission.objects.all().order_by('-id').first()
-            serializer = NFTCommissionViewSerializer(set_commission, many=True)
+            serializer = NFTCommissionViewSerializer(set_commission)
             return Response({
                 "status": True, "status_code": 200, 'msg': "Commission listed",
                 "data": serializer.data}, status=status.HTTP_200_OK)

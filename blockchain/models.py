@@ -153,7 +153,6 @@ class Transaction(models.Model):
     commission_percentage = models.FloatField(blank=True, null=True)
     commission_amount = models.FloatField(blank=True, null=True)
     category_of_nft = models.CharField(max_length=250, blank=True, null=True)
-    # sold_date_time = models.
     nft_status = models.CharField(max_length=50, choices=STATUS, default='Sold')
     created_at = models.DateTimeField(auto_now_add=True)
 
