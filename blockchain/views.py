@@ -666,7 +666,7 @@ class ClaimNFTView(viewsets.ModelViewSet):
             request.data["buyer"] = user_wallet.id
             request.data["buyer_user"] = request.user.id
             request.data["commission_percentage"] = nft_by_id.service_fee
-
+            request.data["nft_category"] = nft_by_id.nft_category
 
             if nft_by_id.nft_sell_type == "Fixed Price":
                 request.data["sold_price"] = nft_by_id.fix_price
@@ -675,11 +675,12 @@ class ClaimNFTView(viewsets.ModelViewSet):
                 last_bid = BidOnNFT.objects.filter(nft_detail=nft_id, bidder_wallet=user_wallet.id,
                                                    bidder_profile=request.user.id).order_by('-id').first()
                 request.data["sold_price"] = last_bid.bid_price
+
             request.data["commission_amount"] = (float(request.data["sold_price"])/100)*float(nft_by_id.service_fee)
+
             serializer_transaction = TransactionNFTSerializer(data=request.data)
             serializer_transaction.is_valid(raise_exception=True)
             serializer_transaction.save()
-
 
             request.data["is_listed"]= False
             request.data['user'] = request.user.id
