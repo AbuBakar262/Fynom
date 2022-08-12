@@ -123,7 +123,7 @@ class UserNFTStatusUpdateViewSerializer(serializers.ModelSerializer):
         fields = ["id", "nft_status", "nft_subject", "status_remarks"]
 
 
-class ListTransectionNFTSerializer(serializers.ModelSerializer):
+class TransactionNFTSerializer(serializers.ModelSerializer):
     # nft_picture = serializers.SlugRelatedField(read_only=True, slug_field='nft.nft_picture')
     # nft_title = serializers.ReadOnlyField(source='nft.nft_title')
     # nft_picture = serializers.URLField(source='nft.nft_picture')
@@ -133,7 +133,7 @@ class ListTransectionNFTSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         # read_only_fields = ('nft_title','nft_picture', 'seller_address', 'seller_address', 'buyer_address')
-        fields = ["id", "nft", "seller", "seller_user", "buyer", "buyer_user", "sold_price", "created_at"]
+        fields = ["id", "nft", "nft_token_id", "seller", "seller_user", "buyer", "buyer_user", "sold_price", "created_at"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -148,7 +148,6 @@ class ListTransectionNFTSerializer(serializers.ModelSerializer):
         data['buyer_user'] = User.objects.filter(id=instance.buyer_user.id).values("id", "name", "username",
                                 user_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("profile_picture"),
                                                              output_field=CharField()))[0]
-
         return data
               # nft_documents=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("documents"), output_field=CharField() ))
 

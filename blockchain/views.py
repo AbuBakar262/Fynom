@@ -175,6 +175,7 @@ class UserNFTsListView(viewsets.ViewSet):
                                                                                                 =F('nft_category__'
                                                                                                    'category_name'),
                         nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("thumbnail"), output_field=CharField()),
+                        nft_teaser = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("teaser"), output_field=CharField()),
                                         nft_pic = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("nft_picture"),
                                                          output_field=CharField()),
                                                                                                         user_profile_pic=Concat(
@@ -216,6 +217,10 @@ class UserNFTsListView(viewsets.ViewSet):
                                                                                                                         'STAGING_PHYNOM_BUCKET_URL')),
                                                                                                                 F("thumbnail"),
                                                                                                                 output_field=CharField()),
+                                                                              nft_teaser=Concat(Value(os.getenv(
+                                                                                  'STAGING_PHYNOM_BUCKET_URL')),
+                                                                                                F("teaser"),
+                                                                                                output_field=CharField()),
                                                                                                             nft_pic=Concat(
                                                                                                                 Value(
                                                                                                                     os.getenv(
@@ -260,6 +265,11 @@ class UserNFTsListView(viewsets.ViewSet):
                                                                                                    'category_name'),
                         nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("thumbnail"),
                                                output_field=CharField()),
+                                                                                                nft_teaser=Concat(Value(
+                                                                                                    os.getenv(
+                                                                                                        'STAGING_PHYNOM_BUCKET_URL')),
+                                                                                                                  F("teaser"),
+                                                                                                                  output_field=CharField()),
                                         nft_pic = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("nft_picture"),
                                                          output_field=CharField()),
                                                                                                         user_profile_pic=Concat(
@@ -302,6 +312,10 @@ class UserNFTsListView(viewsets.ViewSet):
                                                                                                                        'STAGING_PHYNOM_BUCKET_URL')),
                                                                                                                F("thumbnail"),
                                                                                                                output_field=CharField()),
+                                                                             nft_teaser=Concat(Value(os.getenv(
+                                                                                 'STAGING_PHYNOM_BUCKET_URL')),
+                                                                                               F("teaser"),
+                                                                                               output_field=CharField()),
                                                                                                            nft_pic=Concat(
                                                                                                                Value(
                                                                                                                    os.getenv(
@@ -526,13 +540,13 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ListTransectionNFTView(viewsets.ViewSet):
+class ListTransactionNFTView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         try:
             nft_transaction = Transaction.objects.all().order_by("-id")
             paginator = CustomPageNumberPagination()
             result = paginator.paginate_queryset(nft_transaction, request)
-            serializer = ListTransectionNFTSerializer(result, many=True)
+            serializer = TransactionNFTSerializer(result, many=True)
             return paginator.get_paginated_response(serializer.data)
 
         except Exception as e:
@@ -642,6 +656,33 @@ class ClaimNFTView(viewsets.ModelViewSet):
             nft_id = self.kwargs.get('pk')
             user_wallet =  UserWalletAddress.objects.filter(user_wallet=request.user.id).first()
             nft_by_id = NFT.objects.filter(id=nft_id).first()
+
+            if nft_by_id.nft_sell_type == "Fixed Price":
+                request.data["nft"] = nft_by_id.id
+                request.data["nft_token_id"] = nft_by_id.token_id
+                request.data["seller"] = nft_by_id.nft_owner.id
+                request.data["seller_user"] = nft_by_id.user.id
+                request.data["buyer"] = user_wallet.id
+                request.data["buyer_user"] = request.user.id
+                request.data["sold_price"] = nft_by_id.fix_price
+                serializer_transaction = TransactionNFTSerializer(data=request.data, partial=True)
+                serializer_transaction.is_valid(raise_exception=True)
+                serializer_transaction.save()
+
+            if nft_by_id.nft_sell_type == "Timed Auction":
+                request.data["nft"] = nft_by_id.id
+                request.data["nft_token_id"] = nft_by_id.token_id
+                request.data["seller"] = nft_by_id.nft_owner.id
+                request.data["seller_user"] = nft_by_id.user.id
+                request.data["buyer"] = user_wallet.id
+                request.data["buyer_user"] = request.user.id
+                last_bid = BidOnNFT.objects.filter(nft_detail=nft_id, bidder_wallet=user_wallet.id,
+                                                   bidder_profile=request.user.id).order_by('-id').first()
+                request.data["sold_price"] = last_bid.bid_price
+                serializer_transaction = TransactionNFTSerializer(data=request.data)
+                serializer_transaction.is_valid(raise_exception=True)
+                serializer_transaction.save()
+
 
             request.data["is_listed"]= False
             request.data['user'] = request.user.id
