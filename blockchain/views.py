@@ -666,7 +666,7 @@ class ClaimNFTView(viewsets.ModelViewSet):
             request.data["buyer"] = user_wallet.id
             request.data["buyer_user"] = request.user.id
             request.data["commission_percentage"] = nft_by_id.service_fee
-            request.data["nft_category"] = nft_by_id.nft_category
+            request.data["category_of_nft"] = nft_by_id.nft_category.category_name
 
             if nft_by_id.nft_sell_type == "Fixed Price":
                 request.data["sold_price"] = nft_by_id.fix_price
