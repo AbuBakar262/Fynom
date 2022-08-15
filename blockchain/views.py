@@ -20,7 +20,7 @@ class ListRetrieveNFTView(viewsets.ViewSet):
             list_nft = NFT.objects.filter(nft_status="Approved").order_by('-id')
             serializer = NFTViewSerializer(list_nft, many=True)
             return Response({
-                "status": True, "status_code": 200, 'msg': 'User NFTs Listed Successfully',
+                "status": True, "status_code": 200, 'msg': 'User NFTs listed successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -43,7 +43,7 @@ class ListRetrieveNFTView(viewsets.ViewSet):
             serializer = NFTViewSerializer(nft_by_id)
 
             return Response({
-                "status": True, "status_code": 200, 'msg': 'User NFTs Retrieve Successfully',
+                "status": True, "status_code": 200, 'msg': 'User NFTs retrieve successfully',
                 "data": serializer.data, "creator_user":creator_user, "owner_user":owner_user}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -122,7 +122,7 @@ class CreateUpdateNFTView(viewsets.ViewSet):
                     # tags = Tags.objects.create()
                     # nft.tags_set.add(*request.data['tags_title'])
                     return Response({
-                        "status": True, "status_code": 200, 'msg': 'User NFTs Updated Successfully',
+                        "status": True, "status_code": 200, 'msg': 'User NFTs updated successfully',
                         "data": serializer.data}, status=status.HTTP_200_OK)
             return Response({
             "status": False, "status_code": 400, 'msg': 'User not owner of this NFT',
@@ -387,11 +387,18 @@ class NFTCategoryView(viewsets.ViewSet):
         try:
 
             # nft_category = NFTCategory.objects.all()
+            category = request.data['category_name']
+            all_category = NFTCategory.objects.all()
+            for one in all_category:
+                if category.lower() == one.category_name.lower():
+                    return Response({
+                        "status": True, "status_code": 200, 'msg': 'NFT category is already exist',
+                        "data": []}, status=status.HTTP_200_OK)
             serializer = NFTCategorySerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({
-                "status": True, "status_code": 200, 'msg': 'NFT Category Created Successfully',
+                "status": True, "status_code": 200, 'msg': 'NFT category created successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -406,7 +413,7 @@ class NFTCategoryView(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({
-                "status": True, "status_code": 200, 'msg': 'NFT Category Updated Successfully',
+                "status": True, "status_code": 200, 'msg': 'NFT category updated successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -419,13 +426,12 @@ class NFTCategoryView(viewsets.ViewSet):
             category_by_id = NFTCategory.objects.get(id=category_id)
             category_by_id.delete()
             return Response({
-                "status": True, "status_code": 200, 'msg': 'NFT Category is deleted Successfully',
+                "status": True, "status_code": 200, 'msg': 'NFT category is deleted successfully',
                 "data": {}}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class NFTTagView(viewsets.ViewSet):
@@ -445,12 +451,18 @@ class NFTTagView(viewsets.ViewSet):
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
     def create(self, request, *args, **kwargs):
         try:
-            data = request.data
-            serializer = NftTagSerializer(data=data)
+            tag = request.data['tag_title']
+            all_tag = Tags.objects.all()
+            for one in all_tag:
+                if tag.lower() == one.tag_title.lower():
+                    return Response({
+                        "status": True, "status_code": 200, 'msg': 'NFT tag is already exist',
+                        "data": []}, status=status.HTTP_200_OK)
+            serializer = NftTagSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({
-                "status": True, "status_code": 200, 'msg': 'NFT Tag is Created Successfully',
+                "status": True, "status_code": 200, 'msg': 'NFT tag is created successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -464,7 +476,7 @@ class NFTTagView(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({
-                "status": True, "status_code": 200, 'msg': 'NFT Tag is Updated Successfully',
+                "status": True, "status_code": 200, 'msg': 'NFT tag is updated successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -476,12 +488,13 @@ class NFTTagView(viewsets.ViewSet):
             tag_by_id = Tags.objects.get(id=tag_id)
             tag_by_id.delete()
             return Response({
-                "status": True, "status_code": 200, 'msg': 'NFT Tag is deleted Successfully',
+                "status": True, "status_code": 200, 'msg': 'NFT tag is deleted successfully',
                 "data": {}}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class UserNFTStatusUpdateView(viewsets.ViewSet):
     """
@@ -533,7 +546,7 @@ class UserNFTStatusUpdateView(viewsets.ViewSet):
                 #     body = "Your NFT is Pending now due to some updates. "
 
             return Response({
-                "status": True, "status_code": 200, 'msg': 'User NFT Status Update Successfully',
+                "status": True, "status_code": 200, 'msg': 'User NFT status update successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
 
         except Exception as e:
@@ -579,7 +592,7 @@ class NFTCommissionView(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({
-                "status": True, "status_code": 200, 'msg': 'NFT Commission Update Successfully',
+                "status": True, "status_code": 200, 'msg': 'NFT commission update successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -600,7 +613,7 @@ class BidOnNFTDetailsView(viewsets.ModelViewSet):
 
             serializer = self.serializer_class(queryset, many=True)
             return Response({
-                "status": True, "status_code": 200, 'msg': 'Bid on NFT Retrieve Successfully',
+                "status": True, "status_code": 200, 'msg': 'Bid on NFT retrieve successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -718,7 +731,7 @@ class ClaimNFTView(viewsets.ModelViewSet):
                 # tags = Tags.objects.create()
                 # nft.tags_set.add(*request.data['tags_title'])
                 return Response({
-                    "status": True, "status_code": 200, 'msg': 'NFTs Purchased Successfully',
+                    "status": True, "status_code": 200, 'msg': 'NFTs purchased successfully',
                     "data": serializer.data}, status=status.HTTP_200_OK)
             return Response({
             "status": False, "status_code": 400, 'msg': 'Something wrong!',
@@ -728,6 +741,7 @@ class ClaimNFTView(viewsets.ModelViewSet):
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class DeleteDocs(viewsets.ViewSet):
     def destroy(self, request, *args, **kwargs):
@@ -750,3 +764,39 @@ class DeleteDocs(viewsets.ViewSet):
                 "status": False, "status_code": 400, 'msg': "Something is wrong with this document",
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class NFTExplorView(viewsets.ModelViewSet):
+    queryset = NFT.objects.all()
+    serializer_class = NFTExplorSerializer
+
+    def list(self, request, *args, **kwargs):
+        global queryset
+        try:
+            nft_sort_by = self.request.query_params.get('sort_by')
+            nft_min_price = self.request.query_params.get('min_price')
+            nft_max_price = self.request.query_params.get('max_price')
+            # nft_tags = self.request.query_params.get('tags')
+
+            if nft_sort_by=="newest_listed":
+                queryset = self.queryset.filter(is_listed=True, is_minted=True, nft_status="Approved").order_by('-updated_at')
+
+            if nft_min_price:
+                queryset = queryset.filter(Q(fix_price__gte=nft_min_price) | Q(starting_price__gte=nft_min_price))
+
+            if nft_max_price:
+                queryset = queryset.filter(Q(fix_price__lte=nft_max_price) | Q(starting_price__lte=nft_max_price))
+
+            # if nft_tags:
+            #     for tag in nft_tags:
+            #         queryset = self.queryset.filter(fix_price__lte=nft_max_price, starting_price__lte=nft_max_price)
+
+            # queryset = self.queryset.filter(Q(is_minted=True) | Q(is_minted=False),)
+
+            serializer = self.serializer_class(queryset, many=True)
+            return Response({
+                "status": True, "status_code": 200, 'msg': 'Explore NFTs listed successfully',
+                "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)

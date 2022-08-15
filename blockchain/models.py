@@ -13,7 +13,7 @@ class UserWalletAddress(models.Model):
 
 
 class NFTCategory(models.Model):
-    category_name = models.CharField(max_length=150, blank=True, null=True)
+    category_name = models.CharField(max_length=150, blank=True, null=True, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

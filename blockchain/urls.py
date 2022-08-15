@@ -16,10 +16,12 @@ router.register('user_nft_status_update', views.UserNFTStatusUpdateView, basenam
 router.register('list_transactions_of_nft', views.ListTransactionNFTView, basename='list_transactions_of_nft')
 router.register('nft_commission', views.NFTCommissionView, basename='nft_commission')
 router.register('delete_doc', views.DeleteDocs, basename='delete_doc')
+router.register('nft_explore', views.NFTExplorView, basename='nft_explore')
 urlpatterns = [
     path('', include(router.urls)),
     path('claim_nft/<int:pk>/', ClaimNFTView.as_view({'patch': 'partial_update'}), name="claim_nft"),
     path('bid_on_nft_details/<int:pk>/', BidOnNFTDetailsView.as_view({'get': 'retrieve'}), name="bid_on_nft_details"),
     path('do_bid_on_nft/', DoBidOnNFTView.as_view({'post': 'create'}), name="do_bid_on_nft"),
+    # path('do_bid_on_nft/', NFTExplorView.as_view({'get': 'list'}), name="do_bid_on_nft"),
     # path('profile/', UserProfileListView.as_view({'get': 'get'}), name="profile"),
 ]

@@ -3,6 +3,7 @@ from django.db.models.functions import Concat
 from rest_framework import serializers
 
 from blockchain.models import *
+from blockchain.utils import get_eth_price
 from user.models import User
 from user.serializers import UserProfileDetailsViewSerializer
 
@@ -174,3 +175,31 @@ class ClaimNFTSerializer(serializers.ModelSerializer):
     class Meta:
         model = NFT
         fields = ["id","nft_status", "nft_creator", "nft_owner", "user", "nft_sell_type", "is_listed", "updated_at"]
+
+
+class NFTExplorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NFT
+        fields = ["id", "thumbnail", "nft_picture", "teaser", "nft_title", "fix_price", "starting_price",
+                  "start_dateTime","end_datetime"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        from django.db.models import F, Value, CharField
+        import os
+
+        if instance.nft_sell_type == "Fixed Price":
+            data["usd_price"] = get_eth_price(instance.fix_price)
+        if instance.nft_sell_type == "Timed Auction":
+            data["usd_price"] = get_eth_price(instance.starting_price)
+
+        items = Transaction.objects.filter(nft=instance.id).order_by("-id")[:4]
+        owners = []
+        for item in items:
+            owner = User.objects.filter(id=item.buyer_user.id).values("id",user_pic=Concat(Value(os.getenv(
+                'STAGING_PHYNOM_BUCKET_URL')),F("profile_picture"),output_field=CharField()))[0]
+
+            owners.append(owner)
+        data['owners'] = owners
+
+        return data
