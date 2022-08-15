@@ -25,7 +25,7 @@ class NFTCategory(models.Model):
 
 
 class NFTSubCategory(models.Model):
-    sub_category_name = models.CharField(max_length=250, blank=True, null=True)
+    sub_category_name = models.CharField(max_length=250, blank=True, null=True, unique=True)
     main_category = models.ForeignKey(NFTCategory, blank=True, null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
