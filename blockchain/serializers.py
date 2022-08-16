@@ -178,10 +178,11 @@ class ClaimNFTSerializer(serializers.ModelSerializer):
 
 
 class NFTExplorSerializer(serializers.ModelSerializer):
+    nft_pic = serializers.SerializerMethodField('get_pic')
     class Meta:
         model = NFT
-        fields = ["id", "thumbnail", "nft_picture", "teaser", "nft_title", "nft_category", "fix_price", "starting_price",
-                  "start_dateTime","end_datetime", "updated_at"]
+        fields = ["id", "thumbnail",'nft_pic', "teaser", "nft_title", "nft_category", "fix_price", "starting_price",
+                  "nft_sell_type", "start_dateTime","end_datetime", "updated_at"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -205,3 +206,8 @@ class NFTExplorSerializer(serializers.ModelSerializer):
         data['owners'] = owners
 
         return data
+    def get_pic(self, obj):
+        try:
+            return obj.nft_picture.url
+        except Exception as e:
+            return None
