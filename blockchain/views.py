@@ -770,14 +770,15 @@ class NFTExplorView(viewsets.ModelViewSet):
     serializer_class = NFTExplorSerializer
 
     def list(self, request, *args, **kwargs):
-        global queryset, nft_queryset
+        global queryset, nft_queryset, nft_tags_set
         try:
             nft_sort_by = self.request.query_params.get('sort_by')
             nft_min_price = self.request.query_params.get('min_price')
             nft_max_price = self.request.query_params.get('max_price')
             nft_tags = self.request.query_params.get('tags')
-            nft_tags_list = nft_tags.split(',')
-            nft_tags_set = set(list(map(int, nft_tags_list)))
+            if nft_tags:
+                nft_tags_list = nft_tags.split(',')
+                nft_tags_set = set(list(map(int, nft_tags_list)))
             # nft_tags_set = set(nft_tags_list)
             # check = all(item in List1 for item in List2)
             # a =  NFT.objects.exclude(updated_at=)
@@ -813,7 +814,10 @@ class NFTExplorView(viewsets.ModelViewSet):
 
             # queryset = self.queryset.filter(Q(is_minted=True) | Q(is_minted=False),)
             paginator = CustomPageNumberPagination()
-            result = paginator.paginate_queryset(nft_queryset, request)
+            if nft_tags:
+                result = paginator.paginate_queryset(nft_queryset, request)
+            else:
+                result = paginator.paginate_queryset(queryset, request)
             serializer = self.serializer_class(result, many=True)
             return paginator.get_paginated_response(serializer.data)
             # serializer = self.serializer_class(nft_queryset, many=True)
