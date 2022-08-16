@@ -770,12 +770,17 @@ class NFTExplorView(viewsets.ModelViewSet):
     serializer_class = NFTExplorSerializer
 
     def list(self, request, *args, **kwargs):
-        global queryset
+        global queryset, nft_queryset
         try:
             nft_sort_by = self.request.query_params.get('sort_by')
             nft_min_price = self.request.query_params.get('min_price')
             nft_max_price = self.request.query_params.get('max_price')
-            # nft_tags = self.request.query_params.get('tags')
+            nft_tags = self.request.query_params.get('tags')
+            nft_tags_list = nft_tags.split(',')
+            nft_tags_set = set(list(map(int, nft_tags_list)))
+            # nft_tags_set = set(nft_tags_list)
+            # check = all(item in List1 for item in List2)
+            # a =  NFT.objects.exclude(updated_at=)
 
             if nft_sort_by=="newest_listed":
                 queryset = self.queryset.filter(is_listed=True, is_minted=True, nft_status="Approved").order_by('-updated_at')
@@ -786,16 +791,36 @@ class NFTExplorView(viewsets.ModelViewSet):
             if nft_max_price:
                 queryset = queryset.filter(Q(fix_price__lte=nft_max_price) | Q(starting_price__lte=nft_max_price))
 
-            # if nft_tags:
+        # data['tag_title'] = NftTagSerializer(instance.tags_set.filter(nft_create_info__id=instance.id), many=True).data
+
+            if nft_tags:
+                tags_list = []
+                nft_queryset = []
+                for one_nft in queryset:
+                    nft_all_tags = Tags.objects.filter(nft_create_info__id=one_nft.id)
+                    for one_tag in nft_all_tags:
+                        tag_id = one_tag.id
+                        tags_list.append(tag_id)
+                    tags_list_set = set(tags_list)
+                    check_subset = nft_tags_set.issubset(tags_list_set)
+                    tags_list = []
+                    if check_subset is True:
+                        nft_queryset.append(one_nft)
+
+                    # nft_tags_list.append(nft_all_tags)
             #     for tag in nft_tags:
             #         queryset = self.queryset.filter(fix_price__lte=nft_max_price, starting_price__lte=nft_max_price)
 
             # queryset = self.queryset.filter(Q(is_minted=True) | Q(is_minted=False),)
+            paginator = CustomPageNumberPagination()
+            result = paginator.paginate_queryset(nft_queryset, request)
+            serializer = self.serializer_class(result, many=True)
+            return paginator.get_paginated_response(serializer.data)
+            # serializer = self.serializer_class(nft_queryset, many=True)
+            # return Response({
+            #     "status": True, "status_code": 200, 'msg': 'Explore NFTs listed successfully',
+            #     "data": serializer.data}, status=status.HTTP_200_OK)
 
-            serializer = self.serializer_class(queryset, many=True)
-            return Response({
-                "status": True, "status_code": 200, 'msg': 'Explore NFTs listed successfully',
-                "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],

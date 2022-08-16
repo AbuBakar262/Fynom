@@ -102,7 +102,7 @@ class NFTViewSerializer(serializers.ModelSerializer):
 class NFTCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = NFTCategory
-        fields = "__all__"
+        fields = ["id", "category_name"]
 
 # class NFTSerializerNew(serializers.ModelSerializer):
 #     document = serializers.SerializerMethodField('get_doc')
@@ -180,13 +180,15 @@ class ClaimNFTSerializer(serializers.ModelSerializer):
 class NFTExplorSerializer(serializers.ModelSerializer):
     class Meta:
         model = NFT
-        fields = ["id", "thumbnail", "nft_picture", "teaser", "nft_title", "fix_price", "starting_price",
-                  "start_dateTime","end_datetime"]
+        fields = ["id", "thumbnail", "nft_picture", "teaser", "nft_title", "nft_category", "fix_price", "starting_price",
+                  "start_dateTime","end_datetime", "updated_at"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         from django.db.models import F, Value, CharField
         import os
+
+        data['nft_category'] = NFTCategorySerializer(instance.nft_category).data
 
         if instance.nft_sell_type == "Fixed Price":
             data["usd_price"] = get_eth_price(instance.fix_price)
