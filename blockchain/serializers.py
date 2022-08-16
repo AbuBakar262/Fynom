@@ -179,15 +179,21 @@ class ClaimNFTSerializer(serializers.ModelSerializer):
 
 class NFTExplorSerializer(serializers.ModelSerializer):
     nft_pic = serializers.SerializerMethodField('get_pic')
+    nft_thumbnail = serializers.SerializerMethodField('get_nft_thumbnail')
+    nft_teaser = serializers.SerializerMethodField('get_nft_teaser')
     class Meta:
         model = NFT
-        fields = ["id", "thumbnail",'nft_pic', "teaser", "nft_title", "nft_category", "fix_price", "starting_price",
-                  "nft_sell_type", "start_dateTime","end_datetime", "updated_at"]
+        fields = ["id", "nft_thumbnail",'nft_pic', "nft_teaser", "user", "nft_title", "nft_category", "fix_price", "starting_price",
+                  "nft_sell_type", "is_minted", "is_listed", "nft_status", "start_dateTime","end_datetime", "updated_at"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         from django.db.models import F, Value, CharField
         import os
+
+        owner = User.objects.filter(id=instance.user.id).values("id", "name", "username",
+                                user_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("profile_picture"),
+                                                             output_field=CharField()))[0]
 
         data['nft_category'] = NFTCategorySerializer(instance.nft_category).data
 
@@ -196,18 +202,31 @@ class NFTExplorSerializer(serializers.ModelSerializer):
         if instance.nft_sell_type == "Timed Auction":
             data["usd_price"] = get_eth_price(instance.starting_price)
 
-        items = Transaction.objects.filter(nft=instance.id).order_by("-id")[:4]
+        items = Transaction.objects.filter(nft=instance.id).order_by("-id")[:3]
         owners = []
+        owners.append(owner)
         for item in items:
-            owner = User.objects.filter(id=item.buyer_user.id).values("id",user_pic=Concat(Value(os.getenv(
+            owner = User.objects.filter(id=item.seller_user.id).values("id",user_pic=Concat(Value(os.getenv(
                 'STAGING_PHYNOM_BUCKET_URL')),F("profile_picture"),output_field=CharField()))[0]
 
             owners.append(owner)
         data['owners'] = owners
-
         return data
+
     def get_pic(self, obj):
         try:
             return obj.nft_picture.url
+        except Exception as e:
+            return None
+
+    def get_nft_thumbnail(self, obj):
+        try:
+            return obj.thumbnail.url
+        except Exception as e:
+            return None
+
+    def get_nft_teaser(self, obj):
+        try:
+            return obj.teaser.url
         except Exception as e:
             return None
