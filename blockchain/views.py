@@ -776,6 +776,7 @@ class NFTExplorView(viewsets.ModelViewSet):
             nft_min_price = self.request.query_params.get('min_price')
             nft_max_price = self.request.query_params.get('max_price')
             nft_tags = self.request.query_params.get('tags')
+            nft_category = self.request.query_params.get('category')
             if nft_tags:
                 nft_tags_list = nft_tags.split(',')
                 nft_tags_set = set(list(map(int, nft_tags_list)))
@@ -785,6 +786,9 @@ class NFTExplorView(viewsets.ModelViewSet):
 
             if nft_sort_by=="newest_listed":
                 queryset = self.queryset.filter(is_listed=True, is_minted=True, nft_status="Approved").order_by('-updated_at')
+
+            if nft_category:
+                queryset = queryset.filter(nft_category__id=nft_category)
 
             if nft_min_price:
                 queryset = queryset.filter(Q(fix_price__gte=nft_min_price) | Q(starting_price__gte=nft_min_price))
