@@ -183,7 +183,8 @@ class NFTExplorSerializer(serializers.ModelSerializer):
     nft_teaser = serializers.SerializerMethodField('get_nft_teaser')
     class Meta:
         model = NFT
-        fields = ["id", "nft_thumbnail",'nft_pic', "nft_teaser", "user", "nft_title", "nft_category", "fix_price", "starting_price",
+        fields = ["id", "nft_thumbnail",'nft_pic', "nft_teaser", "user", "nft_title", "nft_category", "fix_price",
+                  "starting_price", "nft_collection",
                   "nft_sell_type", "is_minted", "is_listed", "nft_status", "start_dateTime","end_datetime", "updated_at"]
 
     def to_representation(self, instance):
