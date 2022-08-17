@@ -817,9 +817,9 @@ class NFTExplorView(viewsets.ModelViewSet):
             if nft_max_price:
                 queryset = queryset.filter(Q(fix_price__lte=nft_max_price) | Q(starting_price__lte=nft_max_price))
 
-            # date = datetime.datetime.utcnow()
-            # utc_time = calendar.timegm(date.utctimetuple())
-            # queryset = queryset.filter(Q(nft_sell_type="Timed Auction", end_datetime__gt=utc_time) | Q(nft_sell_type="Fixed Price"))
+            date = datetime.datetime.utcnow()
+            utc_time = calendar.timegm(date.utctimetuple())
+            queryset = queryset.filter(Q(nft_sell_type="Timed Auction", end_datetime__gt=utc_time) | Q(nft_sell_type="Fixed Price"))
 
         # data['tag_title'] = NftTagSerializer(instance.tags_set.filter(nft_create_info__id=instance.id), many=True).data
 
