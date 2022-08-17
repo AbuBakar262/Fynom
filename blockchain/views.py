@@ -13,6 +13,8 @@ from user.serializers import UserCollectionSerializer
 from user.utils import Utill
 import boto3
 from backend.settings import *
+import calendar
+import datetime
 
 class ListRetrieveNFTView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
@@ -65,8 +67,11 @@ class CreateUpdateNFTView(viewsets.ViewSet):
             request.data['nft_owner'] = wallet_id.id
             request.data['tags_title'] = request.data.get('tag_title').split(',')
             # request.data['tags'] = request.data.get('tags').split(',')
-            nft_commission = Commission.objects.all().order_by('-id').first()
+            nft_commission = Commission.objects.first()
             request.data["service_fee"] = nft_commission.set_commission
+            # nft_teaser = request.data.get('teaser')
+            # if nft_teaser == "null":
+            #     nft_teaser = request.data.pop('teaser')
             serializer = NFTViewSerializer(data=request.data, context={'request':request})
             serializer.is_valid(raise_exception=True)
             nft = serializer.save()
@@ -433,6 +438,12 @@ class NFTCategoryView(viewsets.ViewSet):
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
+    def get_permissions(self, *args, **kwargs):
+        if self.request.method in ['GET']:
+            return []
+        else:
+            return [IsAuthenticated()]
+
 
 class NFTTagView(viewsets.ViewSet):
 
@@ -494,6 +505,12 @@ class NFTTagView(viewsets.ViewSet):
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+    def get_permissions(self, *args, **kwargs):
+        if self.request.method in ['GET']:
+            return []
+        else:
+            return [IsAuthenticated()]
 
 
 class UserNFTStatusUpdateView(viewsets.ViewSet):
@@ -799,6 +816,10 @@ class NFTExplorView(viewsets.ModelViewSet):
 
             if nft_max_price:
                 queryset = queryset.filter(Q(fix_price__lte=nft_max_price) | Q(starting_price__lte=nft_max_price))
+
+            # date = datetime.datetime.utcnow()
+            # utc_time = calendar.timegm(date.utctimetuple())
+            # queryset = queryset.filter(Q(nft_sell_type="Timed Auction", end_datetime__gt=utc_time) | Q(nft_sell_type="Fixed Price"))
 
         # data['tag_title'] = NftTagSerializer(instance.tags_set.filter(nft_create_info__id=instance.id), many=True).data
 
