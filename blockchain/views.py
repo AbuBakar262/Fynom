@@ -801,14 +801,12 @@ class NFTExplorView(viewsets.ModelViewSet):
             # nft_tags_set = set(nft_tags_list)
             # check = all(item in List1 for item in List2)
             # a =  NFT.objects.exclude(updated_at=)
-
-
+            if not nft_sort_by:
+                if collection_id:
+                    queryset = self.queryset.filter(nft_collection__id=collection_id)
 
             if nft_sort_by=="newest_listed":
                 queryset = self.queryset.filter(is_listed=True, is_minted=True, nft_status="Approved").order_by('-updated_at')
-
-            if collection_id:
-                queryset = queryset.filter(is_minted=True, nft_collection__id=collection_id)
 
             if nft_category!=None and nft_category!='all':
                 queryset = queryset.filter(nft_category__id=nft_category)
