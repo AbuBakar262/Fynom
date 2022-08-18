@@ -858,3 +858,39 @@ class NFTExplorView(viewsets.ModelViewSet):
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+class FindAuctionWinerUser(viewsets.ModelViewSet):
+    queryset = UserWalletAddress.objects.all()
+
+    def SendEmailWinNFT(self, request, *args, **kwargs):
+        try:
+            user_wallet_no = request.data['wallet_address']
+            nft_token_id = request.data['token_id']
+            price = request.data['bid_price']
+
+            wallet_info = UserWalletAddress.objects.filter(wallet_address=user_wallet_no).first()
+            user = User.objects.filter(id=wallet_info.user_wallet.id).first()
+            nft = NFT.objects.filter(token_id=nft_token_id).first() #nft.nft_title
+            if user.email:
+                body = f"You are the winer of '{nft.nft_title}' NFT. You win this NFT by bidding of {price} ETH. " \
+                       f"To visit and claim your " \
+                       f"NFT click on the given link " + os.getenv('FRONTEND_SHOW_NFT_URL') + str(nft.id)
+
+                data = {
+                    'subject': 'Claim Your Phynom NFT',
+                    'body': body,
+                    'to_email': user.email
+                }
+                Utill.send_email(data)
+                return Response({
+                    "status": True, "status_code": 200, 'msg': 'Email sent to the user for claim NFT.',
+                    "data": []}, status=status.HTTP_200_OK)
+            return Response({
+                "status": True, "status_code": 200, 'msg': 'Your email not found.',
+                "data": []}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+

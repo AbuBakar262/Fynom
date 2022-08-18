@@ -22,6 +22,7 @@ urlpatterns = [
     path('claim_nft/<int:pk>/', ClaimNFTView.as_view({'patch': 'partial_update'}), name="claim_nft"),
     path('bid_on_nft_details/<int:pk>/', BidOnNFTDetailsView.as_view({'get': 'retrieve'}), name="bid_on_nft_details"),
     path('do_bid_on_nft/', DoBidOnNFTView.as_view({'post': 'create'}), name="do_bid_on_nft"),
+    path('find_nft_winer/', FindAuctionWinerUser.as_view({'post': 'SendEmailWinNFT'}), name="find_nft_winer"),
     # path('do_bid_on_nft/', NFTExplorView.as_view({'get': 'list'}), name="do_bid_on_nft"),
     # path('profile/', UserProfileListView.as_view({'get': 'get'}), name="profile"),
 ]
