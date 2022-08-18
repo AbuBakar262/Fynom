@@ -102,7 +102,7 @@ class NFTViewSerializer(serializers.ModelSerializer):
 class NFTCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = NFTCategory
-        fields = ["id", "category_name"]
+        fields = "__all__"
 
 # class NFTSerializerNew(serializers.ModelSerializer):
 #     document = serializers.SerializerMethodField('get_doc')
