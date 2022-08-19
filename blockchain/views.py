@@ -4,6 +4,7 @@ from rest_framework import status
 from django.db.models import F, Value, CharField
 import os
 from backend.pagination import CustomPageNumberPagination
+from blockchain.cron import SendEmailToWinner
 from blockchain.serializers import *
 from blockchain.models import *
 from user.models import User
@@ -860,13 +861,15 @@ class NFTExplorView(viewsets.ModelViewSet):
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 class FindAuctionWinerUser(viewsets.ModelViewSet):
-    queryset = UserWalletAddress.objects.all()
+    """will take some arguments from frontend and send the email to the duction winer user to claim nft"""
+    # queryset = UserWalletAddress.objects.all()
 
     def SendEmailWinNFT(self, request, *args, **kwargs):
+        """send email to the action winer user, to claim nft"""
         try:
-            user_wallet_no = request.data['wallet_address']
-            nft_token_id = request.data['token_id']
-            price = request.data['bid_price']
+            user_wallet_no = 'newuser'
+            nft_token_id = '123456789'
+            price = '0.35895'
 
             wallet_info = UserWalletAddress.objects.filter(wallet_address=user_wallet_no).first()
             user = User.objects.filter(id=wallet_info.user_wallet.id).first()
@@ -893,4 +896,5 @@ class FindAuctionWinerUser(viewsets.ModelViewSet):
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
 

@@ -16,3 +16,4 @@ def get_eth_price(amount):
         return eth_dollars
     except Exception as e:
         return False
+
