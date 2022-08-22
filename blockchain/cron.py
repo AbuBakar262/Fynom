@@ -22,25 +22,27 @@ def SendEmailToWinner():
         if nfts:
             for nft in nfts:
                 highest_bid = BidOnNFT.objects.filter(nft_detail=nft.id).order_by('id').first()
-                user = User.objects.filter(id=highest_bid.bidder_profile.id).first()
+                if highest_bid:
+                    user = User.objects.filter(id=highest_bid.bidder_profile.id).first()
 
-                if nft.user != user:
-                    if user.email:
-                        body = f"You are the winner of '{nft.nft_title}' NFT. You win this NFT by bidding of {highest_bid.bid_price} ETH. " \
-                               f"To visit and claim your " \
-                               f"NFT click on the given link " + os.getenv('FRONTEND_SHOW_NFT_URL') + str(nft.id)
+                    if nft.user != user:
+                        if user.email:
+                            body = f"You are the winner of '{nft.nft_title}' NFT. You win this NFT by bidding of {highest_bid.bid_price} ETH. " \
+                                   f"To visit and claim your " \
+                                   f"NFT click on the given link " + os.getenv('FRONTEND_SHOW_NFT_URL') + str(nft.id)
 
-                        data = {
-                            'subject': 'Claim Your Phynom NFT',
-                            'body': body,
-                            'to_email': user.email
-                        }
+                            data = {
+                                'subject': 'Claim Your Phynom NFT',
+                                'body': body,
+                                'to_email': user.email
+                            }
 
-                        Utill.send_email(data)
-                        nft.is_listed = False
-                        nft.save()
-                        logger.info("Email send to user for clime NFT")
-
+                            Utill.send_email(data)
+                            nft.is_listed = False
+                            nft.save()
+                            logger.info("Email send to user for clime NFT")
+                else:
+                    logger.info("No bid on this NFT.")
 
                 # if bid doesn't placed  by any user
 
