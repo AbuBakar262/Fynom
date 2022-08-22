@@ -22,6 +22,8 @@ def SendEmailToWinner():
         if nfts:
             for nft in nfts:
                 highest_bid = BidOnNFT.objects.filter(nft_detail=nft.id).order_by('id').first()
+                nft.is_listed = False
+                nft.save()
                 if highest_bid:
                     user = User.objects.filter(id=highest_bid.bidder_profile.id).first()
 
@@ -38,8 +40,7 @@ def SendEmailToWinner():
                             }
 
                             Utill.send_email(data)
-                            nft.is_listed = False
-                            nft.save()
+
                             logger.info("Email send to user for clime NFT")
                 else:
                     logger.info("No bid on this NFT.")
