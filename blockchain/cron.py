@@ -1,16 +1,14 @@
 import logging
 import os
-from rest_framework.response import Response
-from rest_framework import status
 import calendar
 import datetime
 from blockchain.models import *
 from user.models import User
 from user.utils import Utill
-# from rest_framework.decorators import api_view
-# from backend.settings import *
+
 
 logger = logging.getLogger(__name__)
+
 
 # @api_view(('GET',))
 def SendEmailToWinner():
@@ -43,21 +41,24 @@ def SendEmailToWinner():
                         nft.save()
                         logger.info("Email send to user for clime NFT")
 
-                elif nft.user == user:
-                    body = f"On your Listed '{nft.nft_title}' NFT. No bid placed by anyone. " \
-                           f"Visit your NFT and List it again by " \
-                           f"click on the given link " + os.getenv('FRONTEND_SHOW_NFT_URL') + str(nft.id)
 
-                    data = {
-                        'subject': 'Bid Status of Your Phynom NFT',
-                        'body': body,
-                        'to_email': user.email
-                    }
+                # if bid doesn't placed  by any user
 
-                    Utill.send_email(data)
-                    nft.is_listed = False
-                    nft.save()
-                    logger.info("Email send to owner no bid placed on this NFT.")
+                # elif nft.user == user:
+                #     body = f"On your Listed '{nft.nft_title}' NFT. No bid placed by anyone. " \
+                #            f"Visit your NFT and List it again by " \
+                #            f"click on the given link " + os.getenv('FRONTEND_SHOW_NFT_URL') + str(nft.id)
+                #
+                #     data = {
+                #         'subject': 'Bid Status of Your Phynom NFT',
+                #         'body': body,
+                #         'to_email': user.email
+                #     }
+                #
+                #     Utill.send_email(data)
+                #     nft.is_listed = False
+                #     nft.save()
+                #     logger.info("Email send to owner no bid placed on this NFT.")
         else:
             logger.info("No NFT is waiting for claim.")
 
