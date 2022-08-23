@@ -6,6 +6,7 @@ import os
 from backend.pagination import CustomPageNumberPagination
 from blockchain.serializers import *
 from blockchain.models import *
+from blockchain.utils import validateEmail
 from user.models import User
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import viewsets
@@ -903,3 +904,42 @@ class FindAuctionWinerUser(viewsets.ModelViewSet):
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class UserDisputeManagementView(viewsets.ViewSet):
+    """
+     This api is only use for Admin
+     can change the status of user NFT
+     """
+    # permission_classes = [IsAdminUser]
+    def dispute_email(self, request, *args, **kwargs):
+
+        try:
+
+            user_name = request.data['user_name']
+            email_address=request.data['email_address']
+            email_body = request.data['email_body']
+
+            email_validation=validateEmail(email_address)
+
+            admin = User.objects.filter(is_superuser=True).first()
+
+            if user_name and email_address and email_body and email_validation is True:
+            # send email
+                data = {
+                    'subject': f'Dispute management email of phynom platform from {user_name} user.',
+                    'body': f'Name: {user_name} \nEmail: {email_address} \nDescription: {email_body}',
+                    'to_email': admin.email
+                }
+                Utill.send_email(data)
+
+                return Response({
+                    "status": True, "status_code": 200, 'msg': 'Email send successfully to the admin.',
+                    "data": []}, status=status.HTTP_200_OK)
+
+            return Response({
+                "status": False, "status_code": 400, 'msg': 'Please enter correct information.',
+                "data": []}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
