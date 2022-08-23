@@ -918,7 +918,7 @@ class UserDisputeManagementView(viewsets.ViewSet):
             email_address=request.data['email_address']
             email_body = request.data['email_body']
 
-            email_validation=validateEmail(email_address)
+            email_validation = validateEmail(email_address)
 
             admin = User.objects.filter(is_superuser=True).first()
 
