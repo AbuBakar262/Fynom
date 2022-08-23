@@ -4,7 +4,6 @@ from rest_framework import status
 from django.db.models import F, Value, CharField
 import os
 from backend.pagination import CustomPageNumberPagination
-# from blockchain.cron import SendEmailToWinner
 from blockchain.serializers import *
 from blockchain.models import *
 from user.models import User

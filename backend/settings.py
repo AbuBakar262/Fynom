@@ -214,9 +214,9 @@ AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_QUERYSTRING_AUTH = False
 
-# CRONJOBS = [
-#     ('*/1 * * * *', 'blockchain.cron.SendEmailToWinner')
-# ]
+CRONJOBS = [
+    ('*/1 * * * *', 'blockchain.cron.SendEmailToWinner')
+]
 
 APP_LOG_FILENAME = os.path.join(BASE_DIR, 'blockchain/cron_job/app.log')
 # ERROR_LOG_FILENAME = os.path.join(BASE_DIR, 'blockchain/cron_job/error.log')
