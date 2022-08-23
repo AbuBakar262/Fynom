@@ -67,6 +67,10 @@ SOLD_STATUS = (
     ('Cancel', 'Cancel'),
 )
 
+BID_STATUS = (
+    ('Active', 'Active'),
+    ('Closed', 'Closed'),
+)
 
 class NFT(models.Model):
     thumbnail = models.ImageField(upload_to='nft/', null=True, blank=True)
@@ -129,12 +133,19 @@ class Tags(models.Model):
 
 class BidOnNFT(models.Model):
     nft_detail = models.ForeignKey(NFT, blank=True, null=True, on_delete=models.CASCADE)
+    seller_wallet = models.ForeignKey(UserWalletAddress, blank=True, null=True, related_name='seller_in_bidonnft',
+                               on_delete=models.CASCADE)
+    seller_profile = models.ForeignKey(User, blank=True, null=True, related_name='seller_user_in_bidonnft',
+                                    on_delete=models.CASCADE)
     bidder_wallet = models.ForeignKey(UserWalletAddress, blank=True, null=True, on_delete=models.CASCADE)
     bidder_profile = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     bid_price = models.FloatField(blank=True, null=True)
     bid_datetime = models.CharField(max_length=50, blank=True, null=True)
+    is_email = models.BooleanField(default=False)
+    is_winner = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    bid_status = models.CharField(max_length=50, choices=BID_STATUS, default='Active')
 
 
 

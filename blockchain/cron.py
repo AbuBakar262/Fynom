@@ -18,15 +18,17 @@ def SendEmailToWinner():
         logger.info("--------------API Called-------------")
         date = datetime.datetime.utcnow()
         utc_time = calendar.timegm(date.utctimetuple())
-        nfts = NFT.objects.filter(nft_sell_type="Timed Auction", end_datetime__lt=utc_time, is_listed=True)
+        nfts = NFT.objects.filter(nft_sell_type="Timed Auction", end_datetime__lt=utc_time, is_listed=True, nft_status='Approved')
+
         if nfts:
             for nft in nfts:
-                highest_bid = BidOnNFT.objects.filter(nft_detail=nft.id).order_by('id').first()
-                nft.is_listed = False
-                nft.save()
-                if highest_bid:
+                all_bids = BidOnNFT.objects.filter(nft_detail=nft.id, bid_status='Active')
+                highest_bid = all_bids.order_by('-id').first()
+                all_bids.update(bid_status='Closed')
+                # nft.is_listed = False
+                # nft.save()
+                if highest_bid and highest_bid.is_email is False:
                     user = User.objects.filter(id=highest_bid.bidder_profile.id).first()
-
                     if nft.user != user:
                         if user.email:
                             body = f"You are the winner of '{nft.nft_title}' NFT. You win this NFT by bidding of {highest_bid.bid_price} ETH. " \
@@ -41,9 +43,15 @@ def SendEmailToWinner():
 
                             Utill.send_email(data)
 
+                            highest_bid.is_email = True
+                            highest_bid.is_winner = True
+                            highest_bid.save()
+                        else:
+                            highest_bid.is_winner = True
+                            highest_bid.save()
                             logger.info("Email send to user for clime NFT")
-                else:
-                    logger.info("No bid on this NFT.")
+                # else:
+                #     logger.info("No bid on this NFT.")
 
                 # if bid doesn't placed  by any user
 
