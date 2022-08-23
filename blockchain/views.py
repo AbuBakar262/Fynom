@@ -651,7 +651,13 @@ class DoBidOnNFTView(viewsets.ModelViewSet):
             # request.data._mutable = True
             request.data['bidder_wallet'] = wallet_id.id
             request.data['bidder_profile'] = request.user.id
-            serializer = self.serializer_class(data=request.data)
+
+            nft = NFT.objects.get(id=request.data['nft_detail'])
+
+            request.data['seller_wallet'] = nft.nft_owner.id
+            request.data['seller_profile'] = nft.user.id
+
+            serializer = self.serializer_class(data=request.data, context={'user': request.user})
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({
