@@ -661,7 +661,7 @@ class DoBidOnNFTView(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response({
-                "status": True, "status_code": 200, 'msg': 'Bid successfully created on NFT',
+                "status": True, "status_code": 200, 'msg': 'Bid successfully placed.',
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({

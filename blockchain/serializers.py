@@ -66,7 +66,8 @@ class NFTViewSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         with transaction.atomic():
             nft = NFT.objects.create(**validated_data)
-            if self.context['request'].data['documents']:
+            data = self.context['request'].data
+            if 'documents' in data:
                 nft_docs = dict(self.context['request'].data.lists())['documents']
                 for doc in nft_docs:
                     SupportingDocuments.objects.create(nft_create_info=nft, documents=doc)
