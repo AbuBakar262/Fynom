@@ -1,7 +1,8 @@
 from django.db import transaction
 from django.db.models.functions import Concat
 from rest_framework import serializers
-
+import calendar
+import datetime
 from blockchain.models import *
 from blockchain.utils import get_eth_price
 from user.models import User
@@ -158,7 +159,8 @@ class BidOnNFTDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BidOnNFT
-        fields = ["id","nft_detail", "bidder_wallet", "bidder_profile", "bid_price", "bid_datetime", "created_at"]
+        fields = ["id","nft_detail", "seller_wallet", "seller_profile", "bidder_wallet", "bidder_profile", "bid_price",
+                  "bid_datetime", "created_at"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -166,10 +168,38 @@ class BidOnNFTDetailsSerializer(serializers.ModelSerializer):
         data['bidder_profile'] = User.objects.filter(id=instance.bidder_profile.id).values('id',"name", "username")
         return data
 
-    # def to_representation(self, instance):
-    #     data = super().to_representation(instance)
-    #     data['nft_creator'] = UserDataSerializer(instance.creator).data
-    #     data['nft_owner'] = UserDataSerializer(instance.owner).data
+#   context={'user': request.user}         password2 = attrs.get('password2')          user = self.context.get('user')
+    def validate(self, attrs):
+        nft_owner = attrs.get('seller_profile')
+        bidder = attrs.get('bidder_profile')
+        nft = NFT.objects.filter(id= attrs.get('nft_detail').id).first()
+        if nft.nft_status == 'Approved':
+            # convert utc into unix
+            date = datetime.datetime.utcnow()
+            utc_time = calendar.timegm(date.utctimetuple())
+
+            if int(nft.end_datetime) <= utc_time:
+                raise serializers.ValidationError("NFT bid time expire")
+
+            if int(nft.start_dateTime) > utc_time:
+                raise serializers.ValidationError("Please wait for starting bid on this NFT.")
+
+            if nft_owner == bidder:
+                raise serializers.ValidationError("User can't bid on his/her NFT.")
+
+            bid = BidOnNFT.objects.filter(nft_detail=attrs.get('nft_detail').id, seller_profile=nft_owner,
+                                          bid_status="Active").order_by('-id').first()
+            if bid:
+                if float(attrs.get('bid_price')) <= bid.bid_price:
+                    raise serializers.ValidationError("Current bid price should be higher then last bid price")
+
+            if nft.starting_price >= float(attrs.get('bid_price')):
+                raise serializers.ValidationError("Bid price should be greater then last bid starting price.")
+        else:
+            raise serializers.ValidationError("NFT status is pending now. Please wait for approve NFT")
+
+        return attrs
+
 
 class ClaimNFTSerializer(serializers.ModelSerializer):
     class Meta:
