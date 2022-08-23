@@ -457,7 +457,7 @@ class ListUserCollection(viewsets.ViewSet):
 
 class UserCollectionListView(viewsets.ViewSet):
     """
-    this view is for list/retrieve nfts of perticular user by its id
+    this view is for list/retrieve collection of perticular user by its id
     """
     permission_classes = [AllowAny]
     def retrieve(self, request, *args, **kwargs):

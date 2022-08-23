@@ -65,10 +65,11 @@ class NFTViewSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         with transaction.atomic():
-            nft_docs = dict(self.context['request'].data.lists())['documents']
             nft = NFT.objects.create(**validated_data)
-            for doc in nft_docs:
-                SupportingDocuments.objects.create(nft_create_info=nft, documents=doc)
+            if self.context['request'].data['documents']:
+                nft_docs = dict(self.context['request'].data.lists())['documents']
+                for doc in nft_docs:
+                    SupportingDocuments.objects.create(nft_create_info=nft, documents=doc)
             return nft
 
     # def update(self, instance, validated_data):
@@ -193,7 +194,7 @@ class BidOnNFTDetailsSerializer(serializers.ModelSerializer):
                 if float(attrs.get('bid_price')) <= bid.bid_price:
                     raise serializers.ValidationError("Current bid price should be higher then last bid price")
 
-            if nft.starting_price >= float(attrs.get('bid_price')):
+            if nft.starting_price > float(attrs.get('bid_price')):
                 raise serializers.ValidationError("Bid price should be greater then last bid starting price.")
         else:
             raise serializers.ValidationError("You can't bid now.")
