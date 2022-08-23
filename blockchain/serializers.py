@@ -173,7 +173,7 @@ class BidOnNFTDetailsSerializer(serializers.ModelSerializer):
         nft_owner = attrs.get('seller_profile')
         bidder = attrs.get('bidder_profile')
         nft = NFT.objects.filter(id= attrs.get('nft_detail').id).first()
-        if nft.nft_status == 'Approved':
+        if nft.nft_status == 'Approved' and bidder.status=="Approved" and nft.is_listed==True :
             # convert utc into unix
             date = datetime.datetime.utcnow()
             utc_time = calendar.timegm(date.utctimetuple())
@@ -196,7 +196,7 @@ class BidOnNFTDetailsSerializer(serializers.ModelSerializer):
             if nft.starting_price >= float(attrs.get('bid_price')):
                 raise serializers.ValidationError("Bid price should be greater then last bid starting price.")
         else:
-            raise serializers.ValidationError("NFT status is pending now. Please wait for approve NFT")
+            raise serializers.ValidationError("You can't bid now.")
 
         return attrs
 
