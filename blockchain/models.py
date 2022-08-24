@@ -146,6 +146,7 @@ class BidOnNFT(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     bid_status = models.CharField(max_length=50, choices=BID_STATUS, default='Active')
+    is_claimed = models.BooleanField(default=False)
 
 
 

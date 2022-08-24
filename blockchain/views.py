@@ -72,7 +72,7 @@ class CreateUpdateNFTView(viewsets.ViewSet):
             request.data['tags_title'] = request.data.get('tag_title').split(',')
             # request.data['tags'] = request.data.get('tags').split(',')
             nft_commission = Commission.objects.first()
-            request.data["service_fee"] = nft_commission.set_commission
+            request.data["service_fee"] = nft_commission.set_commission   # hardcode set_commission
             # nft_teaser = request.data.get('teaser')
             # if nft_teaser == "null":
             #     nft_teaser = request.data.pop('teaser')
@@ -700,13 +700,16 @@ class ClaimNFTView(viewsets.ModelViewSet):
                 request.data["sold_price"] = nft_by_id.fix_price
 
             if nft_by_id.nft_sell_type == "Timed Auction":
-                last_bid = BidOnNFT.objects.filter(nft_detail=nft_id, bidder_wallet=user_wallet.id,
-                                                   bidder_profile=request.user.id).order_by('-id').first()
+                last_bid = BidOnNFT.objects.filter(nft_detail=nft_id, bidder_wallet=user_wallet.id, bid_status="Closed",
+                            is_winner=True, is_claimed=False, bidder_profile=request.user.id).order_by('-id').first()
                 request.data["sold_price"] = last_bid.bid_price
+                last_bid.is_claimed=True
+                last_bid.save()
 
+            # nft_by_id.service_fee hardcoded in nft when nft created or ...
             request.data["commission_amount"] = (float(request.data["sold_price"])/100)*float(nft_by_id.service_fee)
 
-            serializer_transaction = TransactionNFTSerializer(data=request.data)
+            serializer_transaction = TransactionNFTSerializer(data=request.data, context={'user': request.user})
             serializer_transaction.is_valid(raise_exception=True)
             serializer_transaction.save()
 
@@ -830,7 +833,9 @@ class NFTExplorView(viewsets.ModelViewSet):
 
             date = datetime.datetime.utcnow()
             utc_time = calendar.timegm(date.utctimetuple())
-            queryset = queryset.filter(Q(nft_sell_type="Timed Auction", end_datetime__gt=utc_time) | Q(nft_sell_type="Fixed Price"))
+
+            if nft_sort_by:
+                queryset = queryset.filter(Q(nft_sell_type="Timed Auction", end_datetime__gt=utc_time) | Q(nft_sell_type="Fixed Price"))
 
         # data['tag_title'] = NftTagSerializer(instance.tags_set.filter(nft_create_info__id=instance.id), many=True).data
 
@@ -869,6 +874,7 @@ class NFTExplorView(viewsets.ModelViewSet):
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class FindAuctionWinerUser(viewsets.ModelViewSet):
     """will take some arguments from frontend and send the email to the duction winer user to claim nft"""

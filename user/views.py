@@ -54,7 +54,6 @@ class AdminLoginView(APIView):
                              "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class AdminChangePasswrodView(APIView):
     """
     only for admin that can change his/her admin login password by login admin dashboard
@@ -331,6 +330,7 @@ class UserProfileStatusUpdateView(viewsets.ViewSet):
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class UserProfileBlockedView(viewsets.ViewSet):
     """
      This api is only use for Admin
@@ -419,6 +419,7 @@ class UserCollection(viewsets.ViewSet):
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class ListUserCollection(viewsets.ViewSet):
     """
     any user can see(list) collection, and retrieve
@@ -457,7 +458,7 @@ class ListUserCollection(viewsets.ViewSet):
 
 class UserCollectionListView(viewsets.ViewSet):
     """
-    this view is for list/retrieve collection of perticular user by its id
+    this view is for list all collection of perticular user by its id, profile page ----> my collection
     """
     permission_classes = [AllowAny]
     def retrieve(self, request, *args, **kwargs):
@@ -476,6 +477,7 @@ class UserCollectionListView(viewsets.ViewSet):
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class TermsAndPoliciesView(viewsets.ViewSet):
     """

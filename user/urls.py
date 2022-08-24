@@ -13,8 +13,8 @@ router.register('user_profile_details_view', views.UserProfileDetailsView, basen
 router.register('user_profile_status_update_view', views.UserProfileStatusUpdateView,
                 basename='user_profile_status_update_view')
 router.register('user_collection', views.UserCollection, basename='user_collection') # create and update
-router.register('user_collection_list', views.UserCollectionListView, basename='user_collection_list') # list user collection by id
-router.register('list_user_collection', views.ListUserCollection, basename='list_user_collection') # list user collection and retrieve
+router.register('user_collection_list', views.UserCollectionListView, basename='user_collection_list') # list user collections by user id
+router.register('list_user_collection', views.ListUserCollection, basename='list_user_collection') # retrive user collection and list nft init
 router.register('profile', views.UserProfileListView, basename='profile') # user profile list and retrieve
 router.register('terms_policies', views.TermsAndPoliciesView, basename='terms_policies')
 
