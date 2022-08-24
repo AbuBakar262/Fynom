@@ -630,7 +630,7 @@ class BidOnNFTDetailsView(viewsets.ModelViewSet):
             nft_id = self.kwargs.get('pk')
             # nft_by_id = NFT.objects.get(id=nft_id)
             # serializer = NFTViewSerializer(nft_by_id)
-            queryset = self.queryset.filter(nft_detail=nft_id).order_by("-id")
+            queryset = self.queryset.filter(nft_detail=nft_id, bid_status="Active").order_by("-id")
 
             serializer = self.serializer_class(queryset, many=True)
             return Response({
