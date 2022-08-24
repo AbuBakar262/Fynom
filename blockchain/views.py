@@ -18,7 +18,9 @@ import calendar
 import datetime
 
 class ListRetrieveNFTView(viewsets.ViewSet):
+    """this is used for listing and retrive nfts"""
     def list(self, request, *args, **kwargs):
+        """only approved nfts lists"""
         try:
             list_nft = NFT.objects.filter(nft_status="Approved").order_by('-id')
             serializer = NFTViewSerializer(list_nft, many=True)
@@ -31,6 +33,7 @@ class ListRetrieveNFTView(viewsets.ViewSet):
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, *args, **kwargs):
+        """nft will retrieve by providing nft id this is nft details view page show"""
         try:
             nft_id = self.kwargs.get('pk')
             nft_by_id = NFT.objects.filter(id=nft_id).first()
@@ -56,7 +59,7 @@ class ListRetrieveNFTView(viewsets.ViewSet):
 
 class CreateUpdateNFTView(viewsets.ViewSet):
 
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         try:
@@ -665,7 +668,8 @@ class DoBidOnNFTView(viewsets.ModelViewSet):
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                "status": False, "status_code": 400, 'msg': e.args[0],
+                "status": False, "status_code": 400,
+                'msg':[e.args[0]['non_field_errors'][0] if 'non_field_errors' in e.args[0] else e.args[0]][0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
