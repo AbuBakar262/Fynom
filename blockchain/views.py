@@ -163,7 +163,6 @@ class UserNFTsListView(viewsets.ViewSet):
                     if nft_category_id != 'all':
                         list_nft = NFT.objects.filter(Q(is_minted=True) | Q(is_minted=False), nft_owner=user_wallet.id,
                                                       is_listed=False, nft_category=nft_category_id).values('id',
-
                                                                                                  'nft_title',
                                                                                                  'fix_price',
                                                                                                  'nft_sell_type',
@@ -199,7 +198,6 @@ class UserNFTsListView(viewsets.ViewSet):
                     else:
                         list_nft = NFT.objects.filter(Q(is_minted=True) | Q(is_minted=False), nft_owner=user_wallet.id,
                                                       is_listed=False).values('id',
-
                                                                                                             'nft_title',
                                                                                                             'fix_price',
                                                                                                             'nft_sell_type',
