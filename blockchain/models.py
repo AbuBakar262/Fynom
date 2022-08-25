@@ -67,10 +67,6 @@ SOLD_STATUS = (
     ('Cancel', 'Cancel'),
 )
 
-BID_STATUS = (
-    ('Active', 'Active'),
-    ('Closed', 'Closed'),
-)
 
 class NFT(models.Model):
     thumbnail = models.ImageField(upload_to='nft/', null=True, blank=True)
@@ -131,6 +127,10 @@ class Tags(models.Model):
         return self.tag_title
 
 
+BID_STATUS = (
+    ('Active', 'Active'),
+    ('Closed', 'Closed'),
+)
 class BidOnNFT(models.Model):
     nft_detail = models.ForeignKey(NFT, blank=True, null=True, on_delete=models.CASCADE)
     seller_wallet = models.ForeignKey(UserWalletAddress, blank=True, null=True, related_name='seller_in_bidonnft',
@@ -147,6 +147,7 @@ class BidOnNFT(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     bid_status = models.CharField(max_length=50, choices=BID_STATUS, default='Active')
     is_claimed = models.BooleanField(default=False)
+    bids_on_this_nft = models.BooleanField(default=True)
 
 
 

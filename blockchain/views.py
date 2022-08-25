@@ -626,9 +626,10 @@ class BidOnNFTDetailsView(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         try:
             nft_id = self.kwargs.get('pk')
-            # nft_by_id = NFT.objects.get(id=nft_id)
+            nft_by_id = NFT.objects.filter(id=nft_id).first()
             # serializer = NFTViewSerializer(nft_by_id)
-            queryset = self.queryset.filter(nft_detail=nft_id, bid_status="Active").order_by("-id")
+            queryset = self.queryset.filter(nft_detail=nft_id, bids_on_this_nft=True, seller_wallet=nft_by_id.nft_owner,
+                                            seller_profile=nft_by_id.user).order_by("-id")
 
             serializer = self.serializer_class(queryset, many=True)
             return Response({
@@ -699,10 +700,15 @@ class ClaimNFTView(viewsets.ModelViewSet):
 
             if nft_by_id.nft_sell_type == "Timed Auction":
                 last_bid = BidOnNFT.objects.filter(nft_detail=nft_id, bidder_wallet=user_wallet.id, bid_status="Closed",
-                            is_winner=True, is_claimed=False, bidder_profile=request.user.id).order_by('-id').first()
+                            is_winner=True, is_claimed=False, bidder_profile=request.user.id, bids_on_this_nft=True,
+                            seller_wallet=nft_by_id.nft_owner.id, seller_profile=nft_by_id.user.id).order_by('-id').first()
                 request.data["sold_price"] = last_bid.bid_price
                 last_bid.is_claimed=True
                 last_bid.save()
+
+            bids_on_nft = BidOnNFT.objects.filter(nft_detail=nft_id, seller_wallet=nft_by_id.nft_owner.id,
+                     bid_status="Closed", bids_on_this_nft=True, seller_profile=nft_by_id.user.id).order_by('-id')
+            bids_on_nft.update(bids_on_this_nft=False)
 
             # nft_by_id.service_fee hardcoded in nft when nft created or ...
             request.data["commission_amount"] = (float(request.data["sold_price"])/100)*float(nft_by_id.service_fee)
