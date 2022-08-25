@@ -55,6 +55,7 @@ def SendEmailToWinner():
                 else:
                     nft.is_listed = False
                     nft.save()
+                    logger.info("No bid found on this nft.")
 
                 # if bid doesn't placed  by any user
 

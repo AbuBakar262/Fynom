@@ -815,12 +815,22 @@ class NFTExplorView(viewsets.ModelViewSet):
             # nft_tags_set = set(nft_tags_list)
             # check = all(item in List1 for item in List2)
             # a =  NFT.objects.exclude(updated_at=)
+            user = request.user.id
+            collection = Collection.objects.filter(id=collection_id).first()
+
             if not nft_sort_by:
-                if collection_id:
+                if collection and user==collection.create_by.id:
                     queryset = self.queryset.filter(nft_collection__id=collection_id)
+                else:
+                    queryset = self.queryset.filter(nft_collection__id=collection_id, is_listed=True, is_minted=True)
+
+            date = datetime.datetime.utcnow()
+            utc_time = calendar.timegm(date.utctimetuple())
 
             if nft_sort_by=="newest_listed":
-                queryset = self.queryset.filter(is_listed=True, is_minted=True, nft_status="Approved").order_by('-updated_at')
+                queryset = self.queryset.filter(
+                    Q(nft_sell_type="Timed Auction", end_datetime__gt=utc_time) | Q(nft_sell_type="Fixed Price"),
+                    is_listed=True, is_minted=True, nft_status="Approved").order_by('-updated_at')
 
             if nft_category!=None and nft_category!='all':
                 queryset = queryset.filter(nft_category__id=nft_category)
@@ -831,11 +841,11 @@ class NFTExplorView(viewsets.ModelViewSet):
             if nft_max_price:
                 queryset = queryset.filter(Q(fix_price__lte=nft_max_price) | Q(starting_price__lte=nft_max_price))
 
-            date = datetime.datetime.utcnow()
-            utc_time = calendar.timegm(date.utctimetuple())
-
-            if nft_sort_by:
-                queryset = queryset.filter(Q(nft_sell_type="Timed Auction", end_datetime__gt=utc_time) | Q(nft_sell_type="Fixed Price"))
+            # date = datetime.datetime.utcnow()
+            # utc_time = calendar.timegm(date.utctimetuple())
+            #
+            # if nft_sort_by:
+            #     queryset = queryset.filter(Q(nft_sell_type="Timed Auction", end_datetime__gt=utc_time) | Q(nft_sell_type="Fixed Price"))
 
         # data['tag_title'] = NftTagSerializer(instance.tags_set.filter(nft_create_info__id=instance.id), many=True).data
 
@@ -876,42 +886,42 @@ class NFTExplorView(viewsets.ModelViewSet):
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class FindAuctionWinerUser(viewsets.ModelViewSet):
-    """will take some arguments from frontend and send the email to the duction winer user to claim nft"""
-    # queryset = UserWalletAddress.objects.all()
-
-    def SendEmailWinNFT(self, request, *args, **kwargs):
-        """send email to the action winer user, to claim nft"""
-        try:
-            user_wallet_no = 'newuser'
-            nft_token_id = '123456789'
-            price = '0.35895'
-
-            wallet_info = UserWalletAddress.objects.filter(wallet_address=user_wallet_no).first()
-            user = User.objects.filter(id=wallet_info.user_wallet.id).first()
-            nft = NFT.objects.filter(token_id=nft_token_id).first() #nft.nft_title
-            if user.email:
-                body = f"You are the winer of '{nft.nft_title}' NFT. You win this NFT by bidding of {price} ETH. " \
-                       f"To visit and claim your " \
-                       f"NFT click on the given link " + os.getenv('FRONTEND_SHOW_NFT_URL') + str(nft.id)
-
-                data = {
-                    'subject': 'Claim Your Phynom NFT',
-                    'body': body,
-                    'to_email': user.email
-                }
-                Utill.send_email(data)
-                return Response({
-                    "status": True, "status_code": 200, 'msg': 'Email sent to the user for claim NFT.',
-                    "data": []}, status=status.HTTP_200_OK)
-            return Response({
-                "status": True, "status_code": 200, 'msg': 'Your email not found.',
-                "data": []}, status=status.HTTP_200_OK)
-
-        except Exception as e:
-            return Response({
-                "status": False, "status_code": 400, 'msg': e.args[0],
-                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+# class FindAuctionWinerUser(viewsets.ModelViewSet):
+#     """will take some arguments from frontend and send the email to the duction winer user to claim nft"""
+#     # queryset = UserWalletAddress.objects.all()
+#
+#     def SendEmailWinNFT(self, request, *args, **kwargs):
+#         """send email to the action winer user, to claim nft"""
+#         try:
+#             user_wallet_no = 'newuser'
+#             nft_token_id = '123456789'
+#             price = '0.35895'
+#
+#             wallet_info = UserWalletAddress.objects.filter(wallet_address=user_wallet_no).first()
+#             user = User.objects.filter(id=wallet_info.user_wallet.id).first()
+#             nft = NFT.objects.filter(token_id=nft_token_id).first() #nft.nft_title
+#             if user.email:
+#                 body = f"You are the winer of '{nft.nft_title}' NFT. You win this NFT by bidding of {price} ETH. " \
+#                        f"To visit and claim your " \
+#                        f"NFT click on the given link " + os.getenv('FRONTEND_SHOW_NFT_URL') + str(nft.id)
+#
+#                 data = {
+#                     'subject': 'Claim Your Phynom NFT',
+#                     'body': body,
+#                     'to_email': user.email
+#                 }
+#                 Utill.send_email(data)
+#                 return Response({
+#                     "status": True, "status_code": 200, 'msg': 'Email sent to the user for claim NFT.',
+#                     "data": []}, status=status.HTTP_200_OK)
+#             return Response({
+#                 "status": True, "status_code": 200, 'msg': 'Your email not found.',
+#                 "data": []}, status=status.HTTP_200_OK)
+#
+#         except Exception as e:
+#             return Response({
+#                 "status": False, "status_code": 400, 'msg': e.args[0],
+#                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserDisputeManagementView(viewsets.ViewSet):
