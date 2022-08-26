@@ -102,6 +102,7 @@ class NFT(models.Model):
     service_fee = models.FloatField(blank=True, null=True)
     is_minted = models.BooleanField(default=False)
     is_listed = models.BooleanField(default=False)
+    e_mail = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

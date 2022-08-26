@@ -18,7 +18,7 @@ def SendEmailToWinner():
         logger.info("--------------API Called-------------")
         date = datetime.datetime.utcnow()
         utc_time = calendar.timegm(date.utctimetuple())
-        nfts = NFT.objects.filter(nft_sell_type="Timed Auction", end_datetime__lt=utc_time, is_listed=True, nft_status='Approved')
+        nfts = NFT.objects.filter(nft_sell_type="Timed Auction", end_datetime__lt=utc_time, is_listed=True, e_mail=True, nft_status='Approved')
 
         if nfts:
             for nft in nfts:
@@ -30,6 +30,8 @@ def SendEmailToWinner():
                     # nft.save()
                     if highest_bid and highest_bid.is_email is False:
                         user = User.objects.filter(id=highest_bid.bidder_profile.id).first()
+                        nft.e_mail = False
+                        nft.save()
 
                         if nft.user != user:
                             if user.email:
@@ -54,6 +56,7 @@ def SendEmailToWinner():
                                 logger.info("Email send to user for clime NFT")
                 else:
                     nft.is_listed = False
+                    nft.e_mail = False
                     nft.save()
                     logger.info("No bid found on this nft.")
 

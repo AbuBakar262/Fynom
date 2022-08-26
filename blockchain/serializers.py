@@ -60,7 +60,7 @@ class NFTViewSerializer(serializers.ModelSerializer):
         fields = ["id", "thumbnail", "nft_picture", "teaser", "nft_title", "nft_collection", "nft_status", "user",
                   "description", "nft_category", "royality", "hash", "contract_id", "token_id", 'top_nft', "nft_creator",
                   "nft_owner", "starting_price", "ending_price","start_dateTime","end_datetime",
-                  "nft_status", "nft_subject", "created_at", "updated_at", "service_fee",
+                  "nft_status", "nft_subject", "created_at", "updated_at", "service_fee", "e_mail",
                    "nft_subject", "status_remarks", "nft_sell_type", "fix_price", "is_minted", "is_listed", ]
 
     def create(self, validated_data):
@@ -73,18 +73,24 @@ class NFTViewSerializer(serializers.ModelSerializer):
                     SupportingDocuments.objects.create(nft_create_info=nft, documents=doc)
             return nft
 
-    # def update(self, instance, validated_data):
-    #     # obj = NFT.objects.update(
-    #     #     nft_status = validated_data['nft_status']
-    #     # )
+    # def update(self, instance, validated_data): #user = self.context.get('user')
+    #     status = validated_data['nft_status']
+    #     listed = validated_data['is_listed']
+    #     # minted = validated_data['is_minted']
+    #     # valid_user =
+    #     if status=="Approved" and listed==True:
+    #         validated_data['e_mail'] = True
+    #     instance.save()
+    #     # obj = NFT.objects.update(nft_status = validated_data['nft_status'])
     #     # obj.update()
-    #     with transaction.atomic():
-    #         nft_docs = dict(self.context['request'].data.lists())['documents']
-    #         prev_doc = SupportingDocuments.objects.filter(nft_create_info__id=instance.id)
-    #         prev_doc.delete()
-    #         for doc in nft_docs:
-    #             SupportingDocuments.objects.create(nft_create_info=instance, documents=doc)
-    #         return instance
+    #     return instance
+        # with transaction.atomic():
+        #     nft_docs = dict(self.context['request'].data.lists())['documents']
+        #     prev_doc = SupportingDocuments.objects.filter(nft_create_info__id=instance.id)
+        #     prev_doc.delete()
+        #     for doc in nft_docs:
+        #         SupportingDocuments.objects.create(nft_create_info=instance, documents=doc)
+        #     return instance
 
 
     def to_representation(self, instance):
