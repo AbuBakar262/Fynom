@@ -859,3 +859,16 @@ class UserDisputeManagementView(viewsets.ViewSet):
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class SearchAPIView(viewsets.ViewSet):
+    def search_function(self, request, *args, **kwargs):
+        try:
+            item = self.request.query_params.get('item')
+            queryset = NFT.objects.filter(nft_title__icontains=item, nft_status='Approved', is_listed=True)
+
+            paginator = CustomPageNumberPagination()
+            result = paginator.paginate_queryset(queryset, request)
+            serializer = NFTExplorSerializer(result, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0], "data": []}, status=status.HTTP_400_BAD_REQUEST)

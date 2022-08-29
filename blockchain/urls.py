@@ -23,6 +23,7 @@ urlpatterns = [
     path('bid_on_nft_details/<int:pk>/', BidOnNFTDetailsView.as_view({'get': 'retrieve'}), name="bid_on_nft_details"),
     path('do_bid_on_nft/', DoBidOnNFTView.as_view({'post': 'create'}), name="do_bid_on_nft"),
     path('contact_us/', UserDisputeManagementView.as_view({'post': 'dispute_email'}), name="contact_us"),
+    path('search_with/', SearchAPIView.as_view({'get': 'search_function'}), name="search_with"),
     # path('find_nft_winer/', cron.SendEmailToWinner, name="find_nft_winer"),
     # path('find_nft_winer/', FindAuctionWinerUser.as_view({'post': 'SendEmailWinNFT'}), name="find_nft_winer"),
     # path('do_bid_on_nft/', NFTExplorView.as_view({'get': 'list'}), name="do_bid_on_nft"),
