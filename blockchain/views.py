@@ -588,8 +588,8 @@ class ClaimNFTView(viewsets.ModelViewSet):
 
             if nft_by_id.nft_sell_type == "Timed Auction":
                 last_bid = BidOnNFT.objects.filter(nft_detail=nft_id, bidder_wallet=user_wallet.id,
-                                                   bidder_profile=request.user.id).order_by('-id').first()
-
+                            bidder_profile=request.user.id, seller_wallet=nft_by_id.nft_owner.id,
+                            seller_profile=nft_by_id.user.id, is_claimed=False).order_by('-id').first()
                 request.data["sold_price"] = last_bid.bid_price
                 last_bid.is_claimed=True
                 last_bid.save()
