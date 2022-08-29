@@ -107,9 +107,9 @@ class CreateUpdateNFTView(viewsets.ViewSet):
             # request.data._mutable = True
             # request.data['nft_status'] = nft_status
 
-            if nft_by_id.nft_owner != nft_by_id.nft_creator:
-                nft_commission = Commission.objects.first()
-                request.data["service_fee"] = nft_commission.set_commission  # hardcode set_commission
+            # if nft_by_id.nft_owner != nft_by_id.nft_creator:
+            #     nft_commission = Commission.objects.first()
+            #     request.data["service_fee"] = nft_commission.set_commission  # hardcode set_commission
 
             if nft_by_id:
                 serializer = NFTViewSerializer(nft_by_id, data=request.data, context={'request':request, 'user': request.user}, partial=True)
