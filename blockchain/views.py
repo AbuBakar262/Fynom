@@ -588,14 +588,14 @@ class ClaimNFTView(viewsets.ModelViewSet):
 
             if nft_by_id.nft_sell_type == "Timed Auction":
                 last_bid = BidOnNFT.objects.filter(nft_detail=nft_id, bidder_wallet=user_wallet.id,
-                            bidder_profile=request.user.id, seller_wallet=nft_by_id.nft_owner.id,
+                            bidder_profile=request.user.id, seller_wallet=nft_by_id.nft_owner.id, bids_on_this_nft=True,
                             seller_profile=nft_by_id.user.id, is_claimed=False).order_by('-id').first()
                 request.data["sold_price"] = last_bid.bid_price
                 last_bid.is_claimed=True
                 last_bid.save()
 
                 bids_on_nft = BidOnNFT.objects.filter(nft_detail=nft_id, seller_wallet=nft_by_id.nft_owner.id,
-                         bid_status="Closed", bids_on_this_nft=True, seller_profile=nft_by_id.user.id).order_by('-id')
+                         bids_on_this_nft=True, seller_profile=nft_by_id.user.id).order_by('-id')
                 bids_on_nft.update(bids_on_this_nft=False)
 
             # nft_by_id.service_fee hardcoded in nft when nft created or ...
