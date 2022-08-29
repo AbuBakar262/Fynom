@@ -25,9 +25,9 @@ class AdminChangePasswordSerializer(serializers.Serializer):
         password2 = attrs.get('password2')
         user = self.context.get('user')
         if not user.check_password(old_password):
-            raise serializers.ValidationError("Old Password does't match")
+            raise serializers.ValidationError("Old password does't match")
         if password1 != password2:
-            raise serializers.ValidationError("Password and Confirm Password does't match")
+            raise serializers.ValidationError("Password and confirm password does't match")
         user.set_password(password1)
         user.save()
         return attrs
