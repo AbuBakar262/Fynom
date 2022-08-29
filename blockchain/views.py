@@ -632,6 +632,8 @@ class ClaimNFTView(viewsets.ModelViewSet):
             collection = Collection.objects.filter(create_by=request.user.id, name="Default").first()
 
             request.data['nft_collection'] = collection.id
+            request.data['e_mail'] = False
+
             # request.data['nft_category'] = category.id
 
 
