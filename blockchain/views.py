@@ -102,7 +102,8 @@ class CreateUpdateNFTView(viewsets.ViewSet):
             nft_status = request.data['nft_status']
             listed = request.data['is_listed']
             type_a = request.data['nft_sell_type']
-            if nft_status == "Approved" and type_a=="Timed Auction" and listed == True:
+            request.data._mutable = True
+            if nft_status == "Approved" and type_a=="Timed Auction" and listed == 'True':
                 request.data['e_mail'] = True
             # request.data._mutable = True
             # request.data['nft_status'] = nft_status
@@ -586,9 +587,9 @@ class ClaimNFTView(viewsets.ModelViewSet):
                 request.data["sold_price"] = nft_by_id.fix_price
 
             if nft_by_id.nft_sell_type == "Timed Auction":
-                last_bid = BidOnNFT.objects.filter(nft_detail=nft_id, bidder_wallet=user_wallet.id, bid_status="Closed",
-                            bidder_profile=request.user.id, bids_on_this_nft=True,seller_wallet=nft_by_id.nft_owner.id,
-                            seller_profile=nft_by_id.user.id, is_winner=True, is_claimed=False).order_by('-id').first()
+                last_bid = BidOnNFT.objects.filter(nft_detail=nft_id, bidder_wallet=user_wallet.id,
+                                                   bidder_profile=request.user.id).order_by('-id').first()
+
                 request.data["sold_price"] = last_bid.bid_price
                 last_bid.is_claimed=True
                 last_bid.save()
