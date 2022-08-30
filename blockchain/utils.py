@@ -1,5 +1,6 @@
 import requests
 import json
+import numpy as np
 
 
 def get_eth_price(amount):
@@ -26,5 +27,11 @@ def validateEmail(email):
         return True
     except ValidationError:
         return False
+
+
+def scientific_to_float(amount):
+    if 'e-' in str(amount):
+        amount=np.format_float_positional(amount, trim='-')
+    return amount
 
 

@@ -120,15 +120,15 @@ class UserCollectionSerializer(serializers.ModelSerializer):
     # user_in_collection = UserProfileSerializer(many=True, read_only=True)
     # user = serializers.SerializerMethodField('get_user')
     # wallet_address = serializers.SlugRelatedField(queryset=UserWalletAddress.objects.all(), slug_field='wallet_address')
-    # logo_image = serializers.ImageField(required=True)
+    logo_image = serializers.ImageField(required=True)
     # featured_image = serializers.ImageField(required=True)
-    # cover_image = serializers.ImageField(required=True)
+    cover_image = serializers.ImageField(required=True)
     name = serializers.CharField(required=True)
     # website_url = serializers.CharField(required=True)
     # instagram_url = serializers.CharField(required=True)
     description = serializers.CharField(required=True)
     # create_by = serializers.CharField(required=True)
-    # collection_category = serializers.CharField(required=True)
+    collection_category = serializers.CharField(required=True)
     class Meta:
         model = Collection
         fields = ["id", "logo_image", "featured_image", "cover_image", "name", "website_url", "instagram_url",

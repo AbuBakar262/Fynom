@@ -10,12 +10,14 @@ from user.serializers import UserProfileDetailsViewSerializer
 
 
 class NftTagSerializer(serializers.ModelSerializer):
+    tag_title = serializers.CharField(required=True)
     class Meta:
         model = Tags
         fields = ["id", "tag_title", "created_at", "updated_at"]
 
 
 class NFTCommissionViewSerializer(serializers.ModelSerializer):
+    set_commission = serializers.CharField(required=True)
     class Meta:
         model = Commission
         fields = ["id", "set_commission", "created_at", "updated_at"]
@@ -54,6 +56,16 @@ class NFTCollectionSerializer(serializers.ModelSerializer):
 class NFTViewSerializer(serializers.ModelSerializer):
     # tags = serializers.ListField(child=serializers.CharField(required=True), allow_empty=False)
     # tags = serializers.SerializerMethodField('get_tag')
+    thumbnail = serializers.ImageField(required=True)
+    nft_picture = serializers.FileField(required=True)
+    nft_title = serializers.CharField(required=True)
+    nft_collection = serializers.CharField(required=True)
+    description = serializers.CharField(required=True)
+    nft_category = serializers.CharField(required=True)
+    royality = serializers.FloatField(required=True)
+    nft_sell_type = serializers.CharField(required=True)
+    service_fee = serializers.CharField(required=True)
+
 
     class Meta:
         model = NFT
@@ -62,6 +74,12 @@ class NFTViewSerializer(serializers.ModelSerializer):
                   "nft_owner", "starting_price", "ending_price","start_dateTime","end_datetime",
                   "nft_status", "nft_subject", "created_at", "updated_at", "service_fee", "e_mail",
                    "nft_subject", "status_remarks", "nft_sell_type", "fix_price", "is_minted", "is_listed", ]
+
+    def validate(self, attrs):
+        royalty = attrs.get('royality')
+        if type(royalty%1) is float and royalty%1 != 0:
+            raise serializers.ValidationError("Please enter an integer number.")
+
 
     def create(self, validated_data):
         with transaction.atomic():
@@ -109,6 +127,7 @@ class NFTViewSerializer(serializers.ModelSerializer):
 
 
 class NFTCategorySerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(required=True)
     class Meta:
         model = NFTCategory
         fields = "__all__"
@@ -128,6 +147,7 @@ class NFTCategorySerializer(serializers.ModelSerializer):
 #             return None
 
 class UserNFTStatusUpdateViewSerializer(serializers.ModelSerializer):
+    nft_status = serializers.CharField(required=True)
     class Meta:
         model = NFT
         fields = ["id", "nft_status", "nft_subject", "status_remarks"]
@@ -164,6 +184,8 @@ class TransactionNFTSerializer(serializers.ModelSerializer):
 
 
 class BidOnNFTDetailsSerializer(serializers.ModelSerializer):
+    nft_detail = serializers.CharField(required=True)
+    bid_price = serializers.CharField(required=True)
 
     class Meta:
         model = BidOnNFT

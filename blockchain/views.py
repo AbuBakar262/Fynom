@@ -6,7 +6,7 @@ import os
 from backend.pagination import CustomPageNumberPagination
 from blockchain.serializers import *
 from blockchain.models import *
-from blockchain.utils import validateEmail
+from blockchain.utils import validateEmail, scientific_to_float
 from user.models import User
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import viewsets
@@ -227,14 +227,19 @@ class UserNFTsListView(viewsets.ViewSet):
                     if nft.get('nft_sell_type')=="Fixed Price":
                         usd_price = get_eth_price(nft.get('fix_price'))
                         nft["usd_price"] = usd_price
+                        nft["fix_price"] = scientific_to_float(nft.get('fix_price'))
+
                     else:
                         bid = BidOnNFT.objects.filter(nft_detail=nft.get('id'), bid_status="Active",
                                                       seller_profile=nft.get('nft_user_id')).order_by('-id').first()
                         if bid:
                             usd_price = get_eth_price(bid.bid_price)
+                            # bid.bid_price = scientific_to_float(bid.bid_price)
                         else:
                             usd_price = get_eth_price(nft.get('starting_price'))
+                        nft["starting_price"] = scientific_to_float(nft.get('starting_price'))
                         nft["usd_price"] = usd_price
+
 
                 paginator = CustomPageNumberPagination()
                 result = paginator.paginate_queryset(list_nft, request)
