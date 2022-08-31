@@ -172,7 +172,7 @@ class TransactionNFTSerializer(serializers.ModelSerializer):
         # read_only_fields = ('nft_title','nft_picture', 'seller_address', 'seller_address', 'buyer_address')
         fields = ["id", "nft", "nft_token_id", "seller", "seller_user", "buyer", "buyer_user", "sold_price",
                   "commission_percentage","commission_amount", "category_of_nft","created_at", "royality_percentage",
-                  "royality_amount"]
+                  "royality_amount", "seller_asset"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

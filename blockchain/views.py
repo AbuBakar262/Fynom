@@ -613,6 +613,7 @@ class ClaimNFTView(viewsets.ModelViewSet):
             # nft_by_id.service_fee hardcoded in nft when nft created or ...
             request.data["commission_amount"] = (float(request.data["sold_price"])/100)*float(nft_by_id.service_fee)
             request.data["royality_amount"] = (float(request.data["sold_price"]) / 100) * float(nft_by_id.royality)
+            request.data["seller_asset"] = (float(request.data["sold_price"])-((request.data["commission_amount"])+(request.data["royality_amount"])))
 
             serializer_transaction = TransactionNFTSerializer(data=request.data, context={'user': request.user})
             serializer_transaction.is_valid(raise_exception=True)

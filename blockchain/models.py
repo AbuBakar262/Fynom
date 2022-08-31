@@ -164,6 +164,7 @@ class Transaction(models.Model):
     buyer = models.ForeignKey(UserWalletAddress, blank=True, null=True,  related_name='buyer_in_transaction', on_delete=models.CASCADE)
     buyer_user = models.ForeignKey(User, blank=True, null=True,  related_name='buyer_user_in_transaction', on_delete=models.CASCADE)
     sold_price = models.FloatField(blank=True, null=True)
+    seller_asset = models.CharField(max_length=250, blank=True, null=True)
     commission_percentage = models.CharField(max_length=250, blank=True, null=True)
     commission_amount = models.TextField(blank=True, null=True)
     royality_percentage = models.CharField(max_length=250, blank=True, null=True)
