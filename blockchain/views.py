@@ -472,6 +472,8 @@ class ListTransactionNFTView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         try:
             nft_transaction = Transaction.objects.all().order_by("-id")
+            # for transaction in nft_transaction:
+            #     transaction['commission_amount'] = scientific_to_float(transaction.commission_amount)
             paginator = CustomPageNumberPagination()
             result = paginator.paginate_queryset(nft_transaction, request)
             serializer = TransactionNFTSerializer(result, many=True)
@@ -605,7 +607,7 @@ class ClaimNFTView(viewsets.ModelViewSet):
                 bids_on_nft.update(bids_on_this_nft=False)
 
             # nft_by_id.service_fee hardcoded in nft when nft created or ...
-            request.data["commission_amount"] = (float(request.data["sold_price"])/100)*float(nft_by_id.service_fee)
+            # request.data["commission_amount"] = (float(request.data["sold_price"])/100)*float(nft_by_id.service_fee)
 
             serializer_transaction = TransactionNFTSerializer(data=request.data, context={'user': request.user})
             serializer_transaction.is_valid(raise_exception=True)

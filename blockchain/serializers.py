@@ -4,7 +4,7 @@ from rest_framework import serializers
 import calendar
 import datetime
 from blockchain.models import *
-from blockchain.utils import get_eth_price
+from blockchain.utils import get_eth_price, scientific_to_float
 from user.models import User
 from user.serializers import UserProfileDetailsViewSerializer
 
@@ -166,6 +166,7 @@ class TransactionNFTSerializer(serializers.ModelSerializer):
     # # nft_thumbnail = serializers.ReadOnlyField(source='nft.thumbnail')
     # seller_address = serializers.ReadOnlyField(source='seller.wallet_address')
     # buyer_address = serializers.ReadOnlyField(source='buyer.wallet_address')
+    commission_amount = serializers.CharField(required=True)
     class Meta:
         model = Transaction
         # read_only_fields = ('nft_title','nft_picture', 'seller_address', 'seller_address', 'buyer_address')
@@ -185,13 +186,14 @@ class TransactionNFTSerializer(serializers.ModelSerializer):
         data['buyer_user'] = User.objects.filter(id=instance.buyer_user.id).values("id", "name", "username",
                                 user_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("profile_picture"),
                                                              output_field=CharField()))[0]
+        # data['commission_amount'] = scientific_to_float(instance.commission_amount)
         return data
               # nft_documents=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("documents"), output_field=CharField() ))
 
 
 class BidOnNFTDetailsSerializer(serializers.ModelSerializer):
-    nft_detail = serializers.CharField(required=True)
-    bid_price = serializers.CharField(required=True)
+    # nft_detail = serializers.IntegerField(required=True)
+    # bid_price = serializers.FloatField(required=True)
 
     class Meta:
         model = BidOnNFT
