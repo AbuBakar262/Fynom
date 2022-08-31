@@ -171,7 +171,8 @@ class TransactionNFTSerializer(serializers.ModelSerializer):
         model = Transaction
         # read_only_fields = ('nft_title','nft_picture', 'seller_address', 'seller_address', 'buyer_address')
         fields = ["id", "nft", "nft_token_id", "seller", "seller_user", "buyer", "buyer_user", "sold_price",
-                  "commission_percentage","commission_amount", "category_of_nft","created_at"]
+                  "commission_percentage","commission_amount", "category_of_nft","created_at", "royality_percentage",
+                  "royality_amount"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -299,3 +300,29 @@ class NFTExplorSerializer(serializers.ModelSerializer):
             return obj.teaser.url
         except Exception as e:
             return None
+
+
+
+class ClaimNFTViewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = NFT
+        fields = ["id", "thumbnail", "nft_picture", "teaser", "nft_title", "nft_collection", "nft_status", "user",
+                  "description", "nft_category", "royality", "hash", "contract_id", "token_id", 'top_nft', "nft_creator",
+                  "nft_owner", "starting_price", "ending_price","start_dateTime","end_datetime",
+                  "nft_status", "nft_subject", "created_at", "updated_at", "service_fee", "e_mail",
+                   "nft_subject", "status_remarks", "nft_sell_type", "fix_price", "is_minted", "is_listed"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['tag_title'] = NftTagSerializer(instance.tags_set.filter(nft_create_info__id=instance.id), many=True).data
+        from django.db.models import F, Value, CharField
+        import os
+        data['documents'] = SupportingDocuments.objects.filter(nft_create_info_id=instance.id).values('id',
+              'nft_create_info', nft_documents=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("documents"), output_field=CharField() ))
+        data['user'] = UserDataSerializer(instance.user).data
+        # data['nft_creator'] = UserWalletAddressSerializer(instance.user).data
+        # data['nft_owner'] = UserWalletAddressSerializer(instance.user).data
+        data['nft_collection'] = NFTCollectionSerializer(instance.nft_collection).data
+        data['nft_category'] = NFTCategorySerializer(instance.nft_category).data
+        return data

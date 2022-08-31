@@ -7,6 +7,7 @@ from backend.pagination import CustomPageNumberPagination
 from blockchain.serializers import *
 from blockchain.models import *
 from blockchain.utils import validateEmail, scientific_to_float
+from user.custom_permissions import IsEmailExist
 from user.models import User
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import viewsets
@@ -540,7 +541,7 @@ class BidOnNFTDetailsView(viewsets.ModelViewSet):
 class DoBidOnNFTView(viewsets.ModelViewSet):
     queryset = BidOnNFT.objects.all()
     serializer_class = BidOnNFTDetailsSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsEmailExist]
 
     def create(self, request, *args, **kwargs):
         try:
@@ -589,7 +590,10 @@ class ClaimNFTView(viewsets.ModelViewSet):
             request.data["buyer"] = user_wallet.id
             request.data["buyer_user"] = request.user.id
             request.data["commission_percentage"] = nft_by_id.service_fee
+            request.data["royality_percentage"] = nft_by_id.royality
             request.data["category_of_nft"] = nft_by_id.nft_category.category_name
+            request.data["nft_token_id"] = nft_by_id.token_id
+
 
             if nft_by_id.nft_sell_type == "Fixed Price":
                 request.data["sold_price"] = nft_by_id.fix_price
@@ -607,7 +611,8 @@ class ClaimNFTView(viewsets.ModelViewSet):
                 bids_on_nft.update(bids_on_this_nft=False)
 
             # nft_by_id.service_fee hardcoded in nft when nft created or ...
-            # request.data["commission_amount"] = (float(request.data["sold_price"])/100)*float(nft_by_id.service_fee)
+            request.data["commission_amount"] = (float(request.data["sold_price"])/100)*float(nft_by_id.service_fee)
+            request.data["royality_amount"] = (float(request.data["sold_price"]) / 100) * float(nft_by_id.royality)
 
             serializer_transaction = TransactionNFTSerializer(data=request.data, context={'user': request.user})
             serializer_transaction.is_valid(raise_exception=True)
@@ -646,7 +651,7 @@ class ClaimNFTView(viewsets.ModelViewSet):
 
 
             if nft_by_id:
-                serializer = NFTViewSerializer(nft_by_id, data=request.data, partial=True)
+                serializer = ClaimNFTViewSerializer(nft_by_id, data=request.data, partial=True)
                 # request.data._mutable = True
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
