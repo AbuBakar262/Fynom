@@ -166,7 +166,7 @@ class TransactionNFTSerializer(serializers.ModelSerializer):
     # # nft_thumbnail = serializers.ReadOnlyField(source='nft.thumbnail')
     # seller_address = serializers.ReadOnlyField(source='seller.wallet_address')
     # buyer_address = serializers.ReadOnlyField(source='buyer.wallet_address')
-    commission_amount = serializers.CharField(required=True)
+    # commission_amount = serializers.CharField(required=True)
     class Meta:
         model = Transaction
         # read_only_fields = ('nft_title','nft_picture', 'seller_address', 'seller_address', 'buyer_address')
