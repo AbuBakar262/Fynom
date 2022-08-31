@@ -85,7 +85,8 @@ class CreateUpdateNFTView(viewsets.ViewSet):
                 "data": serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
-                "status": False, "status_code": 400, 'msg': e.args[0],
+                "status": False, "status_code": 400,
+                'msg':[e.args[0]['non_field_errors'][0] if 'non_field_errors' in e.args[0] else e.args[0]][0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 

@@ -59,9 +59,9 @@ class NFTViewSerializer(serializers.ModelSerializer):
     thumbnail = serializers.ImageField(required=True)
     nft_picture = serializers.FileField(required=True)
     nft_title = serializers.CharField(required=True)
-    nft_collection = serializers.CharField(required=True)
+    # nft_collection = serializers.IntegerField(required=True)
     description = serializers.CharField(required=True)
-    nft_category = serializers.CharField(required=True)
+    # nft_category = serializers.IntegerField(required=True)
     royality = serializers.FloatField(required=True)
     nft_sell_type = serializers.CharField(required=True)
     service_fee = serializers.CharField(required=True)
@@ -77,9 +77,15 @@ class NFTViewSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         royalty = attrs.get('royality')
+        nft_collection = attrs.get('nft_collection')
+        nft_category = attrs.get('nft_category')
         if type(royalty%1) is float and royalty%1 != 0:
             raise serializers.ValidationError("Please enter an integer number.")
-
+        if not nft_collection:
+            raise serializers.ValidationError("please select nft collection.")
+        if not nft_category:
+            raise serializers.ValidationError("please select nft category.")
+        return attrs
 
     def create(self, validated_data):
         with transaction.atomic():
