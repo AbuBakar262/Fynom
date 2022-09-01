@@ -59,8 +59,8 @@ class UserProfileDetailsViewSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    # name= serializers.CharField(required=True)
-    # username= serializers.CharField(required=True)
+    name= serializers.CharField(required=True)
+    username= serializers.CharField(required=True)
     email = serializers.CharField(required=True)
     # user_in_wallet_address = UserProfileDetailsViewSerializer(many=False)
     user_wallet_address = serializers.SerializerMethodField('get_metamask')

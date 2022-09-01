@@ -183,6 +183,10 @@ class UserProfileUpdateView(viewsets.ViewSet):
                     serializer = UserProfileSerializer(user_id, data=request.data, partial=True)
                     serializer.is_valid(raise_exception=True)
                     serializer.save()
+                    # if not user_username:
+                    #     return Response({
+                    #         "status": True, "status_code": 200, 'msg': 'E-mail Updated Successfully',
+                    #         "data": serializer.data}, status=status.HTTP_200_OK)
                     return Response({
                         "status": True, "status_code": 200, 'msg': 'User Profile Updated Successfully',
                         "data": serializer.data}, status=status.HTTP_200_OK)

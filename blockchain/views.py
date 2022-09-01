@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import F, Value, CharField
 import os
+from decimal import Decimal
 from backend.pagination import CustomPageNumberPagination
 from blockchain.serializers import *
 from blockchain.models import *
@@ -611,9 +612,9 @@ class ClaimNFTView(viewsets.ModelViewSet):
                 bids_on_nft.update(bids_on_this_nft=False)
 
             # nft_by_id.service_fee hardcoded in nft when nft created or ...
-            request.data["commission_amount"] = (float(request.data["sold_price"])/100)*float(nft_by_id.service_fee)
-            request.data["royality_amount"] = (float(request.data["sold_price"]) / 100) * float(nft_by_id.royality)
-            request.data["seller_asset"] = (float(request.data["sold_price"])-((request.data["commission_amount"])+(request.data["royality_amount"])))
+            request.data["commission_amount"] = float(Decimal(str(request.data["sold_price"]))/Decimal("100")*Decimal(str(nft_by_id.service_fee)))
+            request.data["royality_amount"] = float(Decimal(str(request.data["sold_price"]))/Decimal("100")*Decimal(str(nft_by_id.royality)))
+            request.data["seller_asset"] = float(Decimal(str(request.data["sold_price"]))-Decimal(str(request.data["commission_amount"]))-Decimal(str(request.data["royality_amount"])))
 
             serializer_transaction = TransactionNFTSerializer(data=request.data, context={'user': request.user})
             serializer_transaction.is_valid(raise_exception=True)
