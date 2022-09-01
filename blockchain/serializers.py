@@ -187,7 +187,7 @@ class TransactionNFTSerializer(serializers.ModelSerializer):
         data['buyer_user'] = User.objects.filter(id=instance.buyer_user.id).values("id", "name", "username",
                                 user_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("profile_picture"),
                                                              output_field=CharField()))[0]
-        data['commission_amount'] = scientific_to_float(instance.commission_amount)
+        data['commission_amount'] = scientific_to_float(float(instance.commission_amount))
         return data
               # nft_documents=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("documents"), output_field=CharField() ))
 
