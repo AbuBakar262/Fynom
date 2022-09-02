@@ -8,7 +8,7 @@ from backend.pagination import CustomPageNumberPagination
 from blockchain.serializers import *
 from blockchain.models import *
 from blockchain.utils import validateEmail, scientific_to_float
-from user.custom_permissions import IsEmailExist
+from user.custom_permissions import IsEmailExist, IsApprovedUser
 from user.models import User
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import viewsets
@@ -61,7 +61,7 @@ class ListRetrieveNFTView(viewsets.ViewSet):
 
 class CreateUpdateNFTView(viewsets.ViewSet):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsApprovedUser]
 
     def create(self, request, *args, **kwargs):
         try:
@@ -718,6 +718,7 @@ class NFTExplorView(viewsets.ModelViewSet):
             nft_tags = self.request.query_params.get('tags')
             nft_category = self.request.query_params.get('category')
             collection_id = self.request.query_params.get('collection')
+            search = self.request.query_params.get('search')
             if nft_tags:
                 nft_tags_list = nft_tags.split(',')
                 nft_tags_set = set(list(map(int, nft_tags_list)))
@@ -740,6 +741,9 @@ class NFTExplorView(viewsets.ModelViewSet):
                 queryset = self.queryset.filter(
                     Q(nft_sell_type="Timed Auction", end_datetime__gt=utc_time) | Q(nft_sell_type="Fixed Price"),
                     is_listed=True, is_minted=True, nft_status="Approved").order_by('-updated_at')
+
+            if search:
+                queryset = queryset.filter(nft_title__icontains=search, nft_status='Approved', is_listed=True)
 
             if nft_category!=None and nft_category!='all':
                 queryset = queryset.filter(nft_category__id=nft_category)
@@ -777,6 +781,7 @@ class NFTExplorView(viewsets.ModelViewSet):
             #         queryset = self.queryset.filter(fix_price__lte=nft_max_price, starting_price__lte=nft_max_price)
 
             # queryset = self.queryset.filter(Q(is_minted=True) | Q(is_minted=False),)
+
             paginator = CustomPageNumberPagination()
             if nft_tags:
                 result = paginator.paginate_queryset(nft_queryset, request)
@@ -878,8 +883,11 @@ class SearchAPIView(viewsets.ViewSet):
     def search_function(self, request, *args, **kwargs):
         try:
             item = self.request.query_params.get('item')
-            queryset = NFT.objects.filter(nft_title__icontains=item, nft_status='Approved', is_listed=True)
-
+            date = datetime.datetime.utcnow()
+            utc_time = calendar.timegm(date.utctimetuple())
+            # queryset = NFT.objects.filter(nft_title__icontains=item, Q(nft_sell_type="Timed Auction", end_datetime__gt=utc_time) | Q(nft_sell_type="Fixed Price"),
+            #         is_listed=True, is_minted=True, nft_status="Approved").order_by('-updated_at')
+            queryset = NFT.objects.filter(nft_title__icontains=item, nft_status='Approved', is_listed=True).order_by('-updated_at')
             paginator = CustomPageNumberPagination()
             result = paginator.paginate_queryset(queryset, request)
             serializer = NFTExplorSerializer(result, many=True)
