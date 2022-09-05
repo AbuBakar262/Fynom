@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import F, Value, CharField
 import os
+from datetime import datetime, timedelta
 from decimal import Decimal
 from backend.pagination import CustomPageNumberPagination
 from blockchain.serializers import *
@@ -474,6 +475,10 @@ class ListTransactionNFTView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         try:
             nft_transaction = Transaction.objects.all().order_by("-id")
+            filter_by = request.query_params.get('filter_by')
+            if filter_by:
+                filter_by = int(filter_by)
+                nft_transaction = nft_transaction.filter(created_at__gte=datetime.datetime.now()-datetime.timedelta(days=filter_by))
             # for transaction in nft_transaction:
             #     transaction['commission_amount'] = scientific_to_float(transaction.commission_amount)
             paginator = CustomPageNumberPagination()
