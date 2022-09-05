@@ -724,6 +724,7 @@ class NFTExplorView(viewsets.ModelViewSet):
             nft_category = self.request.query_params.get('category')
             collection_id = self.request.query_params.get('collection')
             search = self.request.query_params.get('search')
+            filter_by = request.query_params.get('filter_by')
             if nft_tags:
                 nft_tags_list = nft_tags.split(',')
                 nft_tags_set = set(list(map(int, nft_tags_list)))
@@ -752,6 +753,10 @@ class NFTExplorView(viewsets.ModelViewSet):
 
             if nft_category!=None and nft_category!='all':
                 queryset = queryset.filter(nft_category__id=nft_category)
+
+            if filter_by:
+                filter_by = int(filter_by)
+                queryset = queryset.filter(created_at__gte=datetime.datetime.now()-datetime.timedelta(days=filter_by))
 
             if nft_min_price:
                 queryset = queryset.filter(Q(fix_price__gte=nft_min_price) | Q(starting_price__gte=nft_min_price))
