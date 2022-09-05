@@ -3,6 +3,7 @@ import os
 import calendar
 import datetime
 from blockchain.models import *
+from blockchain.utils import scientific_to_float
 from user.models import User
 from user.utils import Utill
 
@@ -35,7 +36,8 @@ def SendEmailToWinner():
 
                         if nft.user != user:
                             if user.email:
-                                body = f"You are the winner of '{nft.nft_title}' NFT. You win this NFT by bidding of {highest_bid.bid_price} ETH. " \
+                                winning_price = scientific_to_float(highest_bid.bid_price)
+                                body = f"You are the winner of '{nft.nft_title}' NFT. You win this NFT by bidding of {winning_price} ETH. " \
                                        f"To visit and claim your " \
                                        f"NFT click on the given link " + os.getenv('FRONTEND_SHOW_NFT_URL') + str(nft.id)
 
