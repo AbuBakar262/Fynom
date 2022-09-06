@@ -475,8 +475,8 @@ class ListTransactionNFTView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         try:
             nft_transaction = Transaction.objects.all().order_by("-id")
-            filter_by = request.query_params.get('filter_by')
-            if filter_by:
+            filter_by = self.request.query_params.get('filter_by')
+            if filter_by and filter_by != 'null':
                 filter_by = int(filter_by)
                 nft_transaction = nft_transaction.filter(created_at__gte=datetime.datetime.now()-datetime.timedelta(days=filter_by))
             # for transaction in nft_transaction:
@@ -724,7 +724,7 @@ class NFTExplorView(viewsets.ModelViewSet):
             nft_category = self.request.query_params.get('category')
             collection_id = self.request.query_params.get('collection')
             search = self.request.query_params.get('search')
-            filter_by = request.query_params.get('filter_by')
+            filter_by = self.request.query_params.get('filter_by')
             if nft_tags:
                 nft_tags_list = nft_tags.split(',')
                 nft_tags_set = set(list(map(int, nft_tags_list)))
