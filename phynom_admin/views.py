@@ -1,9 +1,12 @@
 from django.shortcuts import render
 
 # Create your views here.
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
+from phynom_admin.models import *
+from rest_framework import status, viewsets
 from user.models import *
+from .serializers import AboutUsViewSerializer
 from . utils import *
 import functools
 from django.utils.encoding import force_bytes, force_text
@@ -105,3 +108,61 @@ class AdminResetPassword(APIView):
             return Response({"status": False, "msg": "details are not correct",
                              "server_msg": e.args[-1]
                              })
+
+
+
+class AboutUsView(viewsets.ViewSet):
+    # permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def show_items(self, request, *args, **kwargs):
+        try:
+            about_page = AboutUS.objects.all()
+            serializer = AboutUsViewSerializer(about_page, many=True)
+            return True_Response('About us page listed.', serializer)
+            # return Response({
+            #     "status": True, "status_code": 200, 'msg': 'About us page listed.7',
+            #     "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Exception_Response(e)
+            # return Response({
+            #     "status": False, "status_code": 400, 'msg': e.args[0],
+            #     "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def show_item(self, request, *args, **kwargs):
+        try:
+            id = self.kwargs.get('pk')
+            about_page = AboutUS.objects.get(id=id)
+            serializer = AboutUsViewSerializer(about_page)
+            return True_Response('About us page data retrieve.', serializer)
+            # return Response({
+            #     "status": True, "status_code": 200, 'msg': 'About us page data retrieve.',
+            #     "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Exception_Response(e)
+            # return Response({
+            #     "status": False, "status_code": 400, 'msg': e.args[0],
+            #     "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+    def update_item(self, request, *args, **kwargs):
+        try:
+            id = self.kwargs.get('pk')
+            item = AboutUS.objects.get(id=id)
+            serializer = AboutUsViewSerializer(item, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return True_Response('Item updated successfully.', serializer)
+            # return Response({
+            #     "status": True, "status_code": 200, 'msg': 'Item updated successfully',
+            #     "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Exception_Response(e)
+            # return Response({
+            #     "status": False, "status_code": 400, 'msg': e.args[0],
+            #     "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+    def get_permissions(self, *args, **kwargs):
+        if self.request.method in ['GET']:
+            return []
+        else:
+            return [IsAdminUser(), IsAuthenticated()]

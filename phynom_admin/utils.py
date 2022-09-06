@@ -1,7 +1,8 @@
 import re
 from backend.settings import *
 from django.core.mail import EmailMessage
-
+from rest_framework.response import Response
+from rest_framework import status
 
 def email_validator(email):
     regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
@@ -45,3 +46,13 @@ def password_check(passwd):
     else:
         return val_string
 
+
+def True_Response(msg, serializer):
+    return Response({
+        "status": True, "status_code": 200, 'msg': msg,
+        "data": serializer.data}, status=status.HTTP_200_OK)
+
+def Exception_Response(e):
+    return Response({
+        "status": False, "status_code": 400, 'msg': e.args[0],
+        "data": []}, status=status.HTTP_400_BAD_REQUEST)
