@@ -869,8 +869,8 @@ class UserDisputeManagementView(viewsets.ViewSet):
             if user_name and email_address and email_body and email_validation is True:
             # send email
                 data = {
-                    'subject': f'Dispute management email of phynom platform from {user_name} user.',
-                    'body': f'Name: {user_name} \nEmail: {email_address} \nDescription: {email_body}',
+                    'subject': f'Dispute notification on Phynom marketplace.',
+                    'body': f'Name of user: {user_name} \nEmail address of user: {email_address} \nDescription about dispute: {email_body}',
                     'to_email': admin.email
                 }
                 Utill.send_email(data)
