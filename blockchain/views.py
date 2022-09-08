@@ -73,7 +73,7 @@ class CreateUpdateNFTView(viewsets.ViewSet):
             request.data['user'] = request.user.id
             request.data['nft_owner'] = wallet_id.id
             request.data['tags_title'] = request.data.get('tag_title').split(',')
-            request.data["starting_price"] = float(Decimal(str(request.data["starting_price"])))
+            # request.data["starting_price"] = float(Decimal(str(request.data["starting_price"])))
             # request.data['tags'] = request.data.get('tags').split(',')
             nft_commission = Commission.objects.first()
             request.data["service_fee"] = nft_commission.set_commission   # hardcode set_commission
