@@ -125,7 +125,10 @@ class NFTViewSerializer(serializers.ModelSerializer):
         data['documents'] = SupportingDocuments.objects.filter(nft_create_info_id=instance.id).values('id',
               'nft_create_info', nft_documents=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("documents"), output_field=CharField() ))
         data['user'] = UserDataSerializer(instance.user).data
-        if "e" in str(instance.starting_price):
+
+        if instance.nft_sell_type == "Fixed Price" and "e-" in str(instance.starting_price):
+            data['starting_price'] = scientific_to_float(float(instance.fix_price))
+        if instance.nft_sell_type == "Timed Auction" and "e-" in str(instance.starting_price):
             data['starting_price'] = scientific_to_float(float(instance.starting_price))
         # data['nft_creator'] = UserWalletAddressSerializer(instance.user).data
         # data['nft_owner'] = UserWalletAddressSerializer(instance.user).data

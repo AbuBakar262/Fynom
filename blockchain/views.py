@@ -109,8 +109,9 @@ class CreateUpdateNFTView(viewsets.ViewSet):
             type_a = request.data['nft_sell_type']
             request.data._mutable = True
             if nft_status == "Approved" and type_a=="Timed Auction":
-                if listed and listed.lower()=='true':
-                    request.data['e_mail'] = True
+                if listed:
+                    if listed.lower()=='true':
+                        request.data['e_mail'] = True
             # request.data._mutable = True
             # request.data['nft_status'] = nft_status
 
