@@ -107,8 +107,9 @@ class CreateUpdateNFTView(viewsets.ViewSet):
             listed = request.data['is_listed']
             type_a = request.data['nft_sell_type']
             request.data._mutable = True
-            if nft_status == "Approved" and type_a=="Timed Auction" and listed.lower()=='true':
-                request.data['e_mail'] = True
+            if nft_status == "Approved" and type_a=="Timed Auction":
+                if listed and listed.lower()=='true':
+                    request.data['e_mail'] = True
             # request.data._mutable = True
             # request.data['nft_status'] = nft_status
 
@@ -905,3 +906,6 @@ class SearchAPIView(viewsets.ViewSet):
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0], "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
