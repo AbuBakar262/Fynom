@@ -112,9 +112,11 @@ class AdminResetPassword(APIView):
 
 
 class AboutUsView(viewsets.ViewSet):
+    """working of about us page dynamic only description"""
     # permission_classes = [IsAuthenticated, IsAdminUser]
 
     def show_items(self, request, *args, **kwargs):
+        """will show the all record of about us page (client and admin side) by fetching form table"""
         try:
             about_page = AboutUS.objects.all()
             serializer = AboutUsViewSerializer(about_page, many=True)
@@ -130,6 +132,7 @@ class AboutUsView(viewsets.ViewSet):
 
 
     def show_item(self, request, *args, **kwargs):
+        """this will retrieve single item for update purpus form admin penal"""
         try:
             id = self.kwargs.get('pk')
             about_page = AboutUS.objects.get(id=id)
@@ -145,6 +148,7 @@ class AboutUsView(viewsets.ViewSet):
             #     "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
     def update_item(self, request, *args, **kwargs):
+        """this will update about us page content and this is only for admin"""
         try:
             id = self.kwargs.get('pk')
             item = AboutUS.objects.get(id=id)
@@ -166,3 +170,4 @@ class AboutUsView(viewsets.ViewSet):
             return []
         else:
             return [IsAdminUser(), IsAuthenticated()]
+
