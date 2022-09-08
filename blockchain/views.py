@@ -98,20 +98,21 @@ class CreateUpdateNFTView(viewsets.ViewSet):
         """
         this is used for update nft by id, docoments and tags will delete and auto insert
         """
-        global body
+        global body, listed
         try:
             nft_id = self.kwargs.get('pk')
             user_wallet =  UserWalletAddress.objects.filter(user_wallet=request.user.id).first()
             nft_by_id = NFT.objects.filter(id=nft_id, nft_owner__id=user_wallet.id).first()
             # nft_status = "Pending"
             nft_status = request.data['nft_status']
-            listed = request.data['is_listed']
+            if request.data['nft_status'] == 'Pending':
+                pass
+            else:
+                listed = request.data['is_listed']
             type_a = request.data['nft_sell_type']
             request.data._mutable = True
-            if nft_status == "Approved" and type_a=="Timed Auction":
-                if listed:
-                    if listed.lower()=='true':
-                        request.data['e_mail'] = True
+            if nft_status == "Approved" and type_a=="Timed Auction" and listed.lower()=='true':
+                request.data['e_mail'] = True
             # request.data._mutable = True
             # request.data['nft_status'] = nft_status
 
