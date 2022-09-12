@@ -340,7 +340,7 @@ class ContactUsSerializer(serializers.Serializer):
     email_address = serializers.EmailField(required=False)
     email_body = serializers.CharField(required=False)
     wallet_address = serializers.CharField(required=False)
-    contract_no_NFT = serializers.CharField(required=False)
+    contract_NFT = serializers.CharField(required=False)
 
     def validate(self, attrs):
         if attrs.get('contact_status') == "general query":
@@ -359,8 +359,8 @@ class ContactUsSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Email body is required.")
             if not attrs.get('wallet_address'):
                 raise serializers.ValidationError("Wallet address is required.")
-            if not attrs.get('contract_no_NFT'):
-                raise serializers.ValidationError("Contract no NFT is required.")
+            if not attrs.get('contract_NFT'):
+                raise serializers.ValidationError("Contract NFT is required.")
         else:
             raise serializers.ValidationError("Contact status is required.")
 

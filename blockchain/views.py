@@ -951,14 +951,14 @@ class ContactUsView(viewsets.ViewSet):
                 email_address = serializer.validated_data['email_address']
                 email_body = serializer.validated_data['email_body']
                 wallet_address = serializer.validated_data['wallet_address']
-                contract_no_NFT = serializer.validated_data['contract_no_NFT']
+                contract_NFT = serializer.validated_data['contract_NFT']
                 email_validation = validateEmail(email_address)
                 admin = User.objects.filter(is_superuser=True).first()
                 if user_name and email_address and email_body and email_validation is True:
                     # send email
                     data = {
                         'subject': f'Dispute notification on Phynom marketplace.',
-                        'body': f'Name of user: {user_name} \nEmail address of user: {email_address} \nDescription about dispute: {email_body} \nWallet address of user: {wallet_address} \nContract address of NFT: {contract_no_NFT}',
+                        'body': f'Name of user: {user_name} \nEmail address of user: {email_address} \nDescription about dispute: {email_body} \nWallet address of user: {wallet_address} \nContract address of NFT: {contract_NFT}',
                         'to_email': admin.email
                     }
                     Utill.send_email(data)
