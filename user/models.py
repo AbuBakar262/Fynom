@@ -2,7 +2,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-
 STATE_CHOICES = (
     ('Not Requested', 'Not Requested'),
     ('Pending', 'Pending'),
@@ -32,11 +31,9 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+
     def __str__(self):
         if self.name:
             return self.name
         else:
             return str(self.id)
-
-
-
