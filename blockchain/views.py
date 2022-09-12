@@ -926,17 +926,19 @@ class ContactUsView(viewsets.ViewSet):
             serializer = self.serializer_class(data=request.data)
             serializer.is_valid(raise_exception=True)
             contact_status = serializer.validated_data['contact_status']
-            if contact_status == "general query":
-                user_name = serializer.validated_data['user_name']
-                email_address = serializer.validated_data['email_address']
-                email_body = serializer.validated_data['email_body']
+            user_name = serializer.validated_data['user_name']
+            email_address = serializer.validated_data['email_address']
+            email_body = serializer.validated_data['email_body']
+            if contact_status == "dispute":
+                wallet_address = serializer.validated_data['wallet_address']
+                contract_nft = serializer.validated_data['contract_nft']
                 email_validation = validateEmail(email_address)
                 admin = User.objects.filter(is_superuser=True).first()
                 if user_name and email_address and email_body and email_validation is True:
-                    # send email
+            # send email
                     data = {
-                        'subject': f'General query on Phynom marketplace.',
-                        'body': f'Name of user: {user_name} \nEmail address of user: {email_address} \nDescription about dispute: {email_body}',
+                        'subject': f'Dispute notification on Phynom marketplace.',
+                        'body': f'Name of user: {user_name} \nEmail address of user: {email_address} \nDescription about dispute: {email_body} \nWallet address of user: {wallet_address} \nContract address of NFT: {contract_nft}',
                         'to_email': admin.email
                     }
                     Utill.send_email(data)
@@ -946,19 +948,14 @@ class ContactUsView(viewsets.ViewSet):
                 return Response({
                     "status": False, "status_code": 400, 'msg': 'Please enter correct information.',
                     "data": []}, status=status.HTTP_400_BAD_REQUEST)
-            elif contact_status == "dispute":
-                user_name = serializer.validated_data['user_name']
-                email_address = serializer.validated_data['email_address']
-                email_body = serializer.validated_data['email_body']
-                wallet_address = serializer.validated_data['wallet_address']
-                contract_NFT = serializer.validated_data['contract_NFT']
+            else:
                 email_validation = validateEmail(email_address)
                 admin = User.objects.filter(is_superuser=True).first()
                 if user_name and email_address and email_body and email_validation is True:
-                    # send email
+            # send email
                     data = {
                         'subject': f'Dispute notification on Phynom marketplace.',
-                        'body': f'Name of user: {user_name} \nEmail address of user: {email_address} \nDescription about dispute: {email_body} \nWallet address of user: {wallet_address} \nContract address of NFT: {contract_NFT}',
+                        'body': f'Name of user: {user_name} \nEmail address of user: {email_address} \nDescription about dispute: {email_body}',
                         'to_email': admin.email
                     }
                     Utill.send_email(data)
@@ -972,6 +969,7 @@ class ContactUsView(viewsets.ViewSet):
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 

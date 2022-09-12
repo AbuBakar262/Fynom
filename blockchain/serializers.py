@@ -6,6 +6,7 @@ import datetime
 from blockchain.models import *
 from blockchain.utils import get_eth_price, scientific_to_float
 from user.models import User
+from django.utils.translation import gettext_lazy as _
 from user.serializers import UserProfileDetailsViewSerializer
 
 
@@ -336,32 +337,18 @@ class ClaimNFTViewSerializer(serializers.ModelSerializer):
 
 class ContactUsSerializer(serializers.Serializer):
     contact_status = serializers.CharField(required=True)
-    user_name = serializers.CharField(required=False)
-    email_address = serializers.EmailField(required=False)
-    email_body = serializers.CharField(required=False)
+    user_name = serializers.CharField(required=True)
+    email_address = serializers.EmailField(required=True)
+    email_body = serializers.CharField(required=True)
     wallet_address = serializers.CharField(required=False)
-    contract_NFT = serializers.CharField(required=False)
+    contract_nft = serializers.CharField(required=False)
 
     def validate(self, attrs):
-        if attrs.get('contact_status') == "general query":
-            if not attrs.get('user_name'):
-                raise serializers.ValidationError("User name is required.")
-            if not attrs.get('email_address'):
-                raise serializers.ValidationError("Email address is required.")
-            if not attrs.get('email_body'):
-                raise serializers.ValidationError("Email body is required.")
-        elif attrs.get('contact_status') == "dispute":
-            if not attrs.get('user_name'):
-                raise serializers.ValidationError("User name is required.")
-            if not attrs.get('email_address'):
-                raise serializers.ValidationError("Email address is required.")
-            if not attrs.get('email_body'):
-                raise serializers.ValidationError("Email body is required.")
+        if attrs.get('contact_status') == "dispute":
             if not attrs.get('wallet_address'):
-                raise serializers.ValidationError("Wallet address is required.")
-            if not attrs.get('contract_NFT'):
-                raise serializers.ValidationError("Contract NFT is required.")
-        else:
-            raise serializers.ValidationError("Contact status is required.")
-
+                raise serializers.ValidationError(
+                    {'message': _('Wallet address is required for dispute.')})
+            if not attrs.get('contract_nft'):
+                raise serializers.ValidationError(
+                    {'message': _('Contract nft is required for dispute.')})
         return attrs
