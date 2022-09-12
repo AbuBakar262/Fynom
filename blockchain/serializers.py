@@ -332,3 +332,36 @@ class ClaimNFTViewSerializer(serializers.ModelSerializer):
         data['nft_collection'] = NFTCollectionSerializer(instance.nft_collection).data
         data['nft_category'] = NFTCategorySerializer(instance.nft_category).data
         return data
+
+
+class ContactUsSerializer(serializers.Serializer):
+    contact_status = serializers.CharField(required=True)
+    user_name = serializers.CharField(required=False)
+    email_address = serializers.EmailField(required=False)
+    email_body = serializers.CharField(required=False)
+    wallet_address = serializers.CharField(required=False)
+    contract_no_NFT = serializers.CharField(required=False)
+
+    def validate(self, attrs):
+        if attrs.get('contact_status') == "general query":
+            if not attrs.get('user_name'):
+                raise serializers.ValidationError("User name is required.")
+            if not attrs.get('email_address'):
+                raise serializers.ValidationError("Email address is required.")
+            if not attrs.get('email_body'):
+                raise serializers.ValidationError("Email body is required.")
+        elif attrs.get('contact_status') == "dispute":
+            if not attrs.get('user_name'):
+                raise serializers.ValidationError("User name is required.")
+            if not attrs.get('email_address'):
+                raise serializers.ValidationError("Email address is required.")
+            if not attrs.get('email_body'):
+                raise serializers.ValidationError("Email body is required.")
+            if not attrs.get('wallet_address'):
+                raise serializers.ValidationError("Wallet address is required.")
+            if not attrs.get('contract_no_NFT'):
+                raise serializers.ValidationError("Contract no NFT is required.")
+        else:
+            raise serializers.ValidationError("Contact status is required.")
+
+        return attrs
