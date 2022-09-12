@@ -181,3 +181,8 @@ class Commission(models.Model):
     set_commission = models.FloatField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class NFT_Visite(models.Model):
+    visite_nft = models.ForeignKey(NFT, blank=True, null=True, related_name='nft_in_views', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
