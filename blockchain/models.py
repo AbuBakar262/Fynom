@@ -102,6 +102,7 @@ class NFT(models.Model):
     service_fee = models.FloatField(blank=True, null=True)
     is_minted = models.BooleanField(default=False)
     is_listed = models.BooleanField(default=False)
+    featured_nft = models.BooleanField(default=False)
     e_mail = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -183,6 +184,9 @@ class Commission(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class NFT_Visite(models.Model):
+class VisiteNFT(models.Model):
     visite_nft = models.ForeignKey(NFT, blank=True, null=True, related_name='nft_in_views', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+            return str(self.visite_nft.nft_title)

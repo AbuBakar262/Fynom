@@ -23,5 +23,6 @@ urlpatterns = [
     path('user/', include('user.urls')),
     path('blockchain/', include('blockchain.urls')),
     path('phynom_admin/', include('phynom_admin.urls')),
+    path('home_page/', include('home_page.urls')),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

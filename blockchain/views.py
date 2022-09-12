@@ -51,6 +51,9 @@ class ListRetrieveNFTView(viewsets.ViewSet):
 
             serializer = NFTViewSerializer(nft_by_id)
 
+            visitor = VisiteNFT.objects.create(visite_nft=nft_by_id)
+            visitor.save()
+
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User NFTs retrieve successfully',
                 "data": serializer.data, "creator_user":creator_user, "owner_user":owner_user}, status=status.HTTP_200_OK)
@@ -969,8 +972,6 @@ class ContactUsView(viewsets.ViewSet):
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 
 class SearchAPIView(viewsets.ViewSet):

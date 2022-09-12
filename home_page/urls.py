@@ -13,4 +13,7 @@ urlpatterns = [
     path('', include(router.urls)),
     # path('do_bid_on_nft/', DoBidOnNFTView.as_view({'post': 'create'}), name="do_bid_on_nft"),
     # path('contact_us/', UserDisputeManagementView.as_view({'post': 'dispute_email'}), name="contact_us"),
+    path('featured_nft/', FeaturedNftView.as_view({'get': 'list'}), name="featured_nft"),
+    path('top_nft/', TopNftView.as_view({'get': 'list'}), name="top_nft"),
+    path('highest_bidded/', HighestBiddedNftView.as_view({'get': 'list'}), name="highest_bidded"),
 ]
