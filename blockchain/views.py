@@ -861,31 +861,58 @@ class UserDisputeManagementView(viewsets.ViewSet):
     def dispute_email(self, request, *args, **kwargs):
 
         try:
+            email_status = request.data['email_status']
+            if email_status == "general_query":
+                user_name = request.data['user_name']
+                email_address=request.data['email_address']
+                email_body = request.data['email_body']
 
-            user_name = request.data['user_name']
-            email_address=request.data['email_address']
-            email_body = request.data['email_body']
+                email_validation = validateEmail(email_address)
 
-            email_validation = validateEmail(email_address)
+                admin = User.objects.filter(is_superuser=True).first()
 
-            admin = User.objects.filter(is_superuser=True).first()
+                if user_name and email_address and email_body and email_validation is True:
+                # send email
+                    data = {
+                        'subject': f'Dispute notification on Phynom marketplace.',
+                        'body': f'Name of user: {user_name} \nEmail address of user: {email_address} \nDescription about dispute: {email_body}',
+                        'to_email': admin.email
+                    }
+                    Utill.send_email(data)
 
-            if user_name and email_address and email_body and email_validation is True:
-            # send email
-                data = {
-                    'subject': f'Dispute notification on Phynom marketplace.',
-                    'body': f'Name of user: {user_name} \nEmail address of user: {email_address} \nDescription about dispute: {email_body}',
-                    'to_email': admin.email
-                }
-                Utill.send_email(data)
+                    return Response({
+                        "status": True, "status_code": 200, 'msg': 'Email send successfully to the admin.',
+                        "data": []}, status=status.HTTP_200_OK)
 
                 return Response({
-                    "status": True, "status_code": 200, 'msg': 'Email send successfully to the admin.',
-                    "data": []}, status=status.HTTP_200_OK)
+                    "status": False, "status_code": 400, 'msg': 'Please enter correct information.',
+                    "data": []}, status=status.HTTP_400_BAD_REQUEST)
+            elif email_status == "dispute":
+                user_name = request.data['user_name']
+                email_address = request.data['email_address']
+                email_body = request.data['email_body']
+                wallet_address = request.data['wallet_address']
+                contract_no_NFT = request.data['contract_no_NFT']
 
-            return Response({
-                "status": False, "status_code": 400, 'msg': 'Please enter correct information.',
-                "data": []}, status=status.HTTP_200_OK)
+                email_validation = validateEmail(email_address)
+
+                admin = User.objects.filter(is_superuser=True).first()
+
+                if user_name and email_address and email_body and email_validation is True:
+                    # send email
+                    data = {
+                        'subject': f'Dispute notification on Phynom marketplace.',
+                        'body': f'Name of user: {user_name} \nEmail address of user: {email_address} \nDescription about dispute: {email_body} \nWallet address of user: {wallet_address} \nContract address of NFT: {contract_no_NFT}',
+                        'to_email': admin.email
+                    }
+                    Utill.send_email(data)
+
+                    return Response({
+                        "status": True, "status_code": 200, 'msg': 'Email send successfully to the admin.',
+                        "data": []}, status=status.HTTP_200_OK)
+                return Response({
+                    "status": False, "status_code": 400, 'msg': 'Please enter correct information.',
+                    "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             return Response({
