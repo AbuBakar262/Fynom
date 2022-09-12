@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'blockchain',
     'phynom_admin',
+    'home_page',
 ]
 AUTH_USER_MODEL = 'user.User'
 MIDDLEWARE = [
@@ -102,7 +103,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 #     }
 # }
 
-
+#
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -219,7 +220,7 @@ CRONJOBS = [
 ]
 
 APP_LOG_FILENAME = os.path.join(BASE_DIR, 'blockchain/cron_job/app.log')
-ERROR_LOG_FILENAME = os.path.join(BASE_DIR, 'blockchain/cron_job/error.log')
+# ERROR_LOG_FILENAME = os.path.join(BASE_DIR, 'blockchain/cron_job/error.log')
 
 LOGGING = {
     'version': 1,
@@ -251,3 +252,4 @@ LOGGING = {
         }
     }
 }
+
