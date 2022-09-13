@@ -169,10 +169,52 @@ class CollectionFeaturedNftView(viewsets.ViewSet):
                     colletion = Collection.objects.filter(id=i).first()
                     if colletion:
                         colletions.append(colletion)
-            serializer = CountNftVisiorViewSerializer(colletions, many=True)
+            serializer = CollectionFeaturedNftViewSerializer(colletions, many=True)
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User NFTs listed successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TrendingNftsView(viewsets.ViewSet):
+    """this is used for listing and retrive nfts"""
+
+    def list(self, request, *args, **kwargs):
+        """only approved nfts lists"""
+        try:
+            count_dic = {}
+            trending_nft =[]
+            visited_nft = VisiteNFT.objects.filter(
+                created_at__gte=datetime.datetime.now() - datetime.timedelta(days=7))
+            # unique_no = visited_nft.distinct()
+            for visite in visited_nft:
+                nft = visite.visite_nft_id
+                # hear keys is nft id's and values is visitor number against nft
+                if nft not in count_dic.keys():
+                    count_dic[nft] = 1
+                else:
+                    # a.update({1: a[1] + 1})
+                    count_dic.update({nft: count_dic[nft] + 1})
+            sorted_list = {k: v for k, v in sorted(count_dic.items(), key=lambda item: item[1], reverse=True)}
+            # nft_id = list(count_dic.keys())[0]
+
+            # if featured_nft is None:
+            count_dic_list = list(sorted_list.keys())
+            for i in count_dic_list:
+                featured_nft = NFT.objects.filter(id=i, is_listed=True).first()
+                if featured_nft:
+                    trending_nft.append(featured_nft)
+            updated_listed_nft = NFT.objects.filter(is_listed=True).order_by('-updated_at')
+            for nft in updated_listed_nft:
+                trending_nft.append(nft)
+
+            paginator = CustomPageNumberPagination()
+            result = paginator.paginate_queryset(trending_nft, request)
+            serializer = NFTExplorSerializer(result, many=True)
+            return paginator.get_paginated_response(serializer.data)
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],

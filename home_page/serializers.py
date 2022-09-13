@@ -50,3 +50,16 @@ class HighestBiddedNftViewSerializer(serializers.ModelSerializer):
         data['title'] = NFT.objects.filter(id=instance.nft_detail.id).first().nft_title
         data['percentage'] = NFT.objects.filter(id=instance.nft_detail.id).first().royality
         return data
+
+
+class CollectionFeaturedNftViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Collection
+        fields = ["id", "name", "logo_image", "featured_image", "cover_image"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['user'] = UserDataSerializer(instance.create_by).data
+        data['nfts'] = NFT.objects.filter(nft_collection=instance, is_listed=True).values('id','thumbnail','nft_picture', 'nft_title')
+        return data
+
