@@ -16,4 +16,5 @@ urlpatterns = [
     path('featured_nft/', FeaturedNftView.as_view({'get': 'list'}), name="featured_nft"),
     path('top_nft/', TopNftView.as_view({'get': 'list'}), name="top_nft"),
     path('highest_bidded/', HighestBiddedNftView.as_view({'get': 'list'}), name="highest_bidded"),
+    path('collection_featured_nft/', CollectionFeaturedNftView.as_view({'get': 'list'}), name="collection_featured_nft"),
 ]
