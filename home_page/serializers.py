@@ -47,4 +47,6 @@ class HighestBiddedNftViewSerializer(serializers.ModelSerializer):
         data["nft_detail"] = NFT.objects.filter(id=instance.nft_detail.id).values('id',
                                     nft_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
                                              F("nft_picture"), output_field=CharField()))
+        data['title'] = NFT.objects.filter(id=instance.nft_detail.id).first().nft_title
+        data['percentage'] = NFT.objects.filter(id=instance.nft_detail.id).first().royality
         return data
