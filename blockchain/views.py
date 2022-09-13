@@ -932,7 +932,7 @@ class ContactUsView(viewsets.ViewSet):
             user_name = serializer.validated_data['user_name']
             email_address = serializer.validated_data['email_address']
             email_body = serializer.validated_data['email_body']
-            if contact_status == "dispute":
+            if contact_status == "Dispute":
                 wallet_address = serializer.validated_data['wallet_address']
                 contract_nft = serializer.validated_data['contract_nft']
                 email_validation = validateEmail(email_address)
@@ -957,7 +957,7 @@ class ContactUsView(viewsets.ViewSet):
                 if user_name and email_address and email_body and email_validation is True:
             # send email
                     data = {
-                        'subject': f'Dispute notification on Phynom marketplace.',
+                        'subject': f'General Query notification on Phynom marketplace.',
                         'body': f'Name of user: {user_name} \nEmail address of user: {email_address} \nDescription about dispute: {email_body}',
                         'to_email': admin.email
                     }
