@@ -143,32 +143,30 @@ class CollectionFeaturedNftView(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         """only approved nfts lists"""
         try:
-            featured_nft = NFT.objects.filter(featured_nft=True, is_listed=True).first()
             colletions = []
-            if featured_nft is None:
-                count_dic = {}
-                visited_nft = VisiteNFT.objects.filter(
-                    created_at__gte=datetime.datetime.now() - datetime.timedelta(days=7))
-                # unique_no = visited_nft.distinct()
-                for visite in visited_nft:
-                    nft = visite.visite_nft_id
-                    # hear keys is nft id's and values is visitor number against nft
-                    nft_collection_id = NFT.objects.get(id=nft).nft_collection_id
-                    if nft_collection_id not in count_dic.keys():
-                        count_dic[nft_collection_id] = 1
-                    else:
-                        # a.update({1: a[1] + 1})
-                        count_dic.update({nft_collection_id: count_dic[nft_collection_id] + 1})
-                sorted_list = {k: v for k, v in sorted(count_dic.items(), key=lambda item: item[1], reverse=True)}
-                # nft_id = list(count_dic.keys())[0]
+            count_dic = {}
+            visited_nft = VisiteNFT.objects.filter(
+                created_at__gte=datetime.datetime.now() - datetime.timedelta(days=7))
+            # unique_no = visited_nft.distinct()
+            for visite in visited_nft:
+                nft = visite.visite_nft_id
+                # hear keys is nft id's and values is visitor number against nft
+                nft_collection_id = NFT.objects.get(id=nft).nft_collection_id
+                if nft_collection_id not in count_dic.keys():
+                    count_dic[nft_collection_id] = 1
+                else:
+                    # a.update({1: a[1] + 1})
+                    count_dic.update({nft_collection_id: count_dic[nft_collection_id] + 1})
+            sorted_list = {k: v for k, v in sorted(count_dic.items(), key=lambda item: item[1], reverse=True)}
+            # nft_id = list(count_dic.keys())[0]
 
-                # if featured_nft is None:
+            # if featured_nft is None:
 
-                count_dic_list = list(sorted_list.keys())
-                for i in count_dic_list[:3]:
-                    colletion = Collection.objects.filter(id=i).first()
-                    if colletion:
-                        colletions.append(colletion)
+            count_dic_list = list(sorted_list.keys())
+            for i in count_dic_list[:3]:
+                colletion = Collection.objects.filter(id=i).first()
+                if colletion:
+                    colletions.append(colletion)
             serializer = CollectionFeaturedNftViewSerializer(colletions, many=True)
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User NFTs listed successfully',
