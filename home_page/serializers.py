@@ -1,5 +1,6 @@
 import os
-
+import datetime
+import calendar
 from django.db.models import F
 from rest_framework import serializers
 from django.db.models.functions import Concat
@@ -24,8 +25,10 @@ class CountNftVisiorViewSerializer(serializers.ModelSerializer):
                    "nft_subject", "status_remarks", "nft_sell_type", "fix_price", "is_minted", "is_listed"]
 
     def to_representation(self, instance):
+        highest_bid = ''
         data = super().to_representation(instance)
         data['user'] = UserDataSerializer(instance.user).data
+        data['highest_bidded'] = BidOnNFT.objects.filter(nft_detail=instance).values('bid_price')
         if instance.nft_sell_type == "Fixed Price" and "e" in str(instance.fix_price):
             data['fix_price'] = scientific_to_float(float(instance.fix_price))
         if instance.nft_sell_type == "Timed Auction":
