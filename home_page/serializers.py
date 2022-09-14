@@ -28,11 +28,11 @@ class CountNftVisiorViewSerializer(serializers.ModelSerializer):
         highest_bid = ''
         data = super().to_representation(instance)
         data['user'] = UserDataSerializer(instance.user).data
-        data['highest_bidded'] = BidOnNFT.objects.filter(nft_detail=instance).get().bid_price
+        # data['highest_bidded'] = BidOnNFT.objects.filter(nft_detail=instance).get().bid_price
         if instance.nft_sell_type == "Fixed Price" and "e" in str(instance.fix_price):
             data['fix_price'] = scientific_to_float(float(instance.fix_price))
         if instance.nft_sell_type == "Timed Auction":
-            data['starting_price'] = BidOnNFT.objects.filter(bid_status="Active").order_by('-id').values('bid_price')[0]
+            data['highest_bidded'] = BidOnNFT.objects.filter(bid_status="Active").order_by('-id').values('bid_price')[0]
             if "e" in str(data['starting_price']):
                 data['starting_price'] = scientific_to_float(float(instance.starting_price))
         return data
