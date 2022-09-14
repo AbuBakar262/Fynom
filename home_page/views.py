@@ -126,11 +126,10 @@ class TopNftView(viewsets.ViewSet):
                 if len(featured_nft) >= 8:
                     break
 
-
-            paginator = CustomPageNumberPagination()
-            result = paginator.paginate_queryset(featured_nft, request)
-            serializer = CountNftVisiorViewSerializer(result, many=True)
-            return paginator.get_paginated_response(serializer.data)
+            serializer = CountNftVisiorViewSerializer(featured_nft, many=True)
+            return Response({
+                "status": True, "status_code": 200, 'msg': 'User NFTs listed successfully',
+                "data": serializer.data}, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response({
