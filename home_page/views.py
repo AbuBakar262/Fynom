@@ -126,7 +126,7 @@ class TopNftView(viewsets.ViewSet):
                 if len(featured_nft) >= 8:
                     break
 
-            serializer = CountNftVisiorViewSerializer(featured_nft[:5], many=True)
+            serializer = CountNftVisiorViewSerializer(featured_nft[:4], many=True)
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User NFTs listed successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
