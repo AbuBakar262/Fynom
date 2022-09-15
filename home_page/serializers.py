@@ -9,6 +9,7 @@ from blockchain.utils import scientific_to_float
 from user.models import User
 from blockchain.models import Collection, UserWalletAddress, NFT, BidOnNFT
 from django.utils.translation import gettext_lazy as _
+from django.db.models import F, Value, CharField
 
 # class AdminLoginSerializer(serializers.ModelSerializer):
 #     class Meta:
@@ -67,7 +68,9 @@ class CollectionFeaturedNftViewSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['user'] = UserDataSerializer(instance.create_by).data
-        data['nfts'] = NFT.objects.filter(nft_collection=instance, is_listed=True).values('id','thumbnail','nft_picture', 'nft_title')
+        data['nfts'] = NFT.objects.filter(nft_collection=instance, is_listed=True).values('id','nft_title',
+                                                                                          thumbnail_nft=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("thumbnail"), output_field=CharField() )
+                                                                                          , nft_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("nft_picture"), output_field=CharField() ))
         return data
 
 class FeatureNFTSerializer(serializers.ModelSerializer):
