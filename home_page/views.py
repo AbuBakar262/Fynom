@@ -87,7 +87,7 @@ class HighestBiddedNftView(viewsets.ViewSet):
                 if height_bid_nft:
                     bid_list.append(height_bid_nft)
 
-            serializer = HighestBiddedNftViewSerializer(bid_list, many=True)
+            serializer = HighestBiddedNftViewSerializer(bid_list[:4], many=True)
             return Response({
                 "status": True, "status_code": 200, 'msg': 'User NFTs listed successfully',
                 "data": serializer.data}, status=status.HTTP_200_OK)
