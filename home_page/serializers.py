@@ -8,7 +8,7 @@ from blockchain.serializers import UserDataSerializer
 from blockchain.utils import scientific_to_float
 from user.models import User
 from blockchain.models import Collection, UserWalletAddress, NFT, BidOnNFT
-
+from django.utils.translation import gettext_lazy as _
 
 # class AdminLoginSerializer(serializers.ModelSerializer):
 #     class Meta:
@@ -70,3 +70,18 @@ class CollectionFeaturedNftViewSerializer(serializers.ModelSerializer):
         data['nfts'] = NFT.objects.filter(nft_collection=instance, is_listed=True).values('id','thumbnail','nft_picture', 'nft_title')
         return data
 
+class FeatureNFTSerializer(serializers.ModelSerializer):
+    nft_id = serializers.IntegerField(required=True)
+    is_featured = serializers.BooleanField(required=True)
+
+    class Meta:
+        model = NFT
+        fields = ["nft_id", "is_featured"]
+
+    # if any other nft is featured then raise error and return existing featured nft id
+    def validate(self, attrs):
+        if attrs['is_featured'] == True:
+            if NFT.objects.filter(featured_nft=True).exists():
+                raise serializers.ValidationError(
+                    {"message": _("Featured NFT already exists"), "featured_nft_id": NFT.objects.filter(featured_nft=True).first().id})
+        return attrs
