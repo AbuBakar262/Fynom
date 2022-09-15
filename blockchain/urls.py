@@ -17,6 +17,7 @@ router.register('list_transactions_of_nft', views.ListTransactionNFTView, basena
 router.register('nft_commission', views.NFTCommissionView, basename='nft_commission')
 router.register('delete_doc', views.DeleteDocs, basename='delete_doc')
 router.register('nft_explore', views.NFTExplorView, basename='nft_explore')
+router.register('manage_nfts_list', views.ManageNFTsListView, basename='nft_detail_view')
 urlpatterns = [
     path('', include(router.urls)),
     path('claim_nft/<int:pk>/', ClaimNFTView.as_view({'patch': 'partial_update'}), name="claim_nft"),

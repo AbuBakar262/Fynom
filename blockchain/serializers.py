@@ -352,3 +352,30 @@ class ContactUsSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     {'message': _('Contract nft is required for dispute.')})
         return attrs
+
+class ManageNFTSerializer(serializers.ModelSerializer):
+    nft_pic = serializers.SerializerMethodField('get_pic')
+    nft_thumbnail = serializers.SerializerMethodField('get_nft_thumbnail')
+    class Meta:
+        model = NFT
+        fields = ["id","nft_thumbnail","nft_pic", "nft_title","nft_status", "user", "description",
+                  "nft_status", "is_listed"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        from django.db.models import F, Value, CharField
+        import os
+        data['user'] = UserDataSerializer(instance.user).data
+        return data
+
+    def get_pic(self, obj):
+        try:
+            return obj.nft_picture.url
+        except Exception as e:
+            return None
+
+    def get_nft_thumbnail(self, obj):
+        try:
+            return obj.thumbnail.url
+        except Exception as e:
+            return None

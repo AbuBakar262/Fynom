@@ -992,4 +992,21 @@ class SearchAPIView(viewsets.ViewSet):
                 "status": False, "status_code": 400, 'msg': e.args[0], "data": []}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class ManageNFTsListView(viewsets.ViewSet):
+    queryset = NFT.objects.filter(is_listed=True, nft_status='Approved').order_by('-id')
+    serializer_class = ManageNFTSerializer
 
+    def list(self, request, *args, **kwargs):
+        """
+        this is used for get all nfts
+        """
+        try:
+            queryset = self.queryset
+            paginator = CustomPageNumberPagination()
+            result_page = paginator.paginate_queryset(queryset, request)
+            serializer = ManageNFTSerializer(result_page, many=True, context={'request':request})
+            return paginator.get_paginated_response(serializer.data)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
