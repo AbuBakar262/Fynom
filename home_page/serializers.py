@@ -25,16 +25,20 @@ class CountNftVisiorViewSerializer(serializers.ModelSerializer):
                    "nft_subject", "status_remarks", "nft_sell_type", "fix_price", "is_minted", "is_listed"]
 
     def to_representation(self, instance):
-        highest_bid = ''
         data = super().to_representation(instance)
         data['user'] = UserDataSerializer(instance.user).data
-        data['highest_bidded'] = BidOnNFT.objects.filter(nft_detail=instance).get().bid_price
+        # data['highest_bidded'] = BidOnNFT.objects.filter(nft_detail=instance).get().bid_price
         if instance.nft_sell_type == "Fixed Price" and "e" in str(instance.fix_price):
             data['fix_price'] = scientific_to_float(float(instance.fix_price))
         if instance.nft_sell_type == "Timed Auction":
-            data['starting_price'] = BidOnNFT.objects.filter(bid_status="Active").order_by('-id').values('bid_price')[0]
-            if "e" in str(data['starting_price']):
-                data['starting_price'] = scientific_to_float(float(instance.starting_price))
+            bid_nfts = BidOnNFT.objects.filter(bid_status='Active')
+            if bid_nfts.exists():
+                data['highest_bidded'] = BidOnNFT.objects.filter(bid_status="Active").order_by('-id').values('bid_price')[0].get('bid_price')
+                if "e" in str(data['highest_bidded']):
+                    data['highest_bidded'] = scientific_to_float(float(data['highest_bidded']))
+            elif "e" in str(instance.starting_price):
+                data['highest_bidded'] = scientific_to_float(float(instance.starting_price))
+
         return data
 
 
