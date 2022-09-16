@@ -72,20 +72,3 @@ class CollectionFeaturedNftViewSerializer(serializers.ModelSerializer):
                                                                                           thumbnail_nft=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("thumbnail"), output_field=CharField() )
                                                                                           , nft_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("nft_picture"), output_field=CharField() ))
         return data
-
-class FeatureNFTSerializer(serializers.ModelSerializer):
-    nft_id = serializers.IntegerField(required=True)
-    is_featured = serializers.BooleanField(required=True)
-
-    class Meta:
-        model = NFT
-        fields = ["nft_id", "is_featured"]
-
-    # if any other nft is featured then raise error and return existing featured nft id
-    def validate(self, attrs):
-        if attrs['is_featured'] == True:
-            nft = NFT.objects.filter(id=attrs['nft_id'])
-            nft.update(featured_nft=attrs['is_featured'])
-            already_featured_nft = NFT.objects.filter(featured_nft=True)
-            already_featured_nft.update(featured_nft=False)
-        return attrs

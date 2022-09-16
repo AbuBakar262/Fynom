@@ -352,3 +352,21 @@ class ContactUsSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     {'message': _('Contract nft is required for dispute.')})
         return attrs
+
+
+class FeatureNFTSerializer(serializers.ModelSerializer):
+    nft_id = serializers.IntegerField(required=True)
+    is_featured = serializers.BooleanField(required=True)
+
+    class Meta:
+        model = NFT
+        fields = ["nft_id", "is_featured"]
+
+    # if any other nft is featured then raise error and return existing featured nft id
+    def validate(self, attrs):
+        if attrs['is_featured'] == True:
+            nft = NFT.objects.filter(id=attrs['nft_id'])
+            nft.update(featured_nft=attrs['is_featured'])
+            already_featured_nft = NFT.objects.filter(featured_nft=True)
+            already_featured_nft.update(featured_nft=False)
+        return attrs

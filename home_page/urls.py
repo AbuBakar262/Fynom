@@ -19,5 +19,4 @@ urlpatterns = [
     path('collection_featured_nft/', CollectionFeaturedNftView.as_view({'get': 'list'}), name="collection_featured_nft"),
     # used for tranding and discoverd nfts two in one
     path('trending_nft/', TrendingNftsView.as_view({'get': 'list'}), name="trending_nft"),
-    path('feature_nft/', FeatureNFTView.as_view({'post': 'featureNFT'}), name="feature_nft"),
 ]

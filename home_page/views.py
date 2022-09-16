@@ -217,36 +217,3 @@ class TrendingNftsView(viewsets.ViewSet):
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0],
                 "data": []}, status=status.HTTP_400_BAD_REQUEST)
-
-class FeatureNFTView(viewsets.ViewSet):
-    queryset = NFT.objects.all()
-    serializer_class = FeatureNFTSerializer
-    permission_classes = [AllowAny]
-
-    # admin can make any nft featured or unfeatured
-    def featureNFT(self, request, *args, **kwargs):
-        try:
-            serializers = self.serializer_class(data=request.data)
-            if not serializers.is_valid():
-                return Response({
-                    "status": False, "status_code": 400, 'msg': serializers.errors,
-                    "data": []}, status=status.HTTP_400_BAD_REQUEST)
-            nft_id = serializers.validated_data['nft_id']
-            is_featured = serializers.validated_data['is_featured']
-            nft = NFT.objects.filter(id=nft_id).first()
-            if is_featured == True:
-                nft.featured_nft = True
-                nft.save()
-                return Response({
-                    "status": True, "status_code": 200, 'msg': 'NFT featured successfully',
-                    "data": []}, status=status.HTTP_200_OK)
-            if is_featured == False:
-                nft.featured_nft = False
-                nft.save()
-                return Response({
-                    "status": True, "status_code": 200, 'msg': 'NFT unfeatured successfully',
-                    "data": []}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({
-                "status": False, "status_code": 400, 'msg': e.args[0],
-                "data": []}, status=status.HTTP_400_BAD_REQUEST)

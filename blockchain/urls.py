@@ -25,6 +25,7 @@ urlpatterns = [
     path('do_bid_on_nft/', DoBidOnNFTView.as_view({'post': 'create'}), name="do_bid_on_nft"),
     path('contact_us/', ContactUsView.as_view({'post': 'contact_us'}), name="contact_us"),
     path('search_with/', SearchAPIView.as_view({'get': 'search_function'}), name="search_with"),
+    path('feature_nft/', FeatureNFTView.as_view({'post': 'featureNFT'}), name="feature_nft"),
     # path('find_nft_winer/', cron.SendEmailToWinner, name="find_nft_winer"),
     # path('find_nft_winer/', FindAuctionWinerUser.as_view({'post': 'SendEmailWinNFT'}), name="find_nft_winer"),
     # path('do_bid_on_nft/', NFTExplorView.as_view({'get': 'list'}), name="do_bid_on_nft"),
