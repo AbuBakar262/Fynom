@@ -2,8 +2,7 @@ from django.db.models import Q, Count
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import F, Value, CharField
-import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
 from backend.pagination import CustomPageNumberPagination
 from blockchain.serializers import *
@@ -19,6 +18,7 @@ import boto3
 from backend.settings import *
 import calendar
 import datetime
+
 
 class ListRetrieveNFTView(viewsets.ViewSet):
     """this is used for listing and retrive nfts"""
@@ -196,6 +196,120 @@ class UserNFTsListView(viewsets.ViewSet):
                     else:
                         list_nft = NFT.objects.filter(Q(is_minted=True) | Q(is_minted=False), nft_owner=user_wallet.id,
                                         is_listed=False).values('id','nft_title','fix_price','nft_sell_type',
+                                             'starting_price','ending_price','start_dateTime','end_datetime',
+                                             'is_minted','is_listed','nft_status','nft_subject','status_remarks',
+                                             nft_user_id=F('user__id'),user_nft_collection=F('nft_collection__name'),
+                                             user_nft_category=F('nft_category__category_name'),
+                                nft_thumbnail=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("thumbnail"),output_field=CharField()),
+                                nft_teaser=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("teaser"),output_field=CharField()),
+                                nft_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("nft_picture"),output_field=CharField()),
+                                user_profile_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
+                                                    F("user__profile_picture"),output_field=CharField())).order_by('-id')
+
+                if user_nft == "listmynft":
+                    if nft_category_id != 'all':
+                        list_nft = NFT.objects.filter(is_minted=True, nft_owner=user_wallet.id,
+                                        is_listed=True, nft_category=nft_category_id).values('id','nft_title',
+                                             'fix_price','nft_sell_type','starting_price','ending_price','start_dateTime',
+                                             'end_datetime','is_minted','is_listed','nft_status','nft_subject',
+                                             'status_remarks',nft_user_id=F('user__id'),
+                                             user_nft_collection=F('nft_collection__name'),
+                                             ser_nft_category=F('nft_category__category_name'),
+                                nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("thumbnail"),output_field=CharField()),
+                                ft_teaser=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("teaser"),output_field=CharField()),
+                                nft_pic = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("nft_picture"),output_field=CharField()),
+                                user_profile_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
+                                                    F("user__profile_picture"),output_field=CharField())).order_by('-id')
+                    else:
+                        list_nft = NFT.objects.filter(is_minted=True, nft_owner=user_wallet.id,
+                                        is_listed=True).values('id','nft_title','fix_price','nft_sell_type','starting_price',
+                                              'ending_price','start_dateTime','end_datetime','is_minted','is_listed',
+                                              'nft_status','nft_subject','status_remarks',nft_user_id=F('user__id'),
+                                              user_nft_collection=F('nft_collection__name'),
+                                              user_nft_category=F('nft_category__category_name'),
+                                nft_thumbnail=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("thumbnail"),output_field=CharField()),
+                                nft_teaser=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("teaser"),output_field=CharField()),
+                                nft_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("nft_picture"),output_field=CharField()),
+                                user_profile_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
+                                                        F("user__profile_picture"),output_field=CharField())).order_by('-id')
+
+                # price = list_nft.values_list
+                for nft in list_nft:
+                    if nft.get('nft_sell_type')=="Fixed Price":
+                        usd_price = get_eth_price(nft.get('fix_price'))
+                        nft["usd_price"] = usd_price
+                        nft["fix_price"] = scientific_to_float(nft.get('fix_price'))
+
+                    else:
+                        bid = BidOnNFT.objects.filter(nft_detail=nft.get('id'), bid_status="Active",
+                                                      seller_profile=nft.get('nft_user_id')).order_by('-id').first()
+                        if bid:
+                            usd_price = get_eth_price(bid.bid_price)
+                            # bid.bid_price = scientific_to_float(bid.bid_price)
+                        else:
+                            usd_price = get_eth_price(nft.get('starting_price'))
+                        nft["starting_price"] = scientific_to_float(nft.get('starting_price'))
+                        nft["usd_price"] = usd_price
+
+
+                paginator = CustomPageNumberPagination()
+                result = paginator.paginate_queryset(list_nft, request)
+                return paginator.get_paginated_response(result)
+            elif user_nft == "admin":
+                list_nft = NFT.objects.filter(nft_status='Pending')\
+                    .annotate(document_count=Count('nft_in_supportingdocument')).values('id','nft_title','nft_status',
+                                   'document_count',nft_user_id=F('user__id'),real_name=F('user__name'),
+                                   display_name=F('user__username'),wallet_address=F('nft_owner__wallet_address'),
+                                   user_nft_category=F('nft_category__category_name'),
+                                    nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
+                                                           F("thumbnail"), output_field=CharField())).order_by('-id')
+                paginator = CustomPageNumberPagination()
+                result = paginator.paginate_queryset(list_nft, request)
+                return paginator.get_paginated_response(result)
+
+            else:
+                return Response({
+                    "status": False, "status_code": 400, 'msg': 'user_id, search and category params is required',
+                    "data": []}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                "status": False, "status_code": 400, 'msg': e.args[0],
+                "data": []}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ManageNFTsListView(viewsets.ViewSet):
+    """
+    this view is for list/retrieve nfts of perticular user by its id
+    """
+
+    permission_classes = [AllowAny]
+
+    def list(self, request, *args, **kwargs):
+        list_nft = ''
+        try:
+
+            user_id = request.query_params.get('user_id')
+            user_nft = request.query_params.get('search')
+            nft_category_id = request.query_params.get('category')
+            if user_id and user_nft == 'mynft' or user_nft == 'listmynft' and nft_category_id and user_nft != 'admin':
+                user_wallet = UserWalletAddress.objects.filter(user_wallet=user_id).first()
+                if user_nft == "mynft":
+                    if nft_category_id != 'all':
+                        list_nft = NFT.objects.filter(Q(is_minted=True) | Q(is_minted=False), nft_owner=user_wallet.id,
+                                       is_listed=True, nft_category=nft_category_id).values('id','nft_title',
+                                           'fix_price','nft_sell_type','starting_price','ending_price','start_dateTime',
+                                           'end_datetime','is_minted','is_listed','nft_status','nft_subject',
+                                           'status_remarks',nft_user_id=F('user__id'),
+                                           user_nft_collection=F('nft_collection__name'),
+                                           user_nft_category=F('nft_category__category_name'),
+                            nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("thumbnail"), output_field=CharField()),
+                            nft_teaser = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("teaser"), output_field=CharField()),
+                            nft_pic = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("nft_picture"), output_field=CharField()),
+                            user_profile_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
+                                                F("user__profile_picture"),output_field=CharField())).order_by('-id')
+                    else:
+                        list_nft = NFT.objects.filter(Q(is_minted=True) | Q(is_minted=False), nft_owner=user_wallet.id,
+                                        is_listed=True).values('id','nft_title','fix_price','nft_sell_type',
                                              'starting_price','ending_price','start_dateTime','end_datetime',
                                              'is_minted','is_listed','nft_status','nft_subject','status_remarks',
                                              nft_user_id=F('user__id'),user_nft_collection=F('nft_collection__name'),
@@ -990,23 +1104,3 @@ class SearchAPIView(viewsets.ViewSet):
         except Exception as e:
             return Response({
                 "status": False, "status_code": 400, 'msg': e.args[0], "data": []}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class ManageNFTsListView(viewsets.ViewSet):
-    queryset = NFT.objects.filter(is_listed=True, nft_status='Approved').order_by('-id')
-    serializer_class = ManageNFTSerializer
-
-    def list(self, request, *args, **kwargs):
-        """
-        this is used for get all nfts
-        """
-        try:
-            queryset = self.queryset
-            paginator = CustomPageNumberPagination()
-            result_page = paginator.paginate_queryset(queryset, request)
-            serializer = ManageNFTSerializer(result_page, many=True, context={'request':request})
-            return paginator.get_paginated_response(serializer.data)
-        except Exception as e:
-            return Response({
-                "status": False, "status_code": 400, 'msg': e.args[0],
-                "data": []}, status=status.HTTP_400_BAD_REQUEST)

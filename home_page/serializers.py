@@ -84,7 +84,8 @@ class FeatureNFTSerializer(serializers.ModelSerializer):
     # if any other nft is featured then raise error and return existing featured nft id
     def validate(self, attrs):
         if attrs['is_featured'] == True:
-            if NFT.objects.filter(featured_nft=True).exists():
-                raise serializers.ValidationError(
-                    {"message": _("Featured NFT already exists"), "featured_nft_id": NFT.objects.filter(featured_nft=True).first().id})
+            nft = NFT.objects.filter(id=attrs['nft_id'])
+            nft.update(featured_nft=attrs['is_featured'])
+            already_featured_nft = NFT.objects.filter(featured_nft=True)
+            already_featured_nft.update(featured_nft=False)
         return attrs
