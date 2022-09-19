@@ -371,13 +371,13 @@ class ManageNFTsListView(viewsets.ViewSet):
                 result = paginator.paginate_queryset(list_nft, request)
                 return paginator.get_paginated_response(result)
             elif user_nft == "admin":
-                list_nft = NFT.objects.filter(nft_status='Pending')\
-                    .annotate(document_count=Count('nft_in_supportingdocument')).values('id','nft_title','nft_status',
+                list_nft = NFT.objects.filter(is_listed=True, nft_status='Approved')\
+                    .annotate(document_count=Count('nft_in_supportingdocument')).values('id','nft_title','nft_status', 'featured_nft', 'is_listed',
                                    'document_count',nft_user_id=F('user__id'),real_name=F('user__name'),
                                    display_name=F('user__username'),wallet_address=F('nft_owner__wallet_address'),
                                    user_nft_category=F('nft_category__category_name'),
                                     nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
-                                                           F("thumbnail"), output_field=CharField())).order_by('-id')
+                                                           F("thumbnail"), output_field=CharField())).order_by('-featured_nft')
                 paginator = CustomPageNumberPagination()
                 result = paginator.paginate_queryset(list_nft, request)
                 return paginator.get_paginated_response(result)
