@@ -377,7 +377,9 @@ class ManageNFTsListView(viewsets.ViewSet):
                                    display_name=F('user__username'),wallet_address=F('nft_owner__wallet_address'),
                                    user_nft_category=F('nft_category__category_name'),
                                     nft_thumbnail = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
-                                                           F("thumbnail"), output_field=CharField())).order_by('-featured_nft')
+                                                           F("thumbnail"), output_field=CharField()),
+                                    user_profile_pic = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
+                                    F("user__profile_picture"),output_field=CharField())).order_by('-featured_nft')
                 paginator = CustomPageNumberPagination()
                 result = paginator.paginate_queryset(list_nft, request)
                 return paginator.get_paginated_response(result)
