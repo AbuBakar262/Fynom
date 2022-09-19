@@ -307,7 +307,7 @@ class ManageNFTsListView(viewsets.ViewSet):
                             nft_teaser = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("teaser"), output_field=CharField()),
                             nft_pic = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("nft_picture"), output_field=CharField()),
                             user_profile_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
-                                                F("user__profile_picture"),output_field=CharField())).order_by('-id')
+                                                F("user__profile_picture"),output_field=CharField())).order_by('-featured_nft')
                     else:
                         list_nft = NFT.objects.filter(Q(is_minted=True) | Q(is_minted=False), nft_owner=user_wallet.id,
                                         is_listed=True).values('id','nft_title','fix_price','nft_sell_type',
@@ -319,7 +319,7 @@ class ManageNFTsListView(viewsets.ViewSet):
                                 nft_teaser=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("teaser"),output_field=CharField()),
                                 nft_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("nft_picture"),output_field=CharField()),
                                 user_profile_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
-                                                    F("user__profile_picture"),output_field=CharField())).order_by('-id')
+                                                    F("user__profile_picture"),output_field=CharField())).order_by('-featured_nft')
 
                 if user_nft == "listmynft":
                     if nft_category_id != 'all':
@@ -334,7 +334,7 @@ class ManageNFTsListView(viewsets.ViewSet):
                                 ft_teaser=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("teaser"),output_field=CharField()),
                                 nft_pic = Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')), F("nft_picture"),output_field=CharField()),
                                 user_profile_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
-                                                    F("user__profile_picture"),output_field=CharField())).order_by('-id')
+                                                    F("user__profile_picture"),output_field=CharField())).order_by('-featured_nft')
                     else:
                         list_nft = NFT.objects.filter(is_minted=True, nft_owner=user_wallet.id,
                                         is_listed=True).values('id','nft_title','fix_price','nft_sell_type','starting_price',
@@ -346,7 +346,7 @@ class ManageNFTsListView(viewsets.ViewSet):
                                 nft_teaser=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("teaser"),output_field=CharField()),
                                 nft_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("nft_picture"),output_field=CharField()),
                                 user_profile_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),
-                                                        F("user__profile_picture"),output_field=CharField())).order_by('-id')
+                                                        F("user__profile_picture"),output_field=CharField())).order_by('-featured_nft')
 
                 # price = list_nft.values_list
                 for nft in list_nft:
