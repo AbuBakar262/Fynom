@@ -849,6 +849,7 @@ class NFTExplorView(viewsets.ModelViewSet):
             collection_id = self.request.query_params.get('collection')
             search = self.request.query_params.get('search')
             filter_by = self.request.query_params.get('filter_by')
+            listingtime = self.request.query_params.get('listingtime')
             if nft_tags:
                 nft_tags_list = nft_tags.split(',')
                 nft_tags_set = set(list(map(int, nft_tags_list)))
@@ -887,6 +888,22 @@ class NFTExplorView(viewsets.ModelViewSet):
 
             if nft_max_price:
                 queryset = queryset.filter(Q(fix_price__lte=nft_max_price) | Q(starting_price__lte=nft_max_price))
+
+            if nft_min_price and nft_max_price:
+                queryset = queryset.filter(Q(fix_price__gte=nft_min_price, starting_price__lte=nft_max_price) |
+                                           Q(fix_price__gte=nft_min_price, starting_price__lte=nft_max_price))
+
+            if listingtime:
+                if listingtime == "yesterday":
+                    queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(days=1))
+                if listingtime == "last24hrs":
+                    queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(hours=24))
+                if listingtime == "last7days":
+                    queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(days=7))
+                if listingtime == "thismonth":
+                    queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(days=30))
+                if listingtime == "thisyear":
+                    queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(days=365))
 
             # date = datetime.datetime.utcnow()
             # utc_time = calendar.timegm(date.utctimetuple())
