@@ -267,17 +267,20 @@ class NFTExplorSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         from django.db.models import F, Value, CharField
         import os
-
+        if instance.nft_sell_type == "Fixed Price" and "e" in str(instance.fix_price):
+            data['fix_price'] = scientific_to_float(float(instance.fix_price))
+        if instance.nft_sell_type == "Timed Auction" and "e" in str(instance.starting_price):
+            data['starting_price'] = scientific_to_float(float(instance.starting_price))
         owner = User.objects.filter(id=instance.user.id).values("id", "name", "username",
                                 user_pic=Concat(Value(os.getenv('STAGING_PHYNOM_BUCKET_URL')),F("profile_picture"),
                                                              output_field=CharField()))[0]
 
         data['nft_category'] = NFTCategorySerializer(instance.nft_category).data
 
-        if instance.nft_sell_type == "Fixed Price":
-            data["usd_price"] = get_eth_price(instance.fix_price)
-        if instance.nft_sell_type == "Timed Auction":
-            data["usd_price"] = get_eth_price(instance.starting_price)
+        # if instance.nft_sell_type == "Fixed Price":
+        #     data["usd_price"] = get_eth_price(instance.fix_price)
+        # if instance.nft_sell_type == "Timed Auction":
+        #     data["usd_price"] = get_eth_price(instance.starting_price)
 
         items = Transaction.objects.filter(nft=instance.id).order_by("-id")[:3]
         owners = []
