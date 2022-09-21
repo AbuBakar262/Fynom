@@ -897,10 +897,6 @@ class NFTExplorView(viewsets.ModelViewSet):
             if nft_max_price:
                 queryset = queryset.filter(Q(fix_price__lte=nft_max_price) | Q(starting_price__lte=nft_max_price))
 
-            if nft_min_price and nft_max_price:
-                queryset = queryset.filter(Q(fix_price__gte=nft_min_price, starting_price__lte=nft_max_price) |
-                                           Q(fix_price__gte=nft_min_price, starting_price__lte=nft_max_price))
-
             if listingtime:
                 if listingtime == "yesterday":
                     queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(days=1))
