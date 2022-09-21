@@ -31,7 +31,7 @@ def validateEmail(email):
 
 def scientific_to_float(amount):
     if 'e-' in str(amount):
-        amount=np.format_float_positional(amount, trim='-')
+        amount=np.format_float_positional(float(amount), precision=10, unique=False, fractional=False, trim='-')
     return amount
 
 
