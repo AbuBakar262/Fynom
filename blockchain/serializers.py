@@ -277,10 +277,10 @@ class NFTExplorSerializer(serializers.ModelSerializer):
 
         data['nft_category'] = NFTCategorySerializer(instance.nft_category).data
 
-        # if instance.nft_sell_type == "Fixed Price":
-        #     data["usd_price"] = get_eth_price(instance.fix_price)
-        # if instance.nft_sell_type == "Timed Auction":
-        #     data["usd_price"] = get_eth_price(instance.starting_price)
+        if instance.nft_sell_type == "Fixed Price":
+            data["usd_price"] = get_eth_price(instance.fix_price)
+        if instance.nft_sell_type == "Timed Auction":
+            data["usd_price"] = get_eth_price(instance.starting_price)
 
         items = Transaction.objects.filter(nft=instance.id).order_by("-id")[:3]
         owners = []

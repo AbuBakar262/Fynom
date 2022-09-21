@@ -894,15 +894,15 @@ class NFTExplorView(viewsets.ModelViewSet):
                                            Q(fix_price__gte=nft_min_price, starting_price__lte=nft_max_price))
 
             if listingtime:
-                if listingtime == "yesterday":
+                if listingtime == "Yesterday":
                     queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(days=1))
-                if listingtime == "last24hrs":
+                if listingtime == "Last24hrs":
                     queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(hours=24))
-                if listingtime == "last7days":
+                if listingtime == "Last7days":
                     queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(days=7))
-                if listingtime == "thismonth":
+                if listingtime == "Thismonth":
                     queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(days=30))
-                if listingtime == "thisyear":
+                if listingtime == "Thisyear":
                     queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(days=365))
 
             # date = datetime.datetime.utcnow()
