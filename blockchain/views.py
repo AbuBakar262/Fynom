@@ -872,6 +872,14 @@ class NFTExplorView(viewsets.ModelViewSet):
                 queryset = self.queryset.filter(
                     Q(nft_sell_type="Timed Auction", end_datetime__gt=utc_time) | Q(nft_sell_type="Fixed Price"),
                     is_listed=True, is_minted=True, nft_status="Approved").order_by('-updated_at')
+            elif nft_sort_by=="ascending":
+                queryset = self.queryset.filter(
+                    Q(nft_sell_type="Timed Auction", end_datetime__gt=utc_time) | Q(nft_sell_type="Fixed Price"),
+                    is_listed=True, is_minted=True, nft_status="Approved").order_by('created_at')
+            elif nft_sort_by=="descending":
+                queryset = self.queryset.filter(
+                    Q(nft_sell_type="Timed Auction", end_datetime__gt=utc_time) | Q(nft_sell_type="Fixed Price"),
+                    is_listed=True, is_minted=True, nft_status="Approved").order_by('-created_at')
 
             if search:
                 queryset = queryset.filter(nft_title__icontains=search, nft_status='Approved', is_listed=True)
