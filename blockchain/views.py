@@ -875,11 +875,11 @@ class NFTExplorView(viewsets.ModelViewSet):
             elif nft_sort_by=="ascending":
                 queryset = self.queryset.filter(
                     Q(nft_sell_type="Timed Auction", end_datetime__gt=utc_time) | Q(nft_sell_type="Fixed Price"),
-                    is_listed=True, is_minted=True, nft_status="Approved").order_by('created_at')
+                    is_listed=True, is_minted=True, nft_status="Approved").order_by('id')
             elif nft_sort_by=="descending":
                 queryset = self.queryset.filter(
                     Q(nft_sell_type="Timed Auction", end_datetime__gt=utc_time) | Q(nft_sell_type="Fixed Price"),
-                    is_listed=True, is_minted=True, nft_status="Approved").order_by('-created_at')
+                    is_listed=True, is_minted=True, nft_status="Approved").order_by('-id')
 
             if search:
                 queryset = queryset.filter(nft_title__icontains=search, nft_status='Approved', is_listed=True)
@@ -905,15 +905,15 @@ class NFTExplorView(viewsets.ModelViewSet):
 
             if listingtime:
                 if listingtime == "yesterday":
-                    queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(days=1))
+                    queryset = queryset.filter(updated_at__gte=datetime.datetime.now() - datetime.timedelta(days=1))
                 if listingtime == "last24hrs":
-                    queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(hours=24))
+                    queryset = queryset.filter(updated_at__gte=datetime.datetime.now() - datetime.timedelta(hours=24))
                 if listingtime == "last7days":
-                    queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(days=7))
+                    queryset = queryset.filter(updated_at__gte=datetime.datetime.now() - datetime.timedelta(days=7))
                 if listingtime == "thismonth":
-                    queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(days=30))
+                    queryset = queryset.filter(updated_at__gte=datetime.datetime.now() - datetime.timedelta(days=30))
                 if listingtime == "thisyear":
-                    queryset = queryset.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(days=365))
+                    queryset = queryset.filter(updated_at__gte=datetime.datetime.now() - datetime.timedelta(days=365))
 
             # date = datetime.datetime.utcnow()
             # utc_time = calendar.timegm(date.utctimetuple())
