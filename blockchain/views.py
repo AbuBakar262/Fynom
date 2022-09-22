@@ -932,7 +932,7 @@ class NFTExplorView(viewsets.ModelViewSet):
                         tag_id = one_tag.id
                         tags_list.append(tag_id)
                     tags_list_set = set(tags_list)
-                    check_subset = nft_tags_set.issubset(tags_list_set)
+                    check_subset = tags_list_set.issubset(nft_tags_set)
                     tags_list = []
                     if check_subset is True:
                         nft_queryset.append(one_nft)
